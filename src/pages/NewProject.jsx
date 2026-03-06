@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, MapPin, Calendar, FileText, CloudSun, Loader2 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import { Link } from "react-router-dom";
-import WeatherRequirementsForm from "@/components/projects/WeatherRequirementsForm";
+import WeatherRequirementsForm from "@/components/projects/WeatherRequirementsForm.jsx";
 
 export default function NewProject() {
   const navigate = useNavigate();

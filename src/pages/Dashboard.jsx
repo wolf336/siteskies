@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Search, CloudSun, FolderOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import ProjectCard from "@/components/projects/ProjectCard";
+import ProjectCard from "@/components/projects/ProjectCard.jsx";
 
 export default function Dashboard() {
   const [search, setSearch] = useState("");

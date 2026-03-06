@@ -30,8 +30,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
-import RecommendationBanner from "@/components/projects/RecommendationBanner";
-import ForecastTimeline from "@/components/projects/ForecastTimeline";
+import RecommendationBanner from "@/components/projects/RecommendationBanner.jsx";
+import ForecastTimeline from "@/components/projects/ForecastTimeline.jsx";
 
 export default function ProjectDetail() {
   const urlParams = new URLSearchParams(window.location.search);
