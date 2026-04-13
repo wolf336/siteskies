@@ -29,6 +29,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
+import { toast } from "sonner";
 import RecommendationBanner from "@/components/projects/RecommendationBanner.jsx";
 import ForecastTimeline from "@/components/projects/ForecastTimeline.jsx";
 
@@ -71,6 +72,7 @@ export default function ProjectDetail() {
   const checkWeather = async () => {
     setChecking(true);
     setForecastError("");
+    try {
     const req = project.required_weather || {};
 
     // Step 1 — Geocode
@@ -80,6 +82,7 @@ export default function ProjectDetail() {
     const geoData = await geoRes.json();
     if (!geoData.results || geoData.results.length === 0) {
       setForecastError("Location not found. Please check the project location and try again.");
+      toast.error("Weather update failed. Please try again.", { duration: 3000 });
       setChecking(false);
       return;
     }
@@ -160,6 +163,11 @@ Provide only a recommendation (proceed/caution/postpone) and detailed reasoning.
 
     queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     setChecking(false);
+    toast.success("Weather updated successfully", { duration: 3000 });
+    } catch (err) {
+      setChecking(false);
+      toast.error("Weather update failed. Please try again.", { duration: 3000 });
+    }
   };
 
   if (isLoading) {
