@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -38,6 +37,7 @@ export default function ProjectDetail() {
   const projectId = urlParams.get("id");
   const queryClient = useQueryClient();
   const [checking, setChecking] = useState(false);
+  const [forecastError, setForecastError] = useState("");
 
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
@@ -57,67 +57,91 @@ export default function ProjectDetail() {
     },
   });
 
+  const wmoToCondition = (code) => {
+    if (code === 0) return "Clear Sky";
+    if (code <= 3) return "Partly Cloudy";
+    if (code <= 48) return "Fog";
+    if (code <= 67) return "Rain";
+    if (code <= 77) return "Snow";
+    if (code <= 82) return "Rain Showers";
+    if (code <= 99) return "Thunderstorm";
+    return "Unknown";
+  };
+
   const checkWeather = async () => {
     setChecking(true);
+    setForecastError("");
     const req = project.required_weather || {};
 
-    const prompt = `You are a weather forecasting assistant. For the location "${project.location}", provide a detailed weather forecast for the dates from ${project.start_date} to ${project.end_date}.
+    // Step 1 — Geocode
+    const geoRes = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(project.location)}&count=1`
+    );
+    const geoData = await geoRes.json();
+    if (!geoData.results || geoData.results.length === 0) {
+      setForecastError("Location not found. Please check the project location and try again.");
+      setChecking(false);
+      return;
+    }
+    const { latitude, longitude } = geoData.results[0];
 
-For each day, provide:
-- date (YYYY-MM-DD format)
-- condition (e.g. sunny, cloudy, rain, thunderstorm, snow, fog, partly cloudy)
-- temp_high_c (high temperature in celsius)
-- temp_low_c (low temperature in celsius)
-- precipitation_mm (expected precipitation in mm)
-- wind_speed_kmh (expected wind speed in km/h)
-- humidity_pct (humidity percentage)
+    // Step 2 — Fetch forecast
+    const fRes = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,weathercode&timezone=auto&start_date=${project.start_date}&end_date=${project.end_date}`
+    );
+    const fData = await fRes.json();
+    const daily = fData.daily;
 
-Also evaluate each day against these requirements:
-${req.max_wind_speed_kmh ? `- Max wind speed: ${req.max_wind_speed_kmh} km/h` : ""}
-${req.max_precipitation_mm != null ? `- Max precipitation: ${req.max_precipitation_mm} mm/day` : ""}
-${req.min_temperature_c != null ? `- Min temperature: ${req.min_temperature_c}°C` : ""}
-${req.max_temperature_c != null ? `- Max temperature: ${req.max_temperature_c}°C` : ""}
-${req.no_thunderstorms ? "- No thunderstorms allowed" : ""}
-${req.no_snow ? "- No snow allowed" : ""}
-${req.no_fog ? "- No fog allowed" : ""}
-${req.custom_notes ? `- Additional: ${req.custom_notes}` : ""}
+    // Step 3 — Map to daily_forecasts
+    const daily_forecasts = daily.time.map((date, i) => {
+      const temp_high_c = daily.temperature_2m_max[i];
+      const temp_low_c = daily.temperature_2m_min[i];
+      const precipitation_mm = daily.precipitation_sum[i];
+      const wind_speed_kmh = daily.windspeed_10m_max[i];
+      const condition = wmoToCondition(daily.weathercode[i]);
+      const precipitation_probability = daily.precipitation_probability_max[i];
 
-For each day, set meets_requirements to true/false and list any issues.
+      // Step 4 — Check requirements
+      const issues = [];
+      if (req.max_wind_speed_kmh != null && wind_speed_kmh > req.max_wind_speed_kmh)
+        issues.push(`Wind speed ${wind_speed_kmh} km/h exceeds limit of ${req.max_wind_speed_kmh} km/h`);
+      if (req.max_precipitation_mm != null && precipitation_mm > req.max_precipitation_mm)
+        issues.push(`Precipitation ${precipitation_mm} mm exceeds limit of ${req.max_precipitation_mm} mm`);
+      if (req.min_temperature_c != null && temp_low_c < req.min_temperature_c)
+        issues.push(`Low temp ${temp_low_c}°C is below minimum ${req.min_temperature_c}°C`);
+      if (req.max_temperature_c != null && temp_high_c > req.max_temperature_c)
+        issues.push(`High temp ${temp_high_c}°C exceeds maximum ${req.max_temperature_c}°C`);
+      if (req.no_thunderstorms && condition === "Thunderstorm")
+        issues.push("Thunderstorm forecast");
+      if (req.no_snow && condition === "Snow")
+        issues.push("Snow forecast");
+      if (req.no_fog && condition === "Fog")
+        issues.push("Fog forecast");
 
-Also provide:
-- An overall summary of the weather outlook
-- A recommendation: "proceed" if weather looks good, "caution" if some days are borderline, or "postpone" if conditions are clearly unfavorable
-- Detailed recommendation reasoning
+      return { date, condition, temp_high_c, temp_low_c, precipitation_mm, precipitation_probability, wind_speed_kmh, meets_requirements: issues.length === 0, issues };
+    });
 
-Be realistic and use your knowledge of typical weather patterns for this location and time of year. Today's date is ${new Date().toISOString().split("T")[0]}.`;
+    // Step 5 — LLM for recommendation only
+    const llmResult = await base44.integrations.Core.InvokeLLM({
+      prompt: `Based on the following real weather forecast data and project requirements, provide a recommendation.
 
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt,
-      add_context_from_internet: true,
+Project: ${project.name}
+Location: ${project.location}
+Dates: ${project.start_date} to ${project.end_date}
+
+Weather Requirements:
+${JSON.stringify(req, null, 2)}
+
+Real Forecast Data:
+${JSON.stringify(daily_forecasts, null, 2)}
+
+Provide only a recommendation (proceed/caution/postpone) and detailed reasoning. Do not estimate any weather values — use only the data provided.`,
       response_json_schema: {
         type: "object",
         properties: {
-          daily_forecasts: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                date: { type: "string" },
-                condition: { type: "string" },
-                temp_high_c: { type: "number" },
-                temp_low_c: { type: "number" },
-                precipitation_mm: { type: "number" },
-                wind_speed_kmh: { type: "number" },
-                humidity_pct: { type: "number" },
-                meets_requirements: { type: "boolean" },
-                issues: { type: "array", items: { type: "string" } },
-              },
-            },
-          },
-          summary: { type: "string" },
           recommendation: { type: "string", enum: ["proceed", "caution", "postpone"] },
           recommendation_details: { type: "string" },
-          sources: { type: "array", items: { type: "string" } },
+          summary: { type: "string" },
         },
       },
     });
@@ -125,12 +149,12 @@ Be realistic and use your knowledge of typical weather patterns for this locatio
     await base44.entities.Project.update(projectId, {
       weather_forecast: {
         last_checked: new Date().toISOString(),
-        sources: result.sources || ["AI Weather Analysis", "Internet Weather Data"],
-        daily_forecasts: result.daily_forecasts || [],
-        summary: result.summary || "",
+        sources: ["Open-Meteo"],
+        daily_forecasts,
+        summary: llmResult.summary || "",
       },
-      recommendation: result.recommendation || "pending",
-      recommendation_details: result.recommendation_details || "",
+      recommendation: llmResult.recommendation || "pending",
+      recommendation_details: llmResult.recommendation_details || "",
       status: project.status === "planning" ? "monitoring" : project.status,
     });
 
@@ -160,7 +184,9 @@ Be realistic and use your knowledge of typical weather patterns for this locatio
   }
 
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
-  const canCheckWeather = daysUntilStart <= 28;
+  const canCheckWeather = daysUntilStart <= 16;
+  const forecastAvailableDate = new Date(project.start_date);
+  forecastAvailableDate.setDate(forecastAvailableDate.getDate() - 16);
   const req = project.required_weather || {};
 
   return (
@@ -230,6 +256,13 @@ Be realistic and use your knowledge of typical weather patterns for this locatio
         details={project.recommendation_details}
       />
 
+      {/* Forecast error */}
+      {forecastError && (
+        <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-sm text-destructive">
+          {forecastError}
+        </div>
+      )}
+
       {/* Check Weather button */}
       <div className="flex items-center justify-between">
         <div>
@@ -256,11 +289,10 @@ Be realistic and use your knowledge of typical weather patterns for this locatio
 
       {!canCheckWeather && (
         <div className="rounded-lg bg-muted/50 border border-border p-4 text-sm text-muted-foreground">
-          Weather checks become available 4 weeks before the project start date.
-          <span className="font-medium text-foreground ml-1">
-            {daysUntilStart} days until start
-          </span>
-          — check back in {daysUntilStart - 28} day{daysUntilStart - 28 !== 1 ? "s" : ""}.
+          Forecast not yet available. Your first forecast will be ready on{" "}
+          <span className="font-medium text-foreground">
+            {format(forecastAvailableDate, "MMMM d, yyyy")}
+          </span>.
         </div>
       )}
 
