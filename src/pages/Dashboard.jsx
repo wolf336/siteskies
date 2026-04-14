@@ -7,13 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, CloudSun, FolderOpen } from "lucide-react";
+import { Plus, Search, CloudSun, FolderOpen, List, LayoutGrid, Table2, CalendarDays } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProjectCard from "@/components/projects/ProjectCard.jsx";
+import ProjectGrid from "@/components/projects/ProjectGrid.jsx";
+import ProjectTable from "@/components/projects/ProjectTable.jsx";
+import ProjectCalendar from "@/components/projects/ProjectCalendar.jsx";
 
 export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [view, setView] = useState("list");
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ["projects"],
@@ -53,25 +57,44 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search projects..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+      {/* Filters + View switcher */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center flex-1">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search projects..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Tabs value={filter} onValueChange={setFilter}>
+            <TabsList className="bg-muted">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="active">Active</TabsTrigger>
+              <TabsTrigger value="attention">Needs Attention</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
-        <Tabs value={filter} onValueChange={setFilter}>
-          <TabsList className="bg-muted">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="active">Active</TabsTrigger>
-            <TabsTrigger value="attention">Needs Attention</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* View switcher */}
+        <div className="flex items-center gap-1 border border-border rounded-lg p-1 bg-muted/30 self-start sm:self-auto">
+          {[
+            { key: 'list', icon: List },
+            { key: 'grid', icon: LayoutGrid },
+            { key: 'table', icon: Table2 },
+            { key: 'calendar', icon: CalendarDays },
+          ].map(({ key, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setView(key)}
+              className={`p-1.5 rounded transition-colors ${view === key ? 'bg-background shadow text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              <Icon className="h-4 w-4" />
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Project list */}
@@ -108,21 +131,28 @@ export default function Dashboard() {
           )}
         </div>
       ) : (
-        <motion.div className="grid gap-3" layout>
-          <AnimatePresence>
-            {filtered.map((project) => (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                layout
-              >
-                <ProjectCard project={project} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+        <>
+          {view === 'list' && (
+            <motion.div className="grid gap-3" layout>
+              <AnimatePresence>
+                {filtered.map((project) => (
+                  <motion.div
+                    key={project.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    layout
+                  >
+                    <ProjectCard project={project} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
+          {view === 'grid' && <ProjectGrid projects={filtered} />}
+          {view === 'table' && <ProjectTable projects={filtered} />}
+          {view === 'calendar' && <ProjectCalendar projects={filtered} />}
+        </>
       )}
     </div>
   );
