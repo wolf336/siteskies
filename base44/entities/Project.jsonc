@@ -1,0 +1,172 @@
+{
+  "name": "Project",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Project name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief project description"
+    },
+    "location": {
+      "type": "string",
+      "description": "Project location (city, address, or coordinates)"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Latitude of the project location"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Longitude of the project location"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Planned project start date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Planned project end date"
+    },
+    "project_length_days": {
+      "type": "number",
+      "description": "Duration of the project in days"
+    },
+    "required_weather": {
+      "type": "object",
+      "description": "Weather requirements for the project",
+      "properties": {
+        "max_wind_speed_kmh": {
+          "type": "number",
+          "description": "Maximum acceptable wind speed in km/h"
+        },
+        "max_precipitation_mm": {
+          "type": "number",
+          "description": "Maximum acceptable daily precipitation in mm"
+        },
+        "min_temperature_c": {
+          "type": "number",
+          "description": "Minimum acceptable temperature in Celsius"
+        },
+        "max_temperature_c": {
+          "type": "number",
+          "description": "Maximum acceptable temperature in Celsius"
+        },
+        "no_thunderstorms": {
+          "type": "boolean",
+          "description": "Whether thunderstorms must be avoided"
+        },
+        "no_snow": {
+          "type": "boolean",
+          "description": "Whether snow must be avoided"
+        },
+        "no_fog": {
+          "type": "boolean",
+          "description": "Whether fog must be avoided"
+        },
+        "custom_notes": {
+          "type": "string",
+          "description": "Additional weather requirements"
+        }
+      }
+    },
+    "weather_forecast": {
+      "type": "object",
+      "description": "Latest weather forecast data",
+      "properties": {
+        "last_checked": {
+          "type": "string",
+          "description": "When forecast was last updated"
+        },
+        "sources": {
+          "type": "array",
+          "description": "Weather sources consulted",
+          "items": {
+            "type": "string"
+          }
+        },
+        "daily_forecasts": {
+          "type": "array",
+          "description": "Daily forecast data for project dates",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string"
+              },
+              "condition": {
+                "type": "string"
+              },
+              "temp_high_c": {
+                "type": "number"
+              },
+              "temp_low_c": {
+                "type": "number"
+              },
+              "precipitation_mm": {
+                "type": "number"
+              },
+              "wind_speed_kmh": {
+                "type": "number"
+              },
+              "humidity_pct": {
+                "type": "number"
+              },
+              "meets_requirements": {
+                "type": "boolean"
+              },
+              "issues": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": {
+          "type": "string",
+          "description": "Overall weather summary"
+        }
+      }
+    },
+    "recommendation": {
+      "type": "string",
+      "enum": [
+        "proceed",
+        "caution",
+        "postpone",
+        "pending"
+      ],
+      "default": "pending",
+      "description": "AI recommendation for the project"
+    },
+    "recommendation_details": {
+      "type": "string",
+      "description": "Detailed explanation of the recommendation"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planning",
+        "monitoring",
+        "ready",
+        "in_progress",
+        "completed",
+        "postponed"
+      ],
+      "default": "planning",
+      "description": "Current project status"
+    }
+  },
+  "required": [
+    "name",
+    "location",
+    "start_date",
+    "end_date"
+  ]
+}

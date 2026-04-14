@@ -75,18 +75,25 @@ export default function ProjectDetail() {
     try {
     const req = project.required_weather || {};
 
-    // Step 1 — Geocode
-    const geoRes = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(project.location)}&count=1`
-    );
-    const geoData = await geoRes.json();
-    if (!geoData.results || geoData.results.length === 0) {
-      setForecastError("Location not found. Please check the project location and try again.");
-      toast.error("Weather update failed. Please try again.", { duration: 3000 });
-      setChecking(false);
-      return;
+    // Step 1 — Geocode (skip if coordinates already stored)
+    let latitude, longitude;
+    if (project.latitude != null && project.longitude != null) {
+      latitude = project.latitude;
+      longitude = project.longitude;
+    } else {
+      const geoRes = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(project.location)}&count=1`
+      );
+      const geoData = await geoRes.json();
+      if (!geoData.results || geoData.results.length === 0) {
+        setForecastError("Location not found. Please check the project location and try again.");
+        toast.error("Weather update failed. Please try again.", { duration: 3000 });
+        setChecking(false);
+        return;
+      }
+      latitude = geoData.results[0].latitude;
+      longitude = geoData.results[0].longitude;
     }
-    const { latitude, longitude } = geoData.results[0];
 
     // Step 2 — Fetch forecast
     const fRes = await fetch(

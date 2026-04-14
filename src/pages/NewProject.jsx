@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, MapPin, Calendar, FileText, CloudSun, Loader2 } from "lucide-react";
+import { ArrowLeft, Calendar, FileText, CloudSun, Loader2 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import { Link } from "react-router-dom";
 import WeatherRequirementsForm from "@/components/projects/WeatherRequirementsForm.jsx";
+import LocationPicker from "@/components/projects/LocationPicker.jsx";
 
 export default function NewProject() {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ export default function NewProject() {
     name: "",
     description: "",
     location: "",
+    latitude: null,
+    longitude: null,
     start_date: "",
     end_date: "",
   });
@@ -98,17 +101,14 @@ export default function NewProject() {
                 rows={2}
               />
             </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5 text-primary" />
-                Location
-              </Label>
-              <Input
-                placeholder="City, suburb or address"
-                value={form.location}
-                onChange={(e) => setForm({ ...form, location: e.target.value })}
-              />
-            </div>
+            <LocationPicker
+              location={form.location}
+              latitude={form.latitude}
+              longitude={form.longitude}
+              onChange={({ location, latitude, longitude }) =>
+                setForm((f) => ({ ...f, location, latitude, longitude }))
+              }
+            />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="flex items-center gap-1.5">
