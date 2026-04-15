@@ -16,13 +16,14 @@ import LocationPicker from "@/components/projects/LocationPicker.jsx";
 export default function NewProject() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const today = new Date().toISOString().split("T")[0];
   const [form, setForm] = useState({
     name: "",
     description: "",
     location: "",
     latitude: null,
     longitude: null,
-    start_date: "",
+    start_date: today,
     end_date: "",
   });
   const [requirements, setRequirements] = useState({
