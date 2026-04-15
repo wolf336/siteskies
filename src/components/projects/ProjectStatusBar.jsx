@@ -75,13 +75,13 @@ export default function ProjectStatusBar({ status, onStatusChange }) {
         )}
       </div>
 
-      {/* Mark as postponed link */}
+      {/* Mark as postponed button */}
       {!isPostponed && (
         <button
           onClick={() => onStatusChange("postponed")}
-          className="text-xs text-muted-foreground hover:text-destructive transition-colors underline-offset-2 hover:underline"
+          className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-destructive/50 hover:text-destructive hover:bg-destructive/5 transition-colors"
         >
-          Mark as postponed
+          Mark as Postponed
         </button>
       )}
     </div>
