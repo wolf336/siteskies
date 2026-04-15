@@ -6,13 +6,7 @@ import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import ProjectStatusBar from "@/components/projects/ProjectStatusBar.jsx";
 import {
   ArrowLeft,
   RefreshCw,
@@ -242,23 +236,6 @@ Provide only a recommendation (proceed/caution/postpone) and detailed reasoning.
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Select
-            value={project.status}
-            onValueChange={(value) => updateMutation.mutate({ id: project.id, data: { status: value } })}
-          >
-            <SelectTrigger className="w-36">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="planning">Planning</SelectItem>
-              <SelectItem value="monitoring">Monitoring</SelectItem>
-              <SelectItem value="ready">Ready</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="postponed">Postponed</SelectItem>
-            </SelectContent>
-          </Select>
           <Button
             variant="outline"
             size="icon"
@@ -271,8 +248,13 @@ Provide only a recommendation (proceed/caution/postpone) and detailed reasoning.
           >
             <Trash2 className="h-4 w-4" />
           </Button>
-        </div>
       </div>
+
+      {/* Status progress bar */}
+      <ProjectStatusBar
+        status={project.status}
+        onStatusChange={(value) => updateMutation.mutate({ id: project.id, data: { status: value } })}
+      />
 
       {/* Recommendation banner */}
       <RecommendationBanner
