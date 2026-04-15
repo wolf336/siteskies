@@ -46,6 +46,15 @@ export default function ProjectDetail() {
     enabled: !!projectId,
   });
 
+  // Auto-check weather when a new project is first loaded with no forecast
+  const hasAutoChecked = React.useRef(false);
+  React.useEffect(() => {
+    if (project && !project.weather_forecast?.last_checked && !hasAutoChecked.current) {
+      hasAutoChecked.current = true;
+      checkWeather();
+    }
+  }, [project]);
+
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Project.update(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["project", projectId] }),
