@@ -18,46 +18,30 @@ export default function ProjectStatusBar({ status, onStatusChange }) {
     <div className="space-y-3">
       <div className="flex items-center gap-3">
         {/* Progress bar */}
-        <div className="flex-1 flex items-center">
+        <div className="flex-1 flex items-stretch h-9">
           {STAGES.map((stage, i) => {
             const isActive = i <= activeIndex && !isPostponed;
             const isCurrent = i === activeIndex && !isPostponed;
+            const isLast = i === STAGES.length - 1;
+            const isFirst = i === 0;
 
             return (
-              <React.Fragment key={stage.value}>
-                {/* Connector line */}
-                {i > 0 && (
-                  <div className={cn(
-                    "flex-1 h-0.5 transition-colors",
-                    isActive ? "bg-primary" : "bg-border"
-                  )} />
+              <button
+                key={stage.value}
+                onClick={() => onStatusChange(stage.value)}
+                title={`Set to ${stage.label}`}
+                style={{ clipPath: isLast ? undefined : "polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%)", marginLeft: isFirst ? 0 : "-1px" }}
+                className={cn(
+                  "relative flex-1 flex items-center justify-center text-[11px] font-semibold transition-all border whitespace-nowrap px-2",
+                  isFirst ? "rounded-l-md" : "",
+                  isLast ? "rounded-r-md" : "",
+                  isActive
+                    ? "bg-primary border-primary text-primary-foreground"
+                    : "bg-muted/50 border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
-
-                {/* Stage node */}
-                <button
-                  onClick={() => onStatusChange(stage.value)}
-                  className="flex flex-col items-center gap-1.5 group"
-                  title={`Set to ${stage.label}`}
-                >
-                  <div className={cn(
-                    "h-7 w-7 rounded-full border-2 flex items-center justify-center transition-all",
-                    isActive
-                      ? "bg-primary border-primary text-primary-foreground"
-                      : "bg-background border-border text-muted-foreground",
-                    isCurrent && "ring-2 ring-primary/30 ring-offset-1",
-                    !isActive && "group-hover:border-primary/60 group-hover:text-primary"
-                  )}>
-                    <span className="text-[10px] font-bold">{i + 1}</span>
-                  </div>
-                  <span className={cn(
-                    "text-[11px] font-medium whitespace-nowrap transition-colors",
-                    isActive ? "text-primary" : "text-muted-foreground",
-                    !isActive && "group-hover:text-primary"
-                  )}>
-                    {stage.label}
-                  </span>
-                </button>
-              </React.Fragment>
+              >
+                {stage.label}
+              </button>
             );
           })}
         </div>
