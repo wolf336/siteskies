@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Calendar, Clock, ArrowRight, CloudRain, Sun, TriangleAlert, Hourglass } from "lucide-react";
+import { MapPin, Calendar, Clock, CloudRain, Sun, TriangleAlert, Hourglass, Pencil } from "lucide-react";
 import { format, differenceInDays, isPast } from "date-fns";
+import EditProjectModal from "./EditProjectModal.jsx";
 
 const statusConfig = {
   planning: { label: "Planning", className: "bg-secondary text-secondary-foreground" },
@@ -23,12 +24,15 @@ const recommendationConfig = {
 };
 
 export default function ProjectCard({ project }) {
+  const [editOpen, setEditOpen] = useState(false);
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
   const rec = recommendationConfig[project.recommendation || "pending"];
   const RecIcon = rec.icon;
   const stat = statusConfig[project.status || "planning"];
 
   return (
+    <>
+    {editOpen && <EditProjectModal project={project} open={editOpen} onClose={() => setEditOpen(false)} />}
     <Link to={createPageUrl(`ProjectDetail?id=${project.id}`)}>
       <Card className="group relative overflow-hidden border border-border bg-card transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
         <div
@@ -79,9 +83,18 @@ export default function ProjectCard({ project }) {
               </div>
             </div>
 
-            <div className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 ${rec.className}`}>
-              <RecIcon className="h-4 w-4" />
-              <span className="text-xs font-semibold">{rec.label}</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={(e) => { e.preventDefault(); setEditOpen(true); }}
+                className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                title="Edit project"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+              <div className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 ${rec.className}`}>
+                <RecIcon className="h-4 w-4" />
+                <span className="text-xs font-semibold">{rec.label}</span>
+              </div>
             </div>
           </div>
 
@@ -93,5 +106,6 @@ export default function ProjectCard({ project }) {
         </CardContent>
       </Card>
     </Link>
+    </>
   );
 }

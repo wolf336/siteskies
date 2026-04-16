@@ -21,7 +21,9 @@ import {
   CloudFog,
   Trash2,
   Loader2,
+  Pencil,
 } from "lucide-react";
+import EditProjectModal from "@/components/projects/EditProjectModal.jsx";
 import { format, differenceInDays } from "date-fns";
 import { toast } from "sonner";
 import RecommendationBanner from "@/components/projects/RecommendationBanner.jsx";
@@ -33,6 +35,7 @@ export default function ProjectDetail() {
   const queryClient = useQueryClient();
   const [checking, setChecking] = useState(false);
   const [forecastError, setForecastError] = useState("");
+  const [editOpen, setEditOpen] = useState(false);
 
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
@@ -209,6 +212,7 @@ Provide only a recommendation (proceed/caution/postpone) and detailed reasoning.
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+      {editOpen && <EditProjectModal project={project} open={editOpen} onClose={() => setEditOpen(false)} />}
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -236,18 +240,28 @@ Provide only a recommendation (proceed/caution/postpone) and detailed reasoning.
           </div>
         </div>
 
-          <Button
-            variant="outline"
-            size="icon"
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={() => {
-              if (window.confirm("Delete this project?")) {
-                deleteMutation.mutate(project.id);
-              }
-            }}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setEditOpen(true)}
+              title="Edit project"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={() => {
+                if (window.confirm("Delete this project?")) {
+                  deleteMutation.mutate(project.id);
+                }
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
       </div>
 
       {/* Status progress bar */}
