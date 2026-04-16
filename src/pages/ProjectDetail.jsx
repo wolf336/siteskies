@@ -178,8 +178,10 @@ Provide only a recommendation (proceed/caution/postpone) and detailed reasoning.
     setChecking(false);
     toast.success("Weather updated successfully", { duration: 3000 });
     } catch (err) {
+      console.error("Weather update error:", err);
       setChecking(false);
-      toast.error("Weather update failed. Please try again.", { duration: 3000 });
+      setForecastError(`Weather update failed: ${err?.message || String(err)}`);
+      toast.error(`Weather update failed: ${err?.message || "Unknown error"}`, { duration: 5000 });
     }
   };
 
