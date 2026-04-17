@@ -3,12 +3,12 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, format, addMonths, subMonths, parseISO, isWithinInterval } from 'date-fns';
 import ProjectCalendarModal from './ProjectCalendarModal';
 
-const REC_PILL = {
-  proceed: 'bg-success text-white',
-  caution: 'bg-warning text-warning-foreground',
-  postpone: 'bg-destructive text-white',
-  pending: 'bg-muted-foreground/50 text-white',
-};
+function getDayPillClass(project, dateStr) {
+  const forecast = project.weather_forecast?.daily_forecasts?.find(f => f.date === dateStr);
+  if (forecast?.meets_requirements === true) return 'bg-success text-white';
+  if (forecast?.meets_requirements === false) return 'bg-destructive text-white';
+  return 'bg-muted-foreground/50 text-white';
+}
 
 export default function ProjectCalendar({ projects }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -84,6 +84,7 @@ export default function ProjectCalendar({ projects }) {
               const inMonth = isSameMonth(date, currentMonth);
               const dayProjects = getProjectsForDay(date);
               const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+              const dateStr = format(date, 'yyyy-MM-dd');
 
               return (
                 <div
@@ -98,8 +99,7 @@ export default function ProjectCalendar({ projects }) {
                     <button
                       key={project.id}
                       onClick={() => setSelectedProject(project)}
-                      className={`w-full text-left text-[10px] font-medium px-1.5 py-0.5 rounded truncate leading-tight
-                        ${REC_PILL[project.recommendation] || REC_PILL.pending}`}
+                      className={`w-full text-left text-[10px] font-medium px-1.5 py-0.5 rounded truncate leading-tight ${getDayPillClass(project, dateStr)}`}
                     >
                       {project.name}
                     </button>
