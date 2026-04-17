@@ -127,7 +127,7 @@ export default function ProjectDetail() {
 
       // Step 4 — Check requirements
       const issues = [];
-      if (req.max_wind_speed_kmh != null && wind_speed_kmh > req.max_wind_speed_kmh)
+      if (req.max_wind_speed_kmh != null && wind_speed_kmh >= req.max_wind_speed_kmh)
         issues.push(`Wind speed ${wind_speed_kmh} km/h exceeds limit of ${req.max_wind_speed_kmh} km/h`);
       if (req.max_precipitation_mm != null && precipitation_mm > req.max_precipitation_mm)
         issues.push(`Precipitation ${precipitation_mm} mm exceeds limit of ${req.max_precipitation_mm} mm`);
