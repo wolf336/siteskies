@@ -19,7 +19,7 @@ export default function Layout({ children, currentPageName }) {
               <CloudSun className="h-5 w-5" />
             </div>
             <span className="text-lg font-bold tracking-tight text-foreground">
-              WeatherWatch
+              SiteSkies
             </span>
           </Link>
 
