@@ -99,7 +99,7 @@ export default function ProjectCalendar({ projects }) {
                     <button
                       key={project.id}
                       onClick={() => setSelectedProject(project)}
-                      className={`w-full text-left text-[10px] font-medium px-1.5 py-0.5 rounded truncate leading-tight ${getDayPillClass(project, dateStr)}`}
+                      className={`w-full text-left text-[10px] font-semibold px-1.5 py-0.5 rounded truncate leading-tight ${getDayPillClass(project, dateStr)}`}
                     >
                       {project.name}
                     </button>
