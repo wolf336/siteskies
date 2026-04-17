@@ -109,6 +109,11 @@ export default function ProjectDetail() {
       `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,weathercode&timezone=auto&start_date=${project.start_date}&end_date=${project.end_date}`
     );
     const fData = await fRes.json();
+    if (!fData.daily?.time?.length) {
+      setChecking(false);
+      setForecastError("Weather forecast is not yet available for these project dates. Forecasts are available up to 10 days ahead.");
+      return;
+    }
     const daily = fData.daily;
 
     // Step 3 — Map to daily_forecasts
