@@ -131,10 +131,18 @@
         "summary": {
           "type": "string",
           "description": "Overall weather summary"
+        },
+        "partial_forecast": {
+          "type": "boolean",
+          "description": "Whether the forecast covers only part of the project duration"
+        },
+        "forecast_covers_until": {
+          "type": "string",
+          "description": "The last date covered by the current forecast"
         }
       }
     },
-    "recommendation": {
+    "weather_signal": {
       "type": "string",
       "enum": [
         "proceed",
@@ -143,11 +151,11 @@
         "pending"
       ],
       "default": "pending",
-      "description": "AI recommendation for the project"
+      "description": "Data-driven weather signal for the project"
     },
-    "recommendation_details": {
+    "weather_signal_details": {
       "type": "string",
-      "description": "Detailed explanation of the recommendation"
+      "description": "Detailed explanation of the weather signal"
     },
     "status": {
       "type": "string",

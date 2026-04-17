@@ -37,8 +37,8 @@ const config = {
   },
 };
 
-export default function RecommendationBanner({ recommendation, details }) {
-  const c = config[recommendation || "pending"];
+export default function RecommendationBanner({ weather_signal, weather_signal_details }) {
+  const c = config[weather_signal || "pending"];
   const Icon = c.icon;
 
   return (
@@ -53,8 +53,8 @@ export default function RecommendationBanner({ recommendation, details }) {
         </div>
         <div className="min-w-0 flex-1">
           <h3 className={`text-base font-semibold ${c.textColor}`}>{c.title}</h3>
-          {details && (
-            <p className="mt-1 text-sm text-foreground/70 leading-relaxed">{details}</p>
+          {weather_signal_details && (
+            <p className="mt-1 text-sm text-foreground/70 leading-relaxed">{weather_signal_details}</p>
           )}
         </div>
       </div>

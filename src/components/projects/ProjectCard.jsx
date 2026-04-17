@@ -26,7 +26,7 @@ const recommendationConfig = {
 export default function ProjectCard({ project }) {
   const [editOpen, setEditOpen] = useState(false);
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
-  const rec = recommendationConfig[project.recommendation || "pending"];
+  const rec = recommendationConfig[project.weather_signal || "pending"];
   const RecIcon = rec.icon;
   const stat = statusConfig[project.status || "planning"];
 
@@ -37,11 +37,11 @@ export default function ProjectCard({ project }) {
       <Card className="group relative overflow-hidden border border-border bg-card transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
         <div
           className={`absolute left-0 top-0 h-full w-1 ${
-            project.recommendation === "proceed"
+            project.weather_signal === "proceed"
               ? "bg-success"
-              : project.recommendation === "caution"
+              : project.weather_signal === "caution"
               ? "bg-warning"
-              : project.recommendation === "postpone"
+              : project.weather_signal === "postpone"
               ? "bg-destructive"
               : "bg-muted-foreground/20"
           }`}

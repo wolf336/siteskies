@@ -145,26 +145,31 @@ export default function ProjectDetail() {
       return { date, condition, temp_high_c, temp_low_c, precipitation_mm, precipitation_probability, wind_speed_kmh, meets_requirements: issues.length === 0, issues };
     });
 
-    // Step 5 — LLM for recommendation only
+    // Step 5 — Rule-based weather signal
+    const badDays = daily_forecasts.filter(d => !d.meets_requirements).length;
+    const forecastedDays = daily_forecasts.length;
+    const badPercentage = forecastedDays > 0 ? badDays / forecastedDays : 0;
+
+    let weather_signal;
+    if (badDays === 0) weather_signal = "proceed";
+    else if (badPercentage < 0.5) weather_signal = "caution";
+    else weather_signal = "postpone";
+
+    const weather_signal_details = `${badDays} of ${forecastedDays} forecasted days do not meet weather requirements.`;
+
+    // Step 6 — LLM for summary narrative only
     const llmResult = await base44.integrations.Core.InvokeLLM({
-      prompt: `Based on the following real weather forecast data and project requirements, provide a recommendation.
+      prompt: `Provide a short descriptive summary (2-3 sentences) of the following weather forecast for a construction project. Describe the overall conditions, notable weather patterns, and any days of concern. Do NOT make any proceed/caution/postpone judgement — only describe the forecast conditions.
 
 Project: ${project.name}
 Location: ${project.location}
 Dates: ${project.start_date} to ${project.end_date}
 
-Weather Requirements:
-${JSON.stringify(req, null, 2)}
-
-Real Forecast Data:
-${JSON.stringify(daily_forecasts, null, 2)}
-
-Provide only a recommendation (proceed/caution/postpone) and detailed reasoning. Do not estimate any weather values — use only the data provided.`,
+Forecast Data:
+${JSON.stringify(daily_forecasts, null, 2)}`,
       response_json_schema: {
         type: "object",
         properties: {
-          recommendation: { type: "string", enum: ["proceed", "caution", "postpone"] },
-          recommendation_details: { type: "string" },
           summary: { type: "string" },
         },
       },
@@ -183,8 +188,8 @@ Provide only a recommendation (proceed/caution/postpone) and detailed reasoning.
         partial_forecast: isPartial,
         forecast_covers_until: forecastCoversUntil,
       },
-      recommendation: llmResult.recommendation || "pending",
-      recommendation_details: llmResult.recommendation_details || "",
+      weather_signal,
+      weather_signal_details,
       status: project.status === "planning" ? "monitoring" : project.status,
     });
 
@@ -288,8 +293,8 @@ Provide only a recommendation (proceed/caution/postpone) and detailed reasoning.
 
       {/* Recommendation banner */}
       <RecommendationBanner
-        recommendation={project.recommendation}
-        details={project.recommendation_details}
+        weather_signal={project.weather_signal}
+        weather_signal_details={project.weather_signal_details}
       />
 
       {/* Forecast error */}

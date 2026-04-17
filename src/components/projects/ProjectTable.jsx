@@ -63,8 +63,8 @@ export default function ProjectTable({ projects }) {
                   <WeatherDots forecasts={forecasts} />
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${REC_STYLES[project.recommendation] || REC_STYLES.pending}`}>
-                    {project.recommendation || 'pending'}
+                  <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${REC_STYLES[project.weather_signal] || REC_STYLES.pending}`}>
+                    {project.weather_signal || 'pending'}
                   </span>
                 </td>
               </tr>

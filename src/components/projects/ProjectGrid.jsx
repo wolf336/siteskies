@@ -64,8 +64,8 @@ export default function ProjectGrid({ projects }) {
             </div>
 
             <div>
-              <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${REC_STYLES[project.recommendation] || REC_STYLES.pending}`}>
-                {project.recommendation || 'pending'}
+              <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${REC_STYLES[project.weather_signal] || REC_STYLES.pending}`}>
+                {project.weather_signal || 'pending'}
               </span>
             </div>
           </div>
