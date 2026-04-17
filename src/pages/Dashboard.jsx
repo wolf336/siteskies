@@ -34,7 +34,7 @@ export default function Dashboard() {
     if (filter === "active")
       return matchesSearch && ["planning", "monitoring", "ready", "in_progress"].includes(p.status);
     if (filter === "attention")
-      return matchesSearch && (p.recommendation === "caution" || p.recommendation === "postpone");
+      return matchesSearch && (p.weather_signal === "caution" || p.weather_signal === "postpone");
     if (filter === "completed") return matchesSearch && p.status === "completed";
     return matchesSearch;
   });
