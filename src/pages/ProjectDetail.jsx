@@ -47,8 +47,11 @@ export default function ProjectDetail() {
   const hasAutoChecked = React.useRef(false);
   React.useEffect(() => {
     if (project && !project.weather_forecast?.last_checked && !hasAutoChecked.current) {
-      hasAutoChecked.current = true;
-      checkWeather();
+      const daysUntil = differenceInDays(new Date(project.start_date), new Date());
+      if (daysUntil <= 10) {
+        hasAutoChecked.current = true;
+        checkWeather();
+      }
     }
   }, [project]);
 
@@ -207,9 +210,9 @@ Provide only a recommendation (proceed/caution/postpone) and detailed reasoning.
   }
 
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
-  const canCheckWeather = daysUntilStart <= 16;
+  const canCheckWeather = daysUntilStart <= 10;
   const forecastAvailableDate = new Date(project.start_date);
-  forecastAvailableDate.setDate(forecastAvailableDate.getDate() - 16);
+  forecastAvailableDate.setDate(forecastAvailableDate.getDate() - 10);
   const req = project.required_weather || {};
 
   return (
