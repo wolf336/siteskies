@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Clock, CloudRain, Sun, TriangleAlert, Hourglass, Pencil } from "lucide-react";
 import { format, differenceInDays, isPast } from "date-fns";
 import EditProjectModal from "./EditProjectModal.jsx";
+import { useFormattedLocation } from "@/hooks/useFormattedLocation";
 
 const statusConfig = {
   planning: { label: "Planning", className: "bg-secondary text-secondary-foreground" },
@@ -25,6 +26,7 @@ const recommendationConfig = {
 
 export default function ProjectCard({ project }) {
   const [editOpen, setEditOpen] = useState(false);
+  const formattedLocation = useFormattedLocation(project.location);
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
   const rec = recommendationConfig[project.weather_signal || "pending"];
   const RecIcon = rec.icon;
@@ -60,7 +62,7 @@ export default function ProjectCard({ project }) {
 
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
                 <MapPin className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{project.location}</span>
+                <span className="truncate">{formattedLocation}</span>
               </div>
 
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">

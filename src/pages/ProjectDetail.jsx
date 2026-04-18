@@ -28,6 +28,7 @@ import { format, differenceInDays } from "date-fns";
 import { toast } from "sonner";
 import RecommendationBanner from "@/components/projects/RecommendationBanner.jsx";
 import ForecastTimeline from "@/components/projects/ForecastTimeline.jsx";
+import { useFormattedLocation } from "@/hooks/useFormattedLocation";
 
 export default function ProjectDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -225,6 +226,26 @@ ${JSON.stringify(daily_forecasts, null, 2)}`,
     );
   }
 
+  return (
+    <ProjectDetailContent
+      project={project}
+      projectId={projectId}
+      checking={checking}
+      setChecking={setChecking}
+      forecastError={forecastError}
+      setForecastError={setForecastError}
+      editOpen={editOpen}
+      setEditOpen={setEditOpen}
+      checkWeather={checkWeather}
+      updateMutation={updateMutation}
+      deleteMutation={deleteMutation}
+    />
+  );
+}
+
+function ProjectDetailContent({ project, projectId, checking, setChecking, forecastError, setForecastError, editOpen, setEditOpen, checkWeather, updateMutation, deleteMutation }) {
+  const formattedLocation = useFormattedLocation(project.location);
+
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
   const canCheckWeather = daysUntilStart <= 10;
   const forecastAvailableDate = new Date(project.start_date);
@@ -248,7 +269,7 @@ ${JSON.stringify(daily_forecasts, null, 2)}`,
           <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5" />
-              {project.location}
+              {formattedLocation}
             </div>
             <div className="flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5" />
