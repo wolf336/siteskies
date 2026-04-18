@@ -100,11 +100,7 @@ export default function ProjectCard({ project }) {
             </div>
           </div>
 
-          {project.weather_forecast?.summary && (
-            <p className="mt-3 text-xs text-muted-foreground line-clamp-2 border-t border-border pt-3">
-              {project.weather_forecast.summary}
-            </p>
-          )}
+
         </CardContent>
       </Card>
     </Link>

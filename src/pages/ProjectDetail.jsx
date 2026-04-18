@@ -164,24 +164,6 @@ export default function ProjectDetail() {
 
     const weather_signal_details = `${badDays} of ${forecastedDays} forecasted days do not meet weather requirements.`;
 
-    // Step 6 — LLM for summary narrative only
-    const llmResult = await base44.integrations.Core.InvokeLLM({
-      prompt: `Provide a short descriptive summary (2-3 sentences) of the following weather forecast for a construction project. Describe the overall conditions, notable weather patterns, and any days of concern. Do NOT make any proceed/caution/postpone judgement — only describe the forecast conditions.
-
-Project: ${project.name}
-Location: ${project.location}
-Dates: ${project.start_date} to ${project.end_date}
-
-Forecast Data:
-${JSON.stringify(daily_forecasts, null, 2)}`,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          summary: { type: "string" },
-        },
-      },
-    });
-
     const projectLengthDays = differenceInDays(new Date(project.end_date), new Date(project.start_date)) + 1;
     const isPartial = daily_forecasts.length < projectLengthDays;
     const forecastCoversUntil = isPartial ? daily_forecasts[daily_forecasts.length - 1]?.date : null;
@@ -191,7 +173,7 @@ ${JSON.stringify(daily_forecasts, null, 2)}`,
         last_checked: new Date().toISOString(),
         sources: ["Open-Meteo"],
         daily_forecasts,
-        summary: llmResult.summary || "",
+        summary: "",
         partial_forecast: isPartial,
         forecast_covers_until: forecastCoversUntil,
       },

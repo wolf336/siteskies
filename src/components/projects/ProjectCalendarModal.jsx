@@ -65,13 +65,6 @@ export default function ProjectCalendarModal({ project, onClose }) {
           </div>
         </div>
 
-        {/* Weather summary */}
-        {project.weather_forecast?.summary && (
-          <p className="text-sm text-muted-foreground border-t border-border pt-3">
-            {project.weather_forecast.summary}
-          </p>
-        )}
-
         {/* Forecast dots */}
         <div className="space-y-2 border-t border-border pt-3">
           <WeatherDots forecasts={forecasts} size="lg" />
