@@ -49,7 +49,7 @@ export default function ProjectDetail() {
   React.useEffect(() => {
     if (project && !project.weather_forecast?.last_checked && !hasAutoChecked.current) {
       const daysUntil = differenceInDays(new Date(project.start_date), new Date());
-      if (daysUntil <= 10) {
+      if (daysUntil <= 16) {
         hasAutoChecked.current = true;
         checkWeather();
       }
@@ -105,14 +105,20 @@ export default function ProjectDetail() {
       longitude = geoData.results[0].longitude;
     }
 
-    // Step 2 — Fetch forecast
+    // Step 2 — Fetch forecast (cap end_date to today + 15 days = 16-day window)
+    const today = new Date();
+    const capDate = new Date(today);
+    capDate.setDate(today.getDate() + 15);
+    const capDateStr = capDate.toISOString().split("T")[0];
+    const effectiveEndDate = project.end_date < capDateStr ? project.end_date : capDateStr;
+
     const fRes = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,weathercode&timezone=auto&start_date=${project.start_date}&end_date=${project.end_date}`
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,weathercode&timezone=auto&start_date=${project.start_date}&end_date=${effectiveEndDate}`
     );
     const fData = await fRes.json();
     if (!fData.daily?.time?.length) {
       setChecking(false);
-      setForecastError("Weather forecast is not yet available for these project dates. Forecasts are available up to 10 days ahead.");
+      setForecastError("Weather forecast is not yet available for these project dates. Forecasts are available up to 16 days ahead.");
       return;
     }
     const daily = fData.daily;
@@ -247,9 +253,9 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
   const formattedLocation = useFormattedLocation(project.location);
 
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
-  const canCheckWeather = daysUntilStart <= 10;
+  const canCheckWeather = daysUntilStart <= 16;
   const forecastAvailableDate = new Date(project.start_date);
-  forecastAvailableDate.setDate(forecastAvailableDate.getDate() - 10);
+  forecastAvailableDate.setDate(forecastAvailableDate.getDate() - 16);
   const req = project.required_weather || {};
 
   return (
@@ -365,7 +371,7 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
           <span className="font-medium">{project.project_length_days || differenceInDays(new Date(project.end_date), new Date(project.start_date)) + 1}</span> project days.
           Full forecast available from{" "}
           <span className="font-medium">
-            {format(new Date(new Date(project.end_date).setDate(new Date(project.end_date).getDate() - 10)), "MMMM d, yyyy")}
+            {format(new Date(new Date(project.end_date).setDate(new Date(project.end_date).getDate() - 16)), "MMMM d, yyyy")}
           </span>.
         </div>
       )}
