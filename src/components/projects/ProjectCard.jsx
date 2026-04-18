@@ -52,7 +52,7 @@ export default function ProjectCard({ project }) {
           }`}
         />
         <CardContent className="p-5 pl-6">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center justify-between gap-4">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2.5 mb-1.5">
                 <h3 className="text-base font-semibold text-foreground truncate group-hover:text-primary transition-colors">
@@ -88,14 +88,14 @@ export default function ProjectCard({ project }) {
               </div>
             </div>
 
-            <div className="flex flex-col items-end gap-2">
-              {forecasts.length > 0 && (
-                <div className="flex flex-col items-end gap-1">
-                  <WeatherDots forecasts={forecasts} size="sm" />
-                  <p className="text-[11px] text-muted-foreground">{clearDays} of {forecasts.length} days clear</p>
-                </div>
-              )}
-              <div className="flex items-center gap-2">
+            {forecasts.length > 0 && (
+              <div className="flex flex-col items-center gap-1 px-4">
+                <WeatherDots forecasts={forecasts} size="sm" />
+                <p className="text-[11px] text-muted-foreground whitespace-nowrap">{clearDays} of {forecasts.length} days clear</p>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={(e) => { e.preventDefault(); setEditOpen(true); }}
                 className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -106,7 +106,6 @@ export default function ProjectCard({ project }) {
               <div className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 ${rec.className}`}>
                 <RecIcon className="h-4 w-4" />
                 <span className="text-xs font-semibold">{rec.label}</span>
-              </div>
               </div>
             </div>
           </div>
