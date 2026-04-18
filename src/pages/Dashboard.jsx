@@ -80,6 +80,7 @@ export default function Dashboard() {
   });
 
   return (
+    <>
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -227,5 +228,6 @@ export default function Dashboard() {
       </button>
 
       <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} page="Dashboard" />
+    </>
   );
 }
