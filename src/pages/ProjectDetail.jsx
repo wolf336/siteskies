@@ -29,6 +29,9 @@ import { toast } from "sonner";
 import RecommendationBanner from "@/components/projects/RecommendationBanner.jsx";
 import ForecastTimeline from "@/components/projects/ForecastTimeline.jsx";
 import { useFormattedLocation } from "@/hooks/useFormattedLocation";
+import { useSubscription } from "@/hooks/useSubscription";
+import { TIER_CONFIG } from "@/lib/subscriptionConfig";
+import { Link as RouterLink } from "react-router-dom";
 
 export default function ProjectDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -37,6 +40,7 @@ export default function ProjectDetail() {
   const [checking, setChecking] = useState(false);
   const [forecastError, setForecastError] = useState("");
   const [editOpen, setEditOpen] = useState(false);
+  const { data: subData } = useSubscription();
 
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
@@ -80,6 +84,16 @@ export default function ProjectDetail() {
   };
 
   const checkWeather = async () => {
+    // Check daily refresh limit
+    const sub = subData?.subscription;
+    const tier = sub?.tier || 'free';
+    const config = TIER_CONFIG[tier];
+    const todayRefreshes = sub?.daily_refresh_count || 0;
+    if (todayRefreshes >= config.maxRefreshesPerDay) {
+      toast.error(`You've used all ${config.maxRefreshesPerDay} daily refreshes on your ${config.name} plan. Upgrade for more.`, { duration: 5000 });
+      return;
+    }
+
     setChecking(true);
     setForecastError("");
     try {
@@ -183,6 +197,19 @@ export default function ProjectDetail() {
     });
 
     queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+
+    // Increment daily refresh count
+    if (subData?.subscription?.id) {
+      const today = new Date().toISOString().split('T')[0];
+      const sub = subData.subscription;
+      const currentCount = sub.daily_refresh_date === today ? (sub.daily_refresh_count || 0) : 0;
+      await base44.entities.Subscription.update(sub.id, {
+        daily_refresh_count: currentCount + 1,
+        daily_refresh_date: today,
+      });
+      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+    }
+
     setChecking(false);
     toast.success("Weather updated successfully", { duration: 3000 });
     } catch (err) {

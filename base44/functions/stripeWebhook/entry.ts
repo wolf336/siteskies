@@ -1,0 +1,100 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import Stripe from 'npm:stripe@14.21.0';
+
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
+
+const TIER_BY_PRICE = {
+  'price_1TNTWSK7NunMQg0brA5KJmnC': 'small_team',
+  'price_1TNTWSK7NunMQg0bYp45EAaO': 'small_team',
+  'price_1TNTWSK7NunMQg0bypYjkSj4': 'large_team',
+  'price_1TNTWSK7NunMQg0bjcmVMdB6': 'large_team',
+};
+
+const INTERVAL_BY_PRICE = {
+  'price_1TNTWSK7NunMQg0brA5KJmnC': 'monthly',
+  'price_1TNTWSK7NunMQg0bYp45EAaO': 'yearly',
+  'price_1TNTWSK7NunMQg0bypYjkSj4': 'monthly',
+  'price_1TNTWSK7NunMQg0bjcmVMdB6': 'yearly',
+};
+
+async function upsertSubscription(base44, userId, userEmail, data) {
+  const existing = await base44.asServiceRole.entities.Subscription.filter({ user_id: userId });
+  if (existing.length > 0) {
+    await base44.asServiceRole.entities.Subscription.update(existing[0].id, data);
+  } else {
+    await base44.asServiceRole.entities.Subscription.create({ user_id: userId, user_email: userEmail, ...data });
+  }
+}
+
+Deno.serve(async (req) => {
+  const body = await req.text();
+  const sig = req.headers.get('stripe-signature');
+  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+
+  let event;
+  try {
+    event = await stripe.webhooks.constructEventAsync(body, sig, webhookSecret);
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+  }
+
+  const base44 = createClientFromRequest(req);
+
+  try {
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      const { user_id, user_email, tier, billing_interval } = session.metadata || {};
+      if (!user_id) return Response.json({ received: true });
+
+      const stripeSub = await stripe.subscriptions.retrieve(session.subscription);
+      const priceId = stripeSub.items.data[0]?.price?.id;
+
+      await upsertSubscription(base44, user_id, user_email, {
+        tier: tier || TIER_BY_PRICE[priceId] || 'free',
+        billing_interval: billing_interval || INTERVAL_BY_PRICE[priceId] || 'monthly',
+        status: 'active',
+        stripe_customer_id: session.customer,
+        stripe_subscription_id: session.subscription,
+        stripe_price_id: priceId,
+        current_period_end: new Date(stripeSub.current_period_end * 1000).toISOString(),
+        cancel_at_period_end: false,
+      });
+    }
+
+    if (event.type === 'customer.subscription.updated') {
+      const stripeSub = event.data.object;
+      const priceId = stripeSub.items.data[0]?.price?.id;
+      const existing = await base44.asServiceRole.entities.Subscription.filter({ stripe_subscription_id: stripeSub.id });
+      if (existing.length > 0) {
+        await base44.asServiceRole.entities.Subscription.update(existing[0].id, {
+          status: stripeSub.status,
+          tier: TIER_BY_PRICE[priceId] || existing[0].tier,
+          billing_interval: INTERVAL_BY_PRICE[priceId] || existing[0].billing_interval,
+          stripe_price_id: priceId,
+          current_period_end: new Date(stripeSub.current_period_end * 1000).toISOString(),
+          cancel_at_period_end: stripeSub.cancel_at_period_end,
+        });
+      }
+    }
+
+    if (event.type === 'customer.subscription.deleted') {
+      const stripeSub = event.data.object;
+      const existing = await base44.asServiceRole.entities.Subscription.filter({ stripe_subscription_id: stripeSub.id });
+      if (existing.length > 0) {
+        await base44.asServiceRole.entities.Subscription.update(existing[0].id, {
+          tier: 'free',
+          status: 'canceled',
+          stripe_subscription_id: null,
+          stripe_price_id: null,
+          cancel_at_period_end: false,
+        });
+      }
+    }
+
+    return Response.json({ received: true });
+  } catch (err) {
+    console.error('Webhook handler error:', err);
+    return Response.json({ error: err.message }, { status: 500 });
+  }
+});

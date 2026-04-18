@@ -1,0 +1,31 @@
+{
+  "name": "TeamMember",
+  "type": "object",
+  "properties": {
+    "owner_user_id": {
+      "type": "string",
+      "description": "The user ID of the subscription owner"
+    },
+    "member_email": {
+      "type": "string",
+      "description": "Email of the team member"
+    },
+    "member_user_id": {
+      "type": "string",
+      "description": "User ID of the team member (once they register)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active"
+      ],
+      "default": "pending",
+      "description": "Invitation status"
+    }
+  },
+  "required": [
+    "owner_user_id",
+    "member_email"
+  ]
+}

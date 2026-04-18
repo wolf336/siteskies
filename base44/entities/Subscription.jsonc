@@ -1,0 +1,79 @@
+{
+  "name": "Subscription",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "The user who owns this subscription"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the subscription owner"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "free",
+        "small_team",
+        "large_team",
+        "enterprise"
+      ],
+      "default": "free",
+      "description": "Subscription tier"
+    },
+    "billing_interval": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "yearly"
+      ],
+      "description": "Billing interval for paid plans"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "canceled",
+        "past_due",
+        "trialing"
+      ],
+      "default": "active",
+      "description": "Stripe subscription status"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "Stripe customer ID"
+    },
+    "stripe_subscription_id": {
+      "type": "string",
+      "description": "Stripe subscription ID"
+    },
+    "stripe_price_id": {
+      "type": "string",
+      "description": "Stripe price ID"
+    },
+    "current_period_end": {
+      "type": "string",
+      "description": "When the current billing period ends"
+    },
+    "cancel_at_period_end": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether subscription cancels at period end"
+    },
+    "daily_refresh_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of weather refreshes used today"
+    },
+    "daily_refresh_date": {
+      "type": "string",
+      "description": "Date of the last refresh count reset (YYYY-MM-DD)"
+    }
+  },
+  "required": [
+    "user_id",
+    "user_email",
+    "tier"
+  ]
+}

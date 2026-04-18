@@ -12,10 +12,13 @@ import { differenceInDays } from "date-fns";
 import { Link } from "react-router-dom";
 import WeatherRequirementsForm from "@/components/projects/WeatherRequirementsForm.jsx";
 import LocationPicker from "@/components/projects/LocationPicker.jsx";
+import { useSubscription } from "@/hooks/useSubscription";
+import { TIER_CONFIG } from "@/lib/subscriptionConfig";
 
 export default function NewProject() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const { data: subData } = useSubscription();
   const today = new Date().toISOString().split("T")[0];
   const [form, setForm] = useState({
     name: "",
@@ -42,7 +45,12 @@ export default function NewProject() {
       ? differenceInDays(new Date(form.end_date), new Date(form.start_date)) + 1
       : 0;
 
-  const isValid = form.name && form.location && form.start_date && form.end_date && projectLength > 0;
+  const tier = subData?.subscription?.tier || 'free';
+  const tierConfig = TIER_CONFIG[tier];
+  const projectCount = subData?.projectCount || 0;
+  const atProjectLimit = projectCount >= tierConfig.maxProjects;
+
+  const isValid = form.name && form.location && form.start_date && form.end_date && projectLength > 0 && !atProjectLimit;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -74,6 +82,13 @@ export default function NewProject() {
           Set up your project details and weather requirements
         </p>
       </div>
+
+      {atProjectLimit && (
+        <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+          You've reached the <strong>{projectCount} project</strong> limit on the <strong>{tierConfig.name}</strong> plan.{' '}
+          <Link to="/Billing" className="underline font-medium">Upgrade your plan</Link> to create more projects.
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Project details */}
