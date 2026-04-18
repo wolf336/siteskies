@@ -50,7 +50,7 @@ export default function PlanCard({ tierKey, config, currentTier, billingInterval
         </div>
         {!isFree && !isEnterprise && (
           <p className="text-2xl font-bold text-foreground">
-            ${price}
+            €{price}
             <span className="text-sm font-normal text-muted-foreground">/{billingInterval === 'yearly' ? 'yr' : 'mo'}</span>
           </p>
         )}
