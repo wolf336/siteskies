@@ -14,7 +14,7 @@ const feedbackTypes = [
 ];
 
 export default function FeedbackModal({ open, onClose, page = "Dashboard" }) {
-  const [type, setType] = useState("suggestion");
+  const [type, setType] = useState(null);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -25,7 +25,7 @@ export default function FeedbackModal({ open, onClose, page = "Dashboard" }) {
     toast.success("Thanks for your feedback!");
     setSubmitting(false);
     setMessage("");
-    setType("suggestion");
+    setType(null);
     onClose();
   };
 
