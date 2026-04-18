@@ -4,6 +4,7 @@ import { createPageUrl } from "@/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Clock, CloudRain, Sun, TriangleAlert, Hourglass, Pencil } from "lucide-react";
+import WeatherDots from "./WeatherDots";
 import { format, differenceInDays, isPast } from "date-fns";
 import EditProjectModal from "./EditProjectModal.jsx";
 import { useFormattedLocation } from "@/hooks/useFormattedLocation";
@@ -29,6 +30,8 @@ export default function ProjectCard({ project }) {
   const formattedLocation = useFormattedLocation(project.location);
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
   const rec = recommendationConfig[project.weather_signal || "pending"];
+  const forecasts = project.weather_forecast?.daily_forecasts || [];
+  const clearDays = forecasts.filter(d => d.meets_requirements).length;
   const RecIcon = rec.icon;
   const stat = statusConfig[project.status || "planning"];
 
@@ -85,7 +88,14 @@ export default function ProjectCard({ project }) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-end gap-2">
+              {forecasts.length > 0 && (
+                <div className="flex flex-col items-end gap-1">
+                  <WeatherDots forecasts={forecasts} size="sm" />
+                  <p className="text-[11px] text-muted-foreground">{clearDays} of {forecasts.length} days clear</p>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
               <button
                 onClick={(e) => { e.preventDefault(); setEditOpen(true); }}
                 className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -96,6 +106,7 @@ export default function ProjectCard({ project }) {
               <div className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 ${rec.className}`}>
                 <RecIcon className="h-4 w-4" />
                 <span className="text-xs font-semibold">{rec.label}</span>
+              </div>
               </div>
             </div>
           </div>
