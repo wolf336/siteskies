@@ -80,7 +80,6 @@ export default function Dashboard() {
   });
 
   return (
-    <>
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -91,6 +90,13 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setFeedbackOpen(true)}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <MessageSquare className="h-4 w-4" />
+            Feedback
+          </button>
           <div className="flex flex-col items-end gap-1">
             <Button
               variant="outline"
@@ -218,16 +224,7 @@ export default function Dashboard() {
       )}
     </div>
 
-      {/* Feedback button */}
-      <button
-        onClick={() => setFeedbackOpen(true)}
-        className="fixed bottom-6 right-6 flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors z-50"
-      >
-        <MessageSquare className="h-4 w-4" />
-        Feedback
-      </button>
-
       <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} page="Dashboard" />
-    </>
+    </div>
   );
 }
