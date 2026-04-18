@@ -222,8 +222,6 @@ export default function Dashboard() {
           {view === 'calendar' && <ProjectCalendar projects={filtered} />}
         </>
       )}
-    </div>
-
       <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} page="Dashboard" />
     </div>
   );
