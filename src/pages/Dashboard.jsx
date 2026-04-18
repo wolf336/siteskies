@@ -90,13 +90,6 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setFeedbackOpen(true)}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <MessageSquare className="h-4 w-4" />
-            Feedback
-          </button>
           <div className="flex flex-col items-end gap-1">
             <Button
               variant="outline"
@@ -116,6 +109,13 @@ export default function Dashboard() {
               </p>
             )}
           </div>
+          <button
+            onClick={() => setFeedbackOpen(true)}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <MessageSquare className="h-4 w-4" />
+            Feedback
+          </button>
           <Link to={createPageUrl("NewProject")}>
             <Button className="bg-primary hover:bg-primary/90 gap-2">
               <Plus className="h-4 w-4" />
