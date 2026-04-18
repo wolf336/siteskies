@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, CloudSun, FolderOpen, List, LayoutGrid, Table2, CalendarDays, RefreshCw, Loader2 } from "lucide-react";
+import { Plus, Search, CloudSun, FolderOpen, List, LayoutGrid, Table2, CalendarDays, RefreshCw, Loader2, MessageSquare } from "lucide-react";
+import FeedbackModal from "@/components/FeedbackModal.jsx";
 import { motion, AnimatePresence } from "framer-motion";
 import ProjectCard from "@/components/projects/ProjectCard.jsx";
 import ProjectGrid from "@/components/projects/ProjectGrid.jsx";
@@ -21,6 +22,7 @@ export default function Dashboard() {
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState("list");
   const [syncing, setSyncing] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: projects = [], isLoading } = useQuery({
@@ -214,5 +216,16 @@ export default function Dashboard() {
         </>
       )}
     </div>
+
+      {/* Feedback button */}
+      <button
+        onClick={() => setFeedbackOpen(true)}
+        className="fixed bottom-6 right-6 flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors z-50"
+      >
+        <MessageSquare className="h-4 w-4" />
+        Feedback
+      </button>
+
+      <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} page="Dashboard" />
   );
 }
