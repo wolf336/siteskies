@@ -23,8 +23,8 @@ export default function PlanCard({ tierKey, config, currentTier, billingInterval
       const res = await base44.functions.invoke('createCheckoutSession', {
         tier: tierKey,
         billing_interval: billingInterval,
-        success_url: window.location.origin + '/Billing?success=true',
-        cancel_url: window.location.origin + '/Billing',
+        success_url: window.location.origin + '/Account?success=true',
+        cancel_url: window.location.origin + '/Account',
       });
       if (res.data.error) throw new Error(res.data.error);
       window.location.href = res.data.url;

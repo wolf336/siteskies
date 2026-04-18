@@ -36,8 +36,8 @@ Deno.serve(async (req) => {
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
-      success_url: success_url || `${req.headers.get('origin')}/Billing?success=true`,
-      cancel_url: cancel_url || `${req.headers.get('origin')}/Billing?canceled=true`,
+      success_url: success_url || `${req.headers.get('origin')}/Account?success=true`,
+      cancel_url: cancel_url || `${req.headers.get('origin')}/Account?canceled=true`,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),
         user_id: user.id,
