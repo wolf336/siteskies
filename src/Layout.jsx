@@ -1,15 +1,13 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { CloudSun, LayoutDashboard, FolderPlus, MessageSquare, CreditCard } from "lucide-react";
+import { CloudSun, MessageSquare, UserCircle } from "lucide-react";
 import FeedbackModal from "@/components/FeedbackModal";
 
 export default function Layout({ children, currentPageName }) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const navItems = [
-    { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
-    { name: "New Project", icon: FolderPlus, page: "NewProject" },
-    { name: "Billing", icon: CreditCard, page: "Billing" },
+    { name: "Account", icon: UserCircle, page: "Account" },
   ];
 
   return (
