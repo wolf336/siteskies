@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, CloudSun, FolderOpen, List, LayoutGrid, Table2, CalendarDays, RefreshCw, Loader2, MessageSquare } from "lucide-react";
-import FeedbackModal from "@/components/FeedbackModal.jsx";
+import { Plus, Search, CloudSun, FolderOpen, List, LayoutGrid, Table2, CalendarDays, RefreshCw, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProjectCard from "@/components/projects/ProjectCard.jsx";
 import ProjectGrid from "@/components/projects/ProjectGrid.jsx";
@@ -22,7 +21,6 @@ export default function Dashboard() {
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState("list");
   const [syncing, setSyncing] = useState(false);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: projects = [], isLoading } = useQuery({
@@ -109,13 +107,6 @@ export default function Dashboard() {
               </p>
             )}
           </div>
-          <button
-            onClick={() => setFeedbackOpen(true)}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <MessageSquare className="h-4 w-4" />
-            Feedback
-          </button>
           <Link to={createPageUrl("NewProject")}>
             <Button className="bg-primary hover:bg-primary/90 gap-2">
               <Plus className="h-4 w-4" />
@@ -222,7 +213,6 @@ export default function Dashboard() {
           {view === 'calendar' && <ProjectCalendar projects={filtered} />}
         </>
       )}
-      <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} page="Dashboard" />
     </div>
   );
 }

@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { CloudSun, LayoutDashboard, FolderPlus, Settings } from "lucide-react";
+import { CloudSun, LayoutDashboard, FolderPlus, MessageSquare } from "lucide-react";
+import FeedbackModal from "@/components/FeedbackModal";
 
 export default function Layout({ children, currentPageName }) {
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const navItems = [
     { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
     { name: "New Project", icon: FolderPlus, page: "NewProject" },
@@ -41,7 +43,15 @@ export default function Layout({ children, currentPageName }) {
                 </Link>
               );
             })}
+            <button
+              onClick={() => setFeedbackOpen(true)}
+              className="flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-all"
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">Feedback</span>
+            </button>
           </nav>
+          <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} page={currentPageName} />
         </div>
       </header>
 
