@@ -1,28 +1,66 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, CloudSun, FolderOpen, List, LayoutGrid, Table2, CalendarDays } from "lucide-react";
+import { Plus, Search, CloudSun, FolderOpen, List, LayoutGrid, Table2, CalendarDays, RefreshCw, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProjectCard from "@/components/projects/ProjectCard.jsx";
 import ProjectGrid from "@/components/projects/ProjectGrid.jsx";
 import ProjectTable from "@/components/projects/ProjectTable.jsx";
 import ProjectCalendar from "@/components/projects/ProjectCalendar.jsx";
+import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 
 export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState("list");
+  const [syncing, setSyncing] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ["projects"],
     queryFn: () => base44.entities.Project.list("-created_date"),
   });
+
+  const { data: syncSetting } = useQuery({
+    queryKey: ["lastBulkSync"],
+    queryFn: async () => {
+      const results = await base44.entities.AppSetting.filter({ key: "last_bulk_weather_sync" });
+      if (results.length > 0) {
+        return JSON.parse(results[0].value);
+      }
+      return null;
+    },
+  });
+
+  const handleBulkSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await base44.functions.invoke("bulkUpdateWeather", {});
+      const { successCount, failed, totalEligible } = res.data;
+
+      if (failed.length === 0) {
+        toast.success(`All ${successCount} eligible project${successCount !== 1 ? "s" : ""} synced successfully.`);
+      } else {
+        toast.error(
+          `${successCount} of ${totalEligible} projects synced. ${failed.length} failed:\n${failed.map(f => `• ${f.name}: ${f.reason}`).join("\n")}`,
+          { duration: 8000 }
+        );
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["lastBulkSync"] });
+    } catch (err) {
+      toast.error(`Sync failed: ${err?.message || "Unknown error"}`, { duration: 5000 });
+    }
+    setSyncing(false);
+  };
 
   const filtered = projects.filter((p) => {
     const matchesSearch =
@@ -49,12 +87,33 @@ export default function Dashboard() {
             Track weather conditions for your upcoming projects
           </p>
         </div>
-        <Link to={createPageUrl("NewProject")}>
-          <Button className="bg-primary hover:bg-primary/90 gap-2">
-            <Plus className="h-4 w-4" />
-            New Project
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col items-end gap-1">
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={handleBulkSync}
+              disabled={syncing}
+            >
+              {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              {syncing ? "Syncing..." : "Sync all projects"}
+            </Button>
+            {syncSetting?.synced_at && (
+              <p className="text-xs text-muted-foreground">
+                Last synced {formatDistanceToNow(new Date(syncSetting.synced_at), { addSuffix: true })}
+                {syncSetting.failed_count > 0 && (
+                  <span className="text-destructive ml-1">({syncSetting.failed_count} failed)</span>
+                )}
+              </p>
+            )}
+          </div>
+          <Link to={createPageUrl("NewProject")}>
+            <Button className="bg-primary hover:bg-primary/90 gap-2">
+              <Plus className="h-4 w-4" />
+              New Project
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Filters + View switcher */}
