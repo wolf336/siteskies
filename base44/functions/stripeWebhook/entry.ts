@@ -4,17 +4,17 @@ import Stripe from 'npm:stripe@14.21.0';
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
 const TIER_BY_PRICE = {
-  'price_1TNTWSK7NunMQg0brA5KJmnC': 'small_team',
-  'price_1TNTWSK7NunMQg0bYp45EAaO': 'small_team',
-  'price_1TNTWSK7NunMQg0bypYjkSj4': 'large_team',
-  'price_1TNTWSK7NunMQg0bjcmVMdB6': 'large_team',
+  'price_1TNV0qARwXv1I17HSqMPZH3q': 'small_team',
+  'price_1TNV0qARwXv1I17HkQbxbdDI': 'small_team',
+  'price_1TNV0qARwXv1I17HYsbu6xUw': 'large_team',
+  'price_1TNV0qARwXv1I17HKs7RPkqh': 'large_team',
 };
 
 const INTERVAL_BY_PRICE = {
-  'price_1TNTWSK7NunMQg0brA5KJmnC': 'monthly',
-  'price_1TNTWSK7NunMQg0bYp45EAaO': 'yearly',
-  'price_1TNTWSK7NunMQg0bypYjkSj4': 'monthly',
-  'price_1TNTWSK7NunMQg0bjcmVMdB6': 'yearly',
+  'price_1TNV0qARwXv1I17HSqMPZH3q': 'monthly',
+  'price_1TNV0qARwXv1I17HkQbxbdDI': 'yearly',
+  'price_1TNV0qARwXv1I17HYsbu6xUw': 'monthly',
+  'price_1TNV0qARwXv1I17HKs7RPkqh': 'yearly',
 };
 
 async function upsertSubscription(base44, userId, userEmail, data) {
