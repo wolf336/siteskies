@@ -6,40 +6,141 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const subs = await base44.asServiceRole.entities.Subscription.filter({ user_id: user.id });
+    const today = new Date().toISOString().split('T')[0];
+    const nowIso = new Date().toISOString();
 
-    if (subs.length === 0) {
-      // Auto-create free tier record
-      const newSub = await base44.asServiceRole.entities.Subscription.create({
+    // --- Step 1: load or create the user's own Subscription record ---
+    let ownSubs = await base44.asServiceRole.entities.Subscription.filter({ user_id: user.id });
+    let ownSub;
+    if (ownSubs.length === 0) {
+      ownSub = await base44.asServiceRole.entities.Subscription.create({
         user_id: user.id,
         user_email: user.email,
         tier: 'free',
         status: 'active',
         daily_refresh_count: 0,
-        daily_refresh_date: new Date().toISOString().split('T')[0],
-      });
-      return Response.json({ subscription: newSub });
-    }
-
-    const sub = subs[0];
-
-    // Reset daily refresh count if it's a new day
-    const today = new Date().toISOString().split('T')[0];
-    if (sub.daily_refresh_date !== today) {
-      const updated = await base44.asServiceRole.entities.Subscription.update(sub.id, {
-        daily_refresh_count: 0,
         daily_refresh_date: today,
       });
-      return Response.json({ subscription: updated });
+    } else {
+      ownSub = ownSubs[0];
+      // Reset daily counter if it's a new day
+      if (ownSub.daily_refresh_date !== today) {
+        ownSub = await base44.asServiceRole.entities.Subscription.update(ownSub.id, {
+          daily_refresh_count: 0,
+          daily_refresh_date: today,
+        });
+      }
     }
 
-    // Also return team members
-    const teamMembers = await base44.asServiceRole.entities.TeamMember.filter({ owner_user_id: user.id });
+    // --- Step 2: determine the effective plan ---
+    // Priority: own paid active > active team membership > awaiting within old period > free
+    let effectivePlan = {
+      tier: 'free',
+      billing_interval: null,
+      status: 'active',
+      source: 'own',        // 'own' | 'team' | 'awaiting'
+      inherited_from: null, // { owner_name, owner_email } when source='team'
+      current_period_end: null,
+      cancel_at_period_end: false,
+    };
 
-    // And project count
-    const projects = await base44.asServiceRole.entities.Project.filter({ created_by: user.email });
+    const hasOwnPaidActive = ownSub.tier !== 'free' && ownSub.status === 'active';
 
-    return Response.json({ subscription: sub, teamMembers, projectCount: projects.length });
+    if (hasOwnPaidActive) {
+      // Self-pay wins
+      effectivePlan = {
+        tier: ownSub.tier,
+        billing_interval: ownSub.billing_interval || null,
+        status: ownSub.status,
+        source: 'own',
+        inherited_from: null,
+        current_period_end: ownSub.current_period_end || null,
+        cancel_at_period_end: !!ownSub.cancel_at_period_end,
+      };
+    } else {
+      // Check team memberships by user_id
+      const memberships = await base44.asServiceRole.entities.TeamMember.filter({ member_user_id: user.id });
+
+      // Check for active membership
+      const activeMembership = memberships.find(m => m.status === 'active');
+      if (activeMembership) {
+        const ownerSubs = await base44.asServiceRole.entities.Subscription.filter({ user_id: activeMembership.owner_user_id });
+        const ownerSub = ownerSubs[0];
+        if (ownerSub && ownerSub.tier !== 'free' && ownerSub.status === 'active') {
+          effectivePlan = {
+            tier: ownerSub.tier,
+            billing_interval: ownerSub.billing_interval || null,
+            status: ownerSub.status,
+            source: 'team',
+            inherited_from: {
+              owner_name: activeMembership.owner_name || activeMembership.owner_email || 'your team owner',
+              owner_email: activeMembership.owner_email || null,
+            },
+            current_period_end: ownerSub.current_period_end || null,
+            cancel_at_period_end: !!ownerSub.cancel_at_period_end,
+          };
+        }
+        // If owner's sub is gone/canceled, member falls through to free
+      }
+
+      // Check awaiting_own_sub_end: user accepted invite but old sub hasn't ended yet
+      if (effectivePlan.source === 'own' && effectivePlan.tier === 'free') {
+        const awaitingMembership = memberships.find(m => m.status === 'awaiting_own_sub_end');
+        if (awaitingMembership) {
+          const oldPeriodEnd = awaitingMembership.activates_at;
+          const oldSubStillActive = oldPeriodEnd && oldPeriodEnd > nowIso;
+
+          if (oldSubStillActive) {
+            // Still within the old billing period — show their old plan features
+            effectivePlan = {
+              tier: ownSub.tier !== 'free' ? ownSub.tier : 'free',
+              billing_interval: ownSub.billing_interval || null,
+              status: 'active',
+              source: 'awaiting',
+              inherited_from: null,
+              current_period_end: oldPeriodEnd,
+              cancel_at_period_end: true,
+            };
+          } else if (oldPeriodEnd && oldPeriodEnd <= nowIso) {
+            // Old sub period has ended — flip them to active on the owner's plan
+            await base44.asServiceRole.entities.TeamMember.update(awaitingMembership.id, {
+              status: 'active',
+              activates_at: nowIso,
+            });
+            // Now try to resolve the owner's plan for them
+            const ownerSubs = await base44.asServiceRole.entities.Subscription.filter({ user_id: awaitingMembership.owner_user_id });
+            const ownerSub = ownerSubs[0];
+            if (ownerSub && ownerSub.tier !== 'free' && ownerSub.status === 'active') {
+              effectivePlan = {
+                tier: ownerSub.tier,
+                billing_interval: ownerSub.billing_interval || null,
+                status: ownerSub.status,
+                source: 'team',
+                inherited_from: {
+                  owner_name: awaitingMembership.owner_name || awaitingMembership.owner_email || 'your team owner',
+                  owner_email: awaitingMembership.owner_email || null,
+                },
+                current_period_end: ownerSub.current_period_end || null,
+                cancel_at_period_end: !!ownerSub.cancel_at_period_end,
+              };
+            }
+          }
+        }
+      }
+    }
+
+    // --- Step 3: load team members and project count (user-scoped) ---
+    const [teamMembers, projects] = await Promise.all([
+      base44.asServiceRole.entities.TeamMember.filter({ owner_user_id: user.id }),
+      base44.asServiceRole.entities.Project.filter({ created_by: user.email }),
+    ]);
+
+    return Response.json({
+      subscription: ownSub,       // raw own record (usage counters live here)
+      effectivePlan,              // resolved plan the user actually operates under
+      teamMembers,
+      projectCount: projects.length,
+    });
   } catch (error) {
     console.error('getSubscriptionStatus error:', error);
     return Response.json({ error: error.message }, { status: 500 });
