@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { CloudSun, MessageSquare, UserCircle } from "lucide-react";
+import { CloudSun, MessageSquare, Settings } from "lucide-react";
 import FeedbackModal from "@/components/FeedbackModal";
 
 export default function Layout({ children, currentPageName }) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const navItems = [
-    { name: "Account", icon: UserCircle, page: "Account" },
+    { name: "Settings", icon: Settings, page: "Settings" },
   ];
 
   return (

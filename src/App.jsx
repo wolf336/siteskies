@@ -5,7 +5,8 @@ import { queryClientInstance } from '@/lib/query-client'
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
-import Account from './pages/Account';
+import Settings from './pages/Settings';
+import { Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -59,7 +60,8 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-      <Route path="/Account" element={<LayoutWrapper currentPageName="Account"><Account /></LayoutWrapper>} />
+      <Route path="/Settings" element={<LayoutWrapper currentPageName="Settings"><Settings /></LayoutWrapper>} />
+      <Route path="/Account" element={<AccountRedirect />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
@@ -79,6 +81,11 @@ function App() {
       </QueryClientProvider>
     </AuthProvider>
   )
+}
+
+function AccountRedirect() {
+  const location = useLocation();
+  return <Navigate to={`/Settings${location.search}`} replace />;
 }
 
 export default App

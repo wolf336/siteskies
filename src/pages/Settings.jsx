@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { base44 } from '@/api/base44Client';
-import AccountSidebar from '@/components/account/AccountSidebar';
+import SettingsSidebar from '@/components/settings/SettingsSidebar';
 import UsageOverview from '@/components/account/UsageOverview';
 import BillingSection from '@/components/account/BillingSection';
 import TeamSection from '@/components/account/TeamSection';
 import ProfileSection from '@/components/account/ProfileSection';
+import LegalSection from '@/components/settings/LegalSection';
 
-export default function Account() {
+export default function Settings() {
   const initialSection = (() => {
     const params = new URLSearchParams(window.location.search);
     const s = params.get('section');
-    return ['usage', 'billing', 'team', 'profile'].includes(s) ? s : 'usage';
+    return ['profile', 'team', 'billing', 'usage', 'legal'].includes(s) ? s : 'profile';
   })();
+
   const [activeSection, setActiveSection] = useState(initialSection);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -42,6 +44,8 @@ export default function Account() {
         return <TeamSection />;
       case 'profile':
         return <ProfileSection />;
+      case 'legal':
+        return <LegalSection />;
       default:
         return null;
     }
@@ -49,7 +53,7 @@ export default function Account() {
 
   return (
     <div className="flex gap-8 max-w-5xl">
-      <AccountSidebar active={activeSection} onChange={setActiveSection} />
+      <SettingsSidebar active={activeSection} onChange={setActiveSection} />
       <div className="flex-1 min-w-0">
         {renderSection()}
       </div>
