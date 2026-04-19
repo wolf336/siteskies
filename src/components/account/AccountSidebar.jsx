@@ -1,5 +1,16 @@
-import React from 'react';
-import { BarChart2, CreditCard, Users, User } from 'lucide-react';
+import React, { useState } from 'react';
+import { BarChart2, CreditCard, Users, User, LogOut } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const sections = [
   { key: 'usage', label: 'Usage', icon: BarChart2 },
@@ -9,6 +20,12 @@ const sections = [
 ];
 
 export default function AccountSidebar({ active, onChange }) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const handleLogout = () => {
+    base44.auth.logout('/');
+  };
+
   return (
     <div className="w-56 shrink-0">
       <nav className="space-y-0.5">
@@ -26,7 +43,32 @@ export default function AccountSidebar({ active, onChange }) {
             {label}
           </button>
         ))}
+
+        <div className="pt-2 border-t border-border mt-2">
+          <button
+            onClick={() => setConfirmOpen(true)}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          >
+            <LogOut className="h-4 w-4 shrink-0" />
+            Log Out
+          </button>
+        </div>
       </nav>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Log out?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You'll be signed out of your SiteSkies account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
