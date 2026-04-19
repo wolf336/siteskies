@@ -8,7 +8,12 @@ import TeamSection from '@/components/account/TeamSection';
 import ProfileSection from '@/components/account/ProfileSection';
 
 export default function Account() {
-  const [activeSection, setActiveSection] = useState('usage');
+  const initialSection = (() => {
+    const params = new URLSearchParams(window.location.search);
+    const s = params.get('section');
+    return ['usage', 'billing', 'team', 'profile'].includes(s) ? s : 'usage';
+  })();
+  const [activeSection, setActiveSection] = useState(initialSection);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {

@@ -86,7 +86,7 @@ export default function NewProject() {
       {atProjectLimit && (
         <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
           You've reached the <strong>{projectCount} project</strong> limit on the <strong>{tierConfig.name}</strong> plan.{' '}
-          <Link to="/Billing" className="underline font-medium">Upgrade your plan</Link> to create more projects.
+          <Link to={createPageUrl("Account") + "?section=billing"} className="underline font-medium">Upgrade your plan</Link> to create more projects.
         </div>
       )}
 
