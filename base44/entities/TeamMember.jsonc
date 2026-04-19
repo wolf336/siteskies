@@ -6,22 +6,44 @@
       "type": "string",
       "description": "The user ID of the subscription owner"
     },
+    "owner_email": {
+      "type": "string",
+      "description": "Email of the owner (for display in the invitee's accept UI)"
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Full name of the owner (for display in the invitee's accept UI)"
+    },
     "member_email": {
       "type": "string",
-      "description": "Email of the team member"
+      "description": "Email of the invited team member"
     },
     "member_user_id": {
       "type": "string",
-      "description": "User ID of the team member (once they register)"
+      "description": "User ID of the team member (populated when they sign in and accept)"
     },
     "status": {
       "type": "string",
       "enum": [
         "pending",
-        "active"
+        "awaiting_own_sub_end",
+        "active",
+        "removed"
       ],
       "default": "pending",
-      "description": "Invitation status"
+      "description": "pending: invited, not yet signed up or accepted. awaiting_own_sub_end: invitee accepted but has an existing paid sub that cancels at period end. active: fully linked. removed: owner removed this member."
+    },
+    "invite_token": {
+      "type": "string",
+      "description": "One-time token used in the accept URL"
+    },
+    "accepted_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the invitee accepted"
+    },
+    "activates_at": {
+      "type": "string",
+      "description": "ISO timestamp of when status flips from awaiting_own_sub_end to active (= invitee's old sub period_end)"
     }
   },
   "required": [
