@@ -21,12 +21,23 @@ export default function FeedbackModal({ open, onClose, page = "Dashboard" }) {
   const handleSubmit = async () => {
     if (!message.trim()) return;
     setSubmitting(true);
-    await base44.entities.Feedback.create({ message, type, page });
-    toast.success("Thanks for your feedback!");
-    setSubmitting(false);
-    setMessage("");
-    setType(null);
-    onClose();
+    try {
+      await base44.entities.Feedback.create({
+        message,
+        type,
+        page,
+        user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+      });
+      toast.success("Thanks for your feedback!");
+      setMessage("");
+      setType(null);
+      onClose();
+    } catch (err) {
+      console.error("Feedback submission failed:", err);
+      toast.error("Couldn't send feedback. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
