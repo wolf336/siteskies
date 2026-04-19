@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,24 @@ export default function NewProject() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+
+    // Atomic backend check — uses effective plan (inherits team owner's tier if applicable)
+    try {
+      const res = await base44.functions.invoke('checkProjectLimit', {});
+      if (res.data?.allowed === false) {
+        const { limit, tier } = res.data;
+        const tierName = TIER_CONFIG[tier]?.name || tier;
+        toast.error(`You've reached the ${limit} project limit on the ${tierName} plan.`, { duration: 5000 });
+        setSaving(false);
+        return;
+      }
+      if (res.data?.error) throw new Error(res.data.error);
+    } catch (err) {
+      console.error("Project limit check failed:", err);
+      toast.error("Couldn't verify your project quota. Please try again.", { duration: 4000 });
+      setSaving(false);
+      return;
+    }
 
     let finalLocationName = form.location_name;
     if (!finalLocationName && form.latitude != null && form.longitude != null) {
