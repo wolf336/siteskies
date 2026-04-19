@@ -29,8 +29,7 @@ import { toast } from "sonner";
 import RecommendationBanner from "@/components/projects/RecommendationBanner.jsx";
 import ForecastTimeline from "@/components/projects/ForecastTimeline.jsx";
 import { useFormattedLocation } from "@/hooks/useFormattedLocation";
-import { useSubscription } from "@/hooks/useSubscription";
-import { TIER_CONFIG } from "@/lib/subscriptionConfig";
+
 import { Link as RouterLink } from "react-router-dom";
 
 export default function ProjectDetail() {
@@ -40,8 +39,6 @@ export default function ProjectDetail() {
   const [checking, setChecking] = useState(false);
   const [forecastError, setForecastError] = useState("");
   const [editOpen, setEditOpen] = useState(false);
-  const { data: subData } = useSubscription();
-
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
     queryFn: () => base44.entities.Project.list().then((list) => list.find((p) => p.id === projectId)),
@@ -84,18 +81,26 @@ export default function ProjectDetail() {
   };
 
   const checkWeather = async () => {
-    // Check daily refresh limit
-    const sub = subData?.subscription;
-    const tier = sub?.tier || 'free';
-    const config = TIER_CONFIG[tier];
-    const todayRefreshes = sub?.daily_refresh_count || 0;
-    if (todayRefreshes >= config.maxRefreshesPerDay) {
-      toast.error(`You've used all ${config.maxRefreshesPerDay} daily refreshes on your ${config.name} plan. Upgrade for more.`, { duration: 5000 });
+    setChecking(true);
+    setForecastError("");
+
+    // Atomically check + consume a refresh credit on the server
+    let creditRes;
+    try {
+      creditRes = await base44.functions.invoke('consumeRefreshCredit', {});
+    } catch (err) {
+      setChecking(false);
+      toast.error("Couldn't verify refresh limit. Please try again.", { duration: 4000 });
       return;
     }
 
-    setChecking(true);
-    setForecastError("");
+    if (!creditRes?.data?.allowed) {
+      setChecking(false);
+      const { limit, tier } = creditRes?.data || {};
+      toast.error(`You've used all ${limit} daily refreshes on your ${tier} plan. Upgrade for more.`, { duration: 5000 });
+      return;
+    }
+
     try {
     const req = project.required_weather || {};
 
@@ -197,23 +202,14 @@ export default function ProjectDetail() {
     });
 
     queryClient.invalidateQueries({ queryKey: ["project", projectId] });
-
-    // Increment daily refresh count
-    if (subData?.subscription?.id) {
-      const today = new Date().toISOString().split('T')[0];
-      const sub = subData.subscription;
-      const currentCount = sub.daily_refresh_date === today ? (sub.daily_refresh_count || 0) : 0;
-      await base44.entities.Subscription.update(sub.id, {
-        daily_refresh_count: currentCount + 1,
-        daily_refresh_date: today,
-      });
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
-    }
+    queryClient.invalidateQueries({ queryKey: ['subscription'] });
 
     setChecking(false);
     toast.success("Weather updated successfully", { duration: 3000 });
     } catch (err) {
       console.error("Weather update error:", err);
+      // Refund the credit since the weather fetch/update failed
+      base44.functions.invoke('refundRefreshCredit', {}).catch(e => console.error('Refund failed:', e));
       setChecking(false);
       setForecastError(`Weather update failed: ${err?.message || String(err)}`);
       toast.error(`Weather update failed: ${err?.message || "Unknown error"}`, { duration: 5000 });
