@@ -22,23 +22,12 @@ export default function ProfileSection() {
   const handleDeleteAccount = async () => {
     setDeleting(true);
     try {
-      // Delete all user's projects, subscriptions, and team memberships
-      const [projects, subscriptions, teamMemberships] = await Promise.all([
-        base44.entities.Project.filter({}),
-        base44.entities.Subscription.filter({ user_id: user.id }),
-        base44.entities.TeamMember.filter({ owner_user_id: user.id }),
-      ]);
-
-      await Promise.all([
-        ...projects.map(p => base44.entities.Project.delete(p.id)),
-        ...subscriptions.map(s => base44.entities.Subscription.delete(s.id)),
-        ...teamMemberships.map(t => base44.entities.TeamMember.delete(t.id)),
-      ]);
-
+      const res = await base44.functions.invoke('deleteAccount', {});
+      if (res.data?.error) throw new Error(res.data.error);
       toast.success('Account deleted. Signing you out...');
       setTimeout(() => base44.auth.logout('/'), 1500);
     } catch (err) {
-      toast.error('Failed to delete account: ' + err.message);
+      toast.error('Failed to delete account: ' + (err?.message || 'Unknown error'));
       setDeleting(false);
     }
   };
@@ -96,9 +85,12 @@ export default function ProfileSection() {
               <span className="block">This action is <strong>permanent and cannot be undone</strong>. All of your data will be deleted, including:</span>
               <ul className="list-disc list-inside text-sm space-y-1 mt-2">
                 <li>All your projects and weather forecasts</li>
-                <li>Your subscription record</li>
+                <li>Your subscription (any active Stripe subscription will be canceled immediately)</li>
                 <li>Your team memberships</li>
               </ul>
+              <span className="block text-xs text-muted-foreground pt-2">
+                Note: billing records (past invoices and transactions) are retained by our payment processor for tax and audit purposes.
+              </span>
             </DialogDescription>
           </DialogHeader>
 
