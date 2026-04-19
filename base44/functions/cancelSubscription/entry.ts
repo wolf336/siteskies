@@ -13,7 +13,17 @@ Deno.serve(async (req) => {
     if (subs.length === 0) return Response.json({ error: 'No subscription found' }, { status: 404 });
 
     const sub = subs[0];
-    if (!sub.stripe_subscription_id) return Response.json({ error: 'No active Stripe subscription' }, { status: 400 });
+    if (!sub.stripe_subscription_id) {
+      // Check if user is actually a team member — clearer error message
+      const memberships = await base44.asServiceRole.entities.TeamMember.filter({ member_user_id: user.id });
+      const activeMembership = memberships.find(m => m.status === 'active' || m.status === 'awaiting_own_sub_end');
+      if (activeMembership) {
+        return Response.json({
+          error: "You're a member of someone else's plan. Only the plan owner can cancel the subscription.",
+        }, { status: 403 });
+      }
+      return Response.json({ error: 'No active Stripe subscription' }, { status: 400 });
+    }
 
     // Cancel at period end (not immediately)
     await stripe.subscriptions.update(sub.stripe_subscription_id, { cancel_at_period_end: true });

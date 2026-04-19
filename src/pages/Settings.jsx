@@ -7,6 +7,7 @@ import BillingSection from '@/components/account/BillingSection';
 import TeamSection from '@/components/account/TeamSection';
 import ProfileSection from '@/components/account/ProfileSection';
 import LegalSection from '@/components/settings/LegalSection';
+import AcceptInviteBanner from '@/components/settings/AcceptInviteBanner';
 
 export default function Settings() {
   const initialSection = (() => {
@@ -52,10 +53,13 @@ export default function Settings() {
   };
 
   return (
-    <div className="flex gap-8 max-w-5xl">
-      <SettingsSidebar active={activeSection} onChange={setActiveSection} />
-      <div className="flex-1 min-w-0">
-        {renderSection()}
+    <div className="max-w-5xl space-y-4">
+      <AcceptInviteBanner />
+      <div className="flex gap-8">
+        <SettingsSidebar active={activeSection} onChange={setActiveSection} />
+        <div className="flex-1 min-w-0">
+          {renderSection()}
+        </div>
       </div>
     </div>
   );

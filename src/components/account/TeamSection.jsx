@@ -12,8 +12,8 @@ export default function TeamSection() {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-foreground">Team Members</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Invite and manage your team.</p>
+        <h2 className="text-xl font-semibold text-foreground">Seats</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">Invite people to your plan. Each seat is a separate SiteSkies account covered by your subscription.</p>
       </div>
       {isLoading ? (
         <Skeleton className="h-40 rounded-xl" />

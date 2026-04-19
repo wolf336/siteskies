@@ -16,7 +16,7 @@ const GROUPS = [
     label: 'Account',
     items: [
       { key: 'profile', label: 'Account Info', icon: UserCircle },
-      { key: 'team', label: 'Team Members', icon: Users },
+      { key: 'team', label: 'Seats', icon: Users },
     ],
   },
   {

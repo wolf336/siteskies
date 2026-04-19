@@ -38,7 +38,7 @@ export default function PlanCard({ tierKey, config, currentTier, billingInterval
     `${config.maxProjects >= 999 ? 'Unlimited' : config.maxProjects} projects`,
     `${config.maxRefreshesPerDay >= 999 ? 'Unlimited' : config.maxRefreshesPerDay} refreshes/day`,
     `${config.forecastDays}-day forecast`,
-    `${config.maxMembers >= 999 ? 'Unlimited' : config.maxMembers} member${config.maxMembers !== 1 ? 's' : ''}`,
+    `${config.maxMembers >= 999 ? 'Unlimited' : config.maxMembers} seat${config.maxMembers !== 1 ? 's' : ''}`,
   ];
 
   return (

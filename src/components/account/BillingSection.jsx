@@ -64,6 +64,12 @@ export default function BillingSection() {
         </div>
       ) : (
         <div className="space-y-4">
+          {subscription?.effective_source === 'team' && subscription?.inherited_from && (
+            <div className="rounded-lg bg-primary/5 border border-primary/20 px-4 py-3 text-sm">
+              <strong className="text-foreground">You're on {subscription.inherited_from.owner_name}'s team plan.</strong>
+              <span className="text-muted-foreground"> They cover the subscription. You have your own account and projects, just with their plan features.</span>
+            </div>
+          )}
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
@@ -87,7 +93,7 @@ export default function BillingSection() {
                   Cancellation scheduled
                 </div>
               )}
-              {tier !== 'free' && !subscription?.cancel_at_period_end && (
+              {tier !== 'free' && !subscription?.cancel_at_period_end && subscription?.effective_source !== 'team' && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -101,6 +107,7 @@ export default function BillingSection() {
             </CardContent>
           </Card>
 
+          {subscription?.effective_source !== 'team' && <>
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-foreground">Available Plans</h3>
             <Tabs value={billingInterval} onValueChange={setBillingInterval}>
@@ -124,6 +131,7 @@ export default function BillingSection() {
               />
             ))}
           </div>
+          </>}
         </div>
       )}
     </div>

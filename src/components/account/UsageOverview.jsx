@@ -44,7 +44,7 @@ export default function UsageOverview({ subscription, projectCount, teamMemberCo
         <CardContent className="pt-6 space-y-5">
           <StatBar label="Projects" icon={FolderOpen} used={projectCount} max={config.maxProjects} />
           <StatBar label="Daily Refreshes" icon={RefreshCw} used={todayRefreshes} max={config.maxRefreshesPerDay} />
-          <StatBar label="Team Members" icon={Users} used={teamMemberCount} max={config.maxMembers} />
+          <StatBar label="Seats" icon={Users} used={teamMemberCount} max={config.maxMembers} />
           <div className="flex items-center gap-2 text-sm text-muted-foreground pt-1 border-t border-border">
             <Calendar className="h-4 w-4" />
             <span>Forecast window: <strong className="text-foreground">{config.forecastDays} days</strong></span>
