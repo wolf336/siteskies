@@ -255,7 +255,7 @@ export default function ProjectDetail() {
 }
 
 function ProjectDetailContent({ project, projectId, checking, setChecking, forecastError, setForecastError, editOpen, setEditOpen, checkWeather, updateMutation, deleteMutation }) {
-  const formattedLocation = useFormattedLocation(project.location);
+  const formattedLocation = useFormattedLocation(project.location, project.location_name);
 
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
   const canCheckWeather = daysUntilStart <= 16;

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import { differenceInDays } from "date-fns";
+import { resolveLocationName } from "@/lib/geocode";
 import WeatherRequirementsForm from "./WeatherRequirementsForm.jsx";
 
 export default function EditProjectModal({ project, open, onClose }) {
@@ -16,6 +17,9 @@ export default function EditProjectModal({ project, open, onClose }) {
     name: project.name || "",
     description: project.description || "",
     location: project.location || "",
+    latitude: project.latitude ?? null,
+    longitude: project.longitude ?? null,
+    location_name: project.location_name || null,
     start_date: project.start_date || "",
     end_date: project.end_date || "",
   });
@@ -46,10 +50,17 @@ export default function EditProjectModal({ project, open, onClose }) {
     },
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    let finalLocationName = form.location_name;
+    if (!finalLocationName && form.latitude != null && form.longitude != null) {
+      finalLocationName = await resolveLocationName(form.latitude, form.longitude, 2000);
+    }
+
     updateMutation.mutate({
       ...form,
+      location_name: finalLocationName || null,
       project_length_days: projectLength,
       required_weather: requirements,
     });

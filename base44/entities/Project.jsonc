@@ -22,6 +22,10 @@
       "type": "number",
       "description": "Longitude of the project location"
     },
+    "location_name": {
+      "type": "string",
+      "description": "Human-readable location name (e.g. 'Neuendettelsau, Germany'), resolved once at creation/edit time"
+    },
     "start_date": {
       "type": "string",
       "format": "date",

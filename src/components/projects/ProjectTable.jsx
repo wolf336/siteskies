@@ -49,7 +49,7 @@ export default function ProjectTable({ projects }) {
                   <span className="line-clamp-1">{project.name}</span>
                 </td>
                 <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell max-w-[140px]">
-                  <span className="line-clamp-1">{project.location}</span>
+                  <span className="line-clamp-1">{project.location_name || project.location}</span>
                 </td>
                 <td className="px-4 py-3 text-muted-foreground hidden md:table-cell whitespace-nowrap">
                   {format(new Date(project.start_date + 'T00:00:00'), 'MMM d')} – {format(new Date(project.end_date + 'T00:00:00'), 'MMM d')}

@@ -27,7 +27,7 @@ const recommendationConfig = {
 
 export default function ProjectCard({ project }) {
   const [editOpen, setEditOpen] = useState(false);
-  const formattedLocation = useFormattedLocation(project.location);
+  const formattedLocation = useFormattedLocation(project.location, project.location_name);
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
   const rec = recommendationConfig[project.weather_signal || "pending"];
   const forecasts = project.weather_forecast?.daily_forecasts || [];

@@ -16,7 +16,7 @@ const REC_STYLES = {
 
 export default function ProjectCalendarModal({ project, onClose }) {
   const navigate = useNavigate();
-  const formattedLocation = useFormattedLocation(project.location);
+  const formattedLocation = useFormattedLocation(project.location, project.location_name);
   const forecasts = project.weather_forecast?.daily_forecasts || [];
   const clearDays = forecasts.filter(d => d.meets_requirements).length;
 

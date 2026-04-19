@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MapPin } from "lucide-react";
+import { NOMINATIM_EMAIL, seedGeocodeCache } from "@/lib/geocode";
 
 // Leaflet loaded via CDN (index.html or dynamic injection)
 function loadLeaflet() {
@@ -58,7 +59,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
       const rLng = Math.round(newLng * 1e6) / 1e6;
       setCoordLat(String(rLat));
       setCoordLng(String(rLng));
-      onChange({ location: `${rLat}, ${rLng}`, latitude: rLat, longitude: rLng });
+      onChange({ location: `${rLat}, ${rLng}`, latitude: rLat, longitude: rLng, location_name: null });
     });
     mapRef.current = map;
     markerRef.current = marker;
@@ -91,7 +92,8 @@ export default function LocationPicker({ location, latitude, longitude, onChange
       setSearching(true);
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1&email=${encodeURIComponent(NOMINATIM_EMAIL)}`,
+          { headers: { "Accept-Language": "en" } }
         );
         const data = await res.json();
         setResults(data);
@@ -107,16 +109,25 @@ export default function LocationPicker({ location, latitude, longitude, onChange
     const lng = parseFloat(r.lon);
     setQuery(r.display_name);
     setResults([]);
-    onChange({ location: r.display_name, latitude: lat, longitude: lng });
+
+    const addr = r.address || {};
+    const town = addr.town || addr.city || addr.village || addr.municipality || addr.hamlet || null;
+    const country = addr.country || null;
+    let locationName = null;
+    if (town && country) locationName = `${town}, ${country}`;
+    else if (country) locationName = country;
+
+    seedGeocodeCache(lat, lng, locationName);
+    onChange({ location: r.display_name, latitude: lat, longitude: lng, location_name: locationName });
   };
 
   const handleCoordChange = (latStr, lngStr) => {
     const lat = parseFloat(latStr);
     const lng = parseFloat(lngStr);
     if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-      onChange({ location: `${lat}, ${lng}`, latitude: lat, longitude: lng });
+      onChange({ location: `${lat}, ${lng}`, latitude: lat, longitude: lng, location_name: null });
     } else {
-      onChange({ location: "", latitude: null, longitude: null });
+      onChange({ location: "", latitude: null, longitude: null, location_name: null });
     }
   };
 

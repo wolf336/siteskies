@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Calendar, FileText, CloudSun, Loader2 } from "lucide-react";
 import { differenceInDays } from "date-fns";
+import { resolveLocationName } from "@/lib/geocode";
 import { Link } from "react-router-dom";
 import WeatherRequirementsForm from "@/components/projects/WeatherRequirementsForm.jsx";
 import LocationPicker from "@/components/projects/LocationPicker.jsx";
@@ -26,6 +27,7 @@ export default function NewProject() {
     location: "",
     latitude: null,
     longitude: null,
+    location_name: null,
     start_date: today,
     end_date: "",
   });
@@ -55,8 +57,15 @@ export default function NewProject() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+
+    let finalLocationName = form.location_name;
+    if (!finalLocationName && form.latitude != null && form.longitude != null) {
+      finalLocationName = await resolveLocationName(form.latitude, form.longitude, 2000);
+    }
+
     const project = await base44.entities.Project.create({
       ...form,
+      location_name: finalLocationName || null,
       project_length_days: projectLength,
       required_weather: requirements,
       recommendation: "pending",
@@ -121,8 +130,8 @@ export default function NewProject() {
               location={form.location}
               latitude={form.latitude}
               longitude={form.longitude}
-              onChange={({ location, latitude, longitude }) =>
-                setForm((f) => ({ ...f, location, latitude, longitude }))
+              onChange={({ location, latitude, longitude, location_name }) =>
+                setForm((f) => ({ ...f, location, latitude, longitude, location_name: location_name ?? null }))
               }
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
