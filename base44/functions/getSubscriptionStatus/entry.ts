@@ -8,6 +8,7 @@ Deno.serve(async (req) => {
 
     const today = new Date().toISOString().split('T')[0];
     const nowIso = new Date().toISOString();
+    // nowIso declared above — used for awaiting period checks
 
     // --- Step 1: load or create the user's own Subscription record ---
     let ownSubs = await base44.asServiceRole.entities.Subscription.filter({ user_id: user.id });
@@ -129,15 +130,38 @@ Deno.serve(async (req) => {
       }
     }
 
-    // --- Step 3: load team members and project count (user-scoped) ---
-    const [teamMembers, projects] = await Promise.all([
-      base44.asServiceRole.entities.TeamMember.filter({ owner_user_id: user.id }),
-      base44.asServiceRole.entities.Project.filter({ created_by: user.email }),
-    ]);
+    // --- Step 3: team members list (owners only) and project count ---
+    let teamMembers = [];
+    if (hasOwnPaidActive) {
+      const allMembers = await base44.asServiceRole.entities.TeamMember.filter({ owner_user_id: user.id });
+      teamMembers = allMembers.filter(m => m.status !== 'removed');
+    }
+    const projects = await base44.asServiceRole.entities.Project.filter({ created_by: user.email });
+
+    // --- Step 4: build backwards-compatible effectiveSubscription ---
+    const effectiveSubscription = {
+      id: ownSub.id,
+      user_id: user.id,
+      user_email: user.email,
+      tier: effectivePlan.tier,
+      billing_interval: effectivePlan.billing_interval,
+      status: effectivePlan.status,
+      current_period_end: effectivePlan.current_period_end,
+      cancel_at_period_end: effectivePlan.cancel_at_period_end,
+      // Stripe identifiers only apply to own paid sub
+      stripe_customer_id: effectivePlan.source === 'own' || effectivePlan.source === 'awaiting' ? ownSub.stripe_customer_id : null,
+      stripe_subscription_id: effectivePlan.source === 'own' || effectivePlan.source === 'awaiting' ? ownSub.stripe_subscription_id : null,
+      stripe_price_id: effectivePlan.source === 'own' || effectivePlan.source === 'awaiting' ? ownSub.stripe_price_id : null,
+      // Usage counters are always user-scoped
+      daily_refresh_count: ownSub.daily_refresh_count || 0,
+      daily_refresh_date: ownSub.daily_refresh_date || today,
+      // Metadata for UI
+      effective_source: effectivePlan.source,
+      inherited_from: effectivePlan.inherited_from,
+    };
 
     return Response.json({
-      subscription: ownSub,       // raw own record (usage counters live here)
-      effectivePlan,              // resolved plan the user actually operates under
+      subscription: effectiveSubscription,
       teamMembers,
       projectCount: projects.length,
     });
