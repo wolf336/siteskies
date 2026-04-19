@@ -1,15 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { User, Mail } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { User, Mail, Trash2, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function ProfileSection() {
   const { data: user, isLoading } = useQuery({
     queryKey: ['me'],
     queryFn: () => base44.auth.me(),
   });
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      // Delete all user's projects, subscriptions, and team memberships
+      const [projects, subscriptions, teamMemberships] = await Promise.all([
+        base44.entities.Project.filter({}),
+        base44.entities.Subscription.filter({ user_id: user.id }),
+        base44.entities.TeamMember.filter({ owner_user_id: user.id }),
+      ]);
+
+      await Promise.all([
+        ...projects.map(p => base44.entities.Project.delete(p.id)),
+        ...subscriptions.map(s => base44.entities.Subscription.delete(s.id)),
+        ...teamMemberships.map(t => base44.entities.TeamMember.delete(t.id)),
+      ]);
+
+      toast.success('Account deleted. Signing you out...');
+      setTimeout(() => base44.auth.logout('/'), 1500);
+    } catch (err) {
+      toast.error('Failed to delete account: ' + err.message);
+      setDeleting(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -40,9 +72,62 @@ export default function ProfileSection() {
                 <p className="text-xs text-muted-foreground">Email address</p>
               </div>
             </div>
+
+            <div className="pt-2 border-t border-border">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
+                onClick={() => { setConfirmText(''); setDialogOpen(true); }}
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete Account
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Delete Account</DialogTitle>
+            <DialogDescription className="space-y-2 pt-1">
+              <span className="block">This action is <strong>permanent and cannot be undone</strong>. All of your data will be deleted, including:</span>
+              <ul className="list-disc list-inside text-sm space-y-1 mt-2">
+                <li>All your projects and weather forecasts</li>
+                <li>Your subscription record</li>
+                <li>Your team memberships</li>
+              </ul>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2 py-2">
+            <p className="text-sm text-muted-foreground">
+              Type <strong className="text-foreground">delete</strong> to confirm:
+            </p>
+            <Input
+              value={confirmText}
+              onChange={e => setConfirmText(e.target.value)}
+              placeholder="delete"
+              autoFocus
+            />
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={confirmText !== 'delete' || deleting}
+              onClick={handleDeleteAccount}
+            >
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Delete My Account'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
