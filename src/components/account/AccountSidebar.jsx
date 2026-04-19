@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { BarChart2, CreditCard, Users, User, LogOut } from 'lucide-react';
+import { BarChart2, CreditCard, Users, User, LogOut, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import {
   AlertDialog,
@@ -28,6 +29,16 @@ export default function AccountSidebar({ active, onChange }) {
 
   return (
     <div className="w-56 shrink-0">
+      <div className="mb-3">
+        <Link
+          to="/"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4 shrink-0" />
+          Back to Dashboard
+        </Link>
+      </div>
+
       <nav className="space-y-0.5">
         {sections.map(({ key, label, icon: Icon }) => (
           <button
