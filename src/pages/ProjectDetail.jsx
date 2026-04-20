@@ -40,7 +40,10 @@ export default function ProjectDetail() {
   const [editOpen, setEditOpen] = useState(false);
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
-    queryFn: () => base44.entities.Project.list().then((list) => list.find((p) => p.id === projectId)),
+    queryFn: async () => {
+      const results = await base44.entities.Project.filter({ id: projectId });
+      return results[0] || null;
+    },
     enabled: !!projectId,
   });
 
