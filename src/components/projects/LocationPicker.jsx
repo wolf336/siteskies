@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label";
 import { MapPin } from "lucide-react";
 import { NOMINATIM_EMAIL, seedGeocodeCache } from "@/lib/geocode";
 
-// Leaflet loaded via CDN (index.html or dynamic injection)
 function loadLeaflet() {
   return new Promise((resolve) => {
     if (window.L) return resolve(window.L);
@@ -19,8 +18,13 @@ function loadLeaflet() {
   });
 }
 
+function parseCoord(str) {
+  // Accept both dot and comma as decimal separator
+  return parseFloat(String(str).replace(",", "."));
+}
+
 export default function LocationPicker({ location, latitude, longitude, onChange }) {
-  const [mode, setMode] = useState("search"); // "search" | "coords"
+  const [mode, setMode] = useState("search");
   const [query, setQuery] = useState(location || "");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -33,7 +37,6 @@ export default function LocationPicker({ location, latitude, longitude, onChange
 
   const hasCoords = latitude != null && longitude != null;
 
-  // Init or update map
   const initMap = useCallback(async (lat, lng) => {
     const L = await loadLeaflet();
     if (!mapDivRef.current) return;
@@ -64,18 +67,23 @@ export default function LocationPicker({ location, latitude, longitude, onChange
     });
     mapRef.current = map;
     markerRef.current = marker;
-    // Force Leaflet to recalculate size after the container becomes visible
     setTimeout(() => map.invalidateSize(), 100);
   }, [onChange]);
 
+  // Re-init/update map whenever valid coords arrive
   useEffect(() => {
     if (hasCoords) {
-      // delay to let DOM render the map container before initialising
       setTimeout(() => initMap(latitude, longitude), 100);
     }
   }, [hasCoords, latitude, longitude, initMap]);
 
-  // Cleanup map on unmount
+  // Also invalidate size whenever the map div becomes visible (e.g. mode switch)
+  useEffect(() => {
+    if (hasCoords && mapRef.current) {
+      setTimeout(() => mapRef.current && mapRef.current.invalidateSize(), 150);
+    }
+  }, [hasCoords]);
+
   useEffect(() => {
     return () => {
       if (mapRef.current) {
@@ -125,8 +133,8 @@ export default function LocationPicker({ location, latitude, longitude, onChange
   };
 
   const handleCoordChange = (latStr, lngStr) => {
-    const lat = parseFloat(latStr);
-    const lng = parseFloat(lngStr);
+    const lat = parseCoord(latStr);
+    const lng = parseCoord(lngStr);
     if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
       onChange({ location: `${lat}, ${lng}`, latitude: lat, longitude: lng, location_name: null });
     } else {
@@ -195,21 +203,29 @@ export default function LocationPicker({ location, latitude, longitude, onChange
             <div className="space-y-1">
               <Label className="text-xs text-muted-foreground">Latitude</Label>
               <Input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 placeholder="49.7012"
                 value={coordLat}
-                onChange={(e) => { setCoordLat(e.target.value); handleCoordChange(e.target.value, coordLng); }}
-                step="any"
+                onChange={(e) => {
+                  const val = e.target.value.replace(",", ".");
+                  setCoordLat(val);
+                  handleCoordChange(val, coordLng);
+                }}
               />
             </div>
             <div className="space-y-1">
               <Label className="text-xs text-muted-foreground">Longitude</Label>
               <Input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 placeholder="6.8523"
                 value={coordLng}
-                onChange={(e) => { setCoordLng(e.target.value); handleCoordChange(coordLat, e.target.value); }}
-                step="any"
+                onChange={(e) => {
+                  const val = e.target.value.replace(",", ".");
+                  setCoordLng(val);
+                  handleCoordChange(coordLat, val);
+                }}
               />
             </div>
           </div>
