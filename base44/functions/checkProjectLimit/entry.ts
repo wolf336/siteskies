@@ -7,10 +7,7 @@ const TIER_PROJECT_LIMITS = {
   enterprise: 999,
 };
 
-// NOTE: resolveEffectiveTier logic is canonical in consumeRefreshCredit.
-// If you change tier resolution rules, change them there too (and in getSubscriptionStatus inline logic).
 async function resolveEffectiveTier(base44, user, ownSub, nowIso) {
-  // Own paid active wins
   if (ownSub.tier !== 'free' && ownSub.status === 'active') {
     return { tier: ownSub.tier, source: 'own' };
   }
@@ -26,7 +23,6 @@ async function resolveEffectiveTier(base44, user, ownSub, nowIso) {
     }
   }
 
-  // awaiting_own_sub_end: user keeps their old plan until period_end
   const awaiting = memberships.find(m => m.status === 'awaiting_own_sub_end');
   if (awaiting && ownSub.tier !== 'free' && ownSub.current_period_end && ownSub.current_period_end > nowIso) {
     return { tier: ownSub.tier, source: 'awaiting' };
@@ -47,7 +43,7 @@ Deno.serve(async (req) => {
     const { tier } = await resolveEffectiveTier(base44, user, ownSub, nowIso);
     const limit = TIER_PROJECT_LIMITS[tier] ?? TIER_PROJECT_LIMITS.free;
 
-    const projects = await base44.asServiceRole.entities.Project.filter({ created_by_id: user.id });
+    const projects = await base44.asServiceRole.entities.Project.filter({ created_by: user.email });
     const used = projects.length;
 
     if (used >= limit) {
