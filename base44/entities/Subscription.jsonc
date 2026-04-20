@@ -69,6 +69,10 @@
     "daily_refresh_date": {
       "type": "string",
       "description": "Date of the last refresh count reset (YYYY-MM-DD)"
+    },
+    "last_payment_failed_at": {
+      "type": "string",
+      "description": "ISO timestamp of the most recent invoice.payment_failed event"
     }
   },
   "required": [

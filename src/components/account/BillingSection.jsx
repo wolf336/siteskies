@@ -16,6 +16,7 @@ export default function BillingSection() {
   const { data, isLoading } = useSubscription();
   const [billingInterval, setBillingInterval] = useState('monthly');
   const [canceling, setCanceling] = useState(false);
+  const [openingPortal, setOpeningPortal] = useState(false);
   const [pollTimedOut, setPollTimedOut] = useState(false);
   const queryClient = useQueryClient();
 
@@ -70,6 +71,20 @@ export default function BillingSection() {
     return () => clearInterval(intervalRef.id);
   }, [showSuccess, queryClient]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const handleManageSubscription = async () => {
+    setOpeningPortal(true);
+    try {
+      const res = await base44.functions.invoke('createPortalSession', {
+        return_url: window.location.origin + '/Settings?section=billing',
+      });
+      if (res.data.error) throw new Error(res.data.error);
+      window.location.href = res.data.url;
+    } catch (err) {
+      toast.error(err.message);
+      setOpeningPortal(false);
+    }
+  };
+
   const handleCancel = async () => {
     if (!confirm('Are you sure? Your subscription will remain active until the end of the billing period.')) return;
     setCanceling(true);
@@ -90,6 +105,27 @@ export default function BillingSection() {
         <h2 className="text-xl font-semibold text-foreground">Billing & Subscription</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Manage your plan and billing details.</p>
       </div>
+
+      {subscription?.status === 'past_due' && (
+        <div className="rounded-lg bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 text-sm flex items-start gap-3">
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="font-medium">Payment failed</p>
+            <p className="mt-0.5 text-destructive/80">
+              Your most recent payment could not be processed. Please update your payment method to keep your subscription active.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2 border-destructive/30 text-destructive hover:bg-destructive/10"
+              onClick={handleManageSubscription}
+              disabled={openingPortal}
+            >
+              {openingPortal ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Update payment method'}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {showSuccess && !pollTimedOut && (
         <div className="rounded-lg bg-success/10 border border-success/30 text-success px-4 py-3 text-sm font-medium">
@@ -143,21 +179,21 @@ export default function BillingSection() {
                   Cancellation scheduled
                 </div>
               )}
-              {tier !== 'free' && !subscription?.cancel_at_period_end && subscription?.effective_source !== 'team' && (
+              {tier !== 'free' && subscription?.effective_source !== 'team' && (
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
-                  onClick={handleCancel}
-                  disabled={canceling}
+                  className="w-full"
+                  onClick={handleManageSubscription}
+                  disabled={openingPortal}
                 >
-                  {canceling ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Cancel Subscription'}
+                  {openingPortal ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Manage subscription'}
                 </Button>
               )}
             </CardContent>
           </Card>
 
-          {subscription?.effective_source !== 'team' && <>
+          {tier === 'free' && <>
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-foreground">Available Plans</h3>
             <Tabs value={billingInterval} onValueChange={setBillingInterval}>

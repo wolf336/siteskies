@@ -101,6 +101,22 @@ Deno.serve(async (req) => {
       }
     }
 
+    if (event.type === 'invoice.payment_failed') {
+      const invoice = event.data.object;
+      const subscriptionId = invoice.subscription;
+      if (!subscriptionId) return Response.json({ received: true });
+
+      const existing = await base44.asServiceRole.entities.Subscription.filter({ stripe_subscription_id: subscriptionId });
+      if (existing.length > 0) {
+        await base44.asServiceRole.entities.Subscription.update(existing[0].id, {
+          status: 'past_due',
+          last_payment_failed_at: new Date().toISOString(),
+        });
+      }
+      // TODO: Send the user an email notifying them of the failed payment.
+      // Stripe's Smart Retries send their own email by default, so this is not critical for launch.
+    }
+
     return Response.json({ received: true });
   } catch (err) {
     console.error('Webhook handler error:', err);
