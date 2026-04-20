@@ -159,8 +159,11 @@ export default function NewProject() {
                   Start Date
                 </Label>
                 <Input
-                  type="date"
+                  type={form.start_date ? "date" : "text"}
+                  placeholder="Select date"
                   value={form.start_date}
+                  onFocus={(e) => { e.target.type = "date"; }}
+                  onBlur={(e) => { if (!form.start_date) e.target.type = "text"; }}
                   onChange={(e) => setForm({ ...form, start_date: e.target.value })}
                 />
               </div>
@@ -170,9 +173,12 @@ export default function NewProject() {
                   End Date
                 </Label>
                 <Input
-                  type="date"
+                  type={form.end_date ? "date" : "text"}
+                  placeholder="Select date"
                   value={form.end_date}
                   min={form.start_date}
+                  onFocus={(e) => { e.target.type = "date"; }}
+                  onBlur={(e) => { if (!form.end_date) e.target.type = "text"; }}
                   onChange={(e) => setForm({ ...form, end_date: e.target.value })}
                 />
               </div>
