@@ -7,7 +7,8 @@ const TIER_LIMITS = {
   enterprise: 999,
 };
 
-// Resolves the effective tier for limit checks — mirrors getSubscriptionStatus logic.
+// NOTE: resolveEffectiveTier is the canonical copy of this logic.
+// If you change tier resolution rules, change them here AND in checkProjectLimit AND in getSubscriptionStatus inline logic.
 async function resolveEffectiveTier(base44, user, ownSub, nowIso) {
   // Own paid active wins
   if (ownSub.tier !== 'free' && ownSub.status === 'active') {

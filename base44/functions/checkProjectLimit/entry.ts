@@ -7,14 +7,12 @@ const TIER_PROJECT_LIMITS = {
   enterprise: 999,
 };
 
-async function resolveEffectiveTier(base44, user) {
-  const nowIso = new Date().toISOString();
-
-  const ownSubs = await base44.asServiceRole.entities.Subscription.filter({ user_id: user.id });
-  const ownSub = ownSubs[0];
-
-  if (ownSub && ownSub.tier !== 'free' && ownSub.status === 'active') {
-    return ownSub.tier;
+// NOTE: resolveEffectiveTier logic is canonical in consumeRefreshCredit.
+// If you change tier resolution rules, change them there too (and in getSubscriptionStatus inline logic).
+async function resolveEffectiveTier(base44, user, ownSub, nowIso) {
+  // Own paid active wins
+  if (ownSub.tier !== 'free' && ownSub.status === 'active') {
+    return { tier: ownSub.tier, source: 'own' };
   }
 
   const memberships = await base44.asServiceRole.entities.TeamMember.filter({ member_user_id: user.id });
@@ -24,16 +22,17 @@ async function resolveEffectiveTier(base44, user) {
     const ownerSubs = await base44.asServiceRole.entities.Subscription.filter({ user_id: activeMembership.owner_user_id });
     const ownerSub = ownerSubs[0];
     if (ownerSub && ownerSub.tier !== 'free' && ownerSub.status === 'active') {
-      return ownerSub.tier;
+      return { tier: ownerSub.tier, source: 'team' };
     }
   }
 
+  // awaiting_own_sub_end: user keeps their old plan until period_end
   const awaiting = memberships.find(m => m.status === 'awaiting_own_sub_end');
-  if (awaiting && ownSub && ownSub.tier !== 'free' && ownSub.current_period_end && ownSub.current_period_end > nowIso) {
-    return ownSub.tier;
+  if (awaiting && ownSub.tier !== 'free' && ownSub.current_period_end && ownSub.current_period_end > nowIso) {
+    return { tier: ownSub.tier, source: 'awaiting' };
   }
 
-  return 'free';
+  return { tier: 'free', source: 'own' };
 }
 
 Deno.serve(async (req) => {
@@ -42,7 +41,10 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const tier = await resolveEffectiveTier(base44, user);
+    const nowIso = new Date().toISOString();
+    const ownSubs = await base44.asServiceRole.entities.Subscription.filter({ user_id: user.id });
+    const ownSub = ownSubs[0] || { tier: 'free', status: 'active' };
+    const { tier } = await resolveEffectiveTier(base44, user, ownSub, nowIso);
     const limit = TIER_PROJECT_LIMITS[tier] ?? TIER_PROJECT_LIMITS.free;
 
     const projects = await base44.asServiceRole.entities.Project.filter({ created_by: user.email });
