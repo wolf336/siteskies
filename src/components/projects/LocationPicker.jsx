@@ -25,7 +25,9 @@ function parseCoord(str) {
 
 export default function LocationPicker({ location, latitude, longitude, onChange }) {
   const [mode, setMode] = useState(latitude != null && longitude != null ? "coords" : "search");
-  const [query, setQuery] = useState(location || "");
+  // If location looks like coords (e.g. "49.7, 10.55"), don't pre-fill the address search field
+  const isCoordString = location && /^-?\d+\.?\d*\s*,\s*-?\d+\.?\d*$/.test(location.trim());
+  const [query, setQuery] = useState(isCoordString ? "" : (location || ""));
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [coordLat, setCoordLat] = useState(latitude != null ? String(latitude) : "");
@@ -169,7 +171,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
 
       {/* Mode: search */}
       {mode === "search" && (
-        <div className="relative">
+        <div className="relative" style={{ minHeight: 0 }}>
           <Input
             placeholder="City, suburb or address"
             value={query}
@@ -180,7 +182,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
             <div className="absolute right-3 top-2.5 text-xs text-muted-foreground">Searching…</div>
           )}
           {results.length > 0 && (
-            <div className="absolute z-50 top-full mt-1 w-full rounded-lg border border-border bg-card shadow-lg overflow-hidden">
+            <div className="absolute z-[9999] top-full mt-1 w-full rounded-lg border border-border bg-card shadow-lg overflow-hidden">
               {results.map((r) => (
                 <button
                   key={r.place_id}
