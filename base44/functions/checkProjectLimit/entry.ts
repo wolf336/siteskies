@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     const { tier } = await resolveEffectiveTier(base44, user, ownSub, nowIso);
     const limit = TIER_PROJECT_LIMITS[tier] ?? TIER_PROJECT_LIMITS.free;
 
-    const projects = await base44.asServiceRole.entities.Project.filter({ created_by: user.email });
+    const projects = await base44.asServiceRole.entities.Project.filter({ created_by_id: user.id });
     const used = projects.length;
 
     if (used >= limit) {

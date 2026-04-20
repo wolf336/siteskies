@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
       const allMembers = await base44.asServiceRole.entities.TeamMember.filter({ owner_user_id: user.id });
       teamMembers = allMembers.filter(m => m.status !== 'removed');
     }
-    const projects = await base44.asServiceRole.entities.Project.filter({ created_by: user.email });
+    const projects = await base44.asServiceRole.entities.Project.filter({ created_by_id: user.id });
 
     // --- Step 4: build backwards-compatible effectiveSubscription ---
     const effectiveSubscription = {

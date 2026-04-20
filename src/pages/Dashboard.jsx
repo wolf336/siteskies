@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
@@ -22,10 +23,12 @@ export default function Dashboard() {
   const [view, setView] = useState("list");
   const [syncing, setSyncing] = useState(false);
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data: projects = [], isLoading } = useQuery({
-    queryKey: ["projects"],
-    queryFn: () => base44.entities.Project.list("-created_date"),
+    queryKey: ["projects", user?.id],
+    queryFn: () => base44.entities.Project.filter({ created_by_id: user.id }, "-created_date"),
+    enabled: !!user?.id,
   });
 
   const { data: syncSetting } = useQuery({
@@ -54,7 +57,7 @@ export default function Dashboard() {
         );
       }
 
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["projects", user?.id] });
       queryClient.invalidateQueries({ queryKey: ["lastBulkSync"] });
     } catch (err) {
       toast.error(`Sync failed: ${err?.message || "Unknown error"}`, { duration: 5000 });
