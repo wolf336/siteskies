@@ -21,6 +21,7 @@ export default function NewProject() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const { data: subData } = useSubscription();
+  const today = new Date().toISOString().split("T")[0];
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -28,7 +29,7 @@ export default function NewProject() {
     latitude: null,
     longitude: null,
     location_name: null,
-    start_date: "",
+    start_date: today,
     end_date: "",
   });
   const [requirements, setRequirements] = useState({
@@ -159,11 +160,8 @@ export default function NewProject() {
                   Start Date
                 </Label>
                 <Input
-                  type={form.start_date ? "date" : "text"}
-                  placeholder="Select date"
+                  type="date"
                   value={form.start_date}
-                  onFocus={(e) => { e.target.type = "date"; }}
-                  onBlur={(e) => { if (!form.start_date) e.target.type = "text"; }}
                   onChange={(e) => setForm({ ...form, start_date: e.target.value })}
                 />
               </div>
@@ -173,12 +171,9 @@ export default function NewProject() {
                   End Date
                 </Label>
                 <Input
-                  type={form.end_date ? "date" : "text"}
-                  placeholder="Select date"
+                  type="date"
                   value={form.end_date}
                   min={form.start_date}
-                  onFocus={(e) => { e.target.type = "date"; }}
-                  onBlur={(e) => { if (!form.end_date) e.target.type = "text"; }}
                   onChange={(e) => setForm({ ...form, end_date: e.target.value })}
                 />
               </div>
