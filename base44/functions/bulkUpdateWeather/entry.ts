@@ -14,7 +14,6 @@ const wmoToCondition = (code) => {
 const updateProjectWeather = async (project, base44) => {
   const req = project.required_weather || {};
 
-  // Geocode if needed
   let latitude, longitude;
   if (project.latitude != null && project.longitude != null) {
     latitude = project.latitude;
@@ -31,7 +30,6 @@ const updateProjectWeather = async (project, base44) => {
     longitude = geoData.results[0].longitude;
   }
 
-  // Cap end_date to today + 15
   const today = new Date();
   const capDate = new Date(today);
   capDate.setDate(today.getDate() + 15);
@@ -81,7 +79,6 @@ const updateProjectWeather = async (project, base44) => {
 
   const weather_signal_details = `${badDays} of ${forecastedDays} forecasted days do not meet weather requirements.`;
 
-  // Calculate project length
   const startMs = new Date(project.start_date).getTime();
   const endMs = new Date(project.end_date).getTime();
   const projectLengthDays = Math.round((endMs - startMs) / (1000 * 60 * 60 * 24)) + 1;
@@ -111,7 +108,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const projects = await base44.asServiceRole.entities.Project.filter({ created_by_id: user.id });
+    // Consume a SINGLE refresh credit for the entire bulk sync
+    const creditRes = await base44.functions.invoke('consumeRefreshCredit', {});
+    if (!creditRes?.data?.allowed) {
+      const { limit, tier } = creditRes?.data || {};
+      return Response.json({
+        success: false,
+        error: `Daily refresh limit reached`,
+        limit,
+        tier,
+      }, { status: 403 });
+    }
+
+    // Fetch projects belonging to this user (by email, which is how created_by is stored)
+    const projects = await base44.asServiceRole.entities.Project.filter({ created_by: user.email });
 
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];
@@ -146,7 +156,6 @@ Deno.serve(async (req) => {
       total_eligible: eligibleProjects.length,
     };
 
-    // Upsert the AppSetting record
     const existing = await base44.asServiceRole.entities.AppSetting.filter({ key: "last_bulk_weather_sync" });
     if (existing.length > 0) {
       await base44.asServiceRole.entities.AppSetting.update(existing[0].id, {
@@ -161,6 +170,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ success: true, successCount, failed, totalEligible: eligibleProjects.length });
   } catch (error) {
+    console.error("bulkUpdateWeather error:", error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

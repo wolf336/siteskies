@@ -46,15 +46,19 @@ export default function Dashboard() {
     setSyncing(true);
     try {
       const res = await base44.functions.invoke("bulkUpdateWeather", {});
-      const { successCount, failed, totalEligible } = res.data;
 
-      if (failed.length === 0) {
-        toast.success(`All ${successCount} eligible project${successCount !== 1 ? "s" : ""} synced successfully.`);
+      if (!res.data.success && res.data.error) {
+        toast.error(`${res.data.error}. Upgrade your plan for more refreshes.`, { duration: 5000 });
       } else {
-        toast.error(
-          `${successCount} of ${totalEligible} projects synced. ${failed.length} failed:\n${failed.map(f => `• ${f.name}: ${f.reason}`).join("\n")}`,
-          { duration: 8000 }
-        );
+        const { successCount, failed, totalEligible } = res.data;
+        if (failed.length === 0) {
+          toast.success(`All ${successCount} eligible project${successCount !== 1 ? "s" : ""} synced successfully.`);
+        } else {
+          toast.error(
+            `${successCount} of ${totalEligible} projects synced. ${failed.length} failed:\n${failed.map(f => `• ${f.name}: ${f.reason}`).join("\n")}`,
+            { duration: 8000 }
+          );
+        }
       }
 
       queryClient.invalidateQueries({ queryKey: ["projects", user?.id] });
