@@ -21,7 +21,6 @@ export default function NewProject() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const { data: subData } = useSubscription();
-  const today = new Date().toISOString().split("T")[0];
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -29,7 +28,7 @@ export default function NewProject() {
     latitude: null,
     longitude: null,
     location_name: null,
-    start_date: today,
+    start_date: "",
     end_date: "",
   });
   const [requirements, setRequirements] = useState({
