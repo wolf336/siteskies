@@ -1,7 +1,4 @@
-import { useState, useEffect } from "react";
-
-const geocodeCache = {};
-const NOMINATIM_EMAIL = "liam.stienen@gmail.com";
+import { useMemo } from "react";
 
 function parseCoords(location) {
   if (!location) return null;
@@ -14,63 +11,27 @@ function truncateCoords(lat, lon) {
   return `${parseFloat(lat.toFixed(4))}, ${parseFloat(lon.toFixed(4))}`;
 }
 
+/**
+ * Formats a project's location for display.
+ *
+ * - If a location_name was resolved at save time, show "Name · short coords"
+ *   (or just "Name" if the location string isn't parseable coords).
+ * - If no location_name but the location string is coords, show truncated coords.
+ * - Otherwise fall back to the raw location string.
+ *
+ * No network calls — resolution happens at save time via lib/geocode.js.
+ * Projects created before location_name existed will display as coords until
+ * they're edited (the save handler will backfill the name at that point).
+ */
 export function useFormattedLocation(location, locationName) {
-  const coords = parseCoords(location);
-  const truncated = coords ? truncateCoords(coords.lat, coords.lon) : null;
+  return useMemo(() => {
+    const coords = parseCoords(location);
+    const truncated = coords ? truncateCoords(coords.lat, coords.lon) : null;
 
-  const initialDisplay = locationName
-    ? (truncated ? `${locationName} · ${truncated}` : locationName)
-    : (truncated ?? location);
-
-  const [display, setDisplay] = useState(initialDisplay);
-
-  useEffect(() => {
-    // Fast path — we already have a stored name, don't hit Nominatim at all.
     if (locationName) {
-      setDisplay(truncated ? `${locationName} · ${truncated}` : locationName);
-      return;
+      return truncated ? `${locationName} · ${truncated}` : locationName;
     }
 
-    if (!coords) {
-      setDisplay(location);
-      return;
-    }
-
-    const cacheKey = `${coords.lat},${coords.lon}`;
-
-    if (geocodeCache[cacheKey]) {
-      setDisplay(geocodeCache[cacheKey]);
-      return;
-    }
-
-    setDisplay(truncated);
-
-    fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lon}&format=json&email=${encodeURIComponent(NOMINATIM_EMAIL)}`,
-      { headers: { "Accept-Language": "en" } }
-    )
-      .then((r) => r.json())
-      .then((data) => {
-        const addr = data.address || {};
-        const town = addr.town || addr.city || addr.village || addr.municipality || null;
-        const country = addr.country || null;
-
-        let formatted;
-        if (town && country) {
-          formatted = `${town}, ${country} · ${truncated}`;
-        } else if (country) {
-          formatted = `${country} · ${truncated}`;
-        } else {
-          formatted = truncated;
-        }
-
-        geocodeCache[cacheKey] = formatted;
-        setDisplay(formatted);
-      })
-      .catch(() => {
-        setDisplay(truncated);
-      });
+    return truncated ?? location ?? "";
   }, [location, locationName]);
-
-  return display;
 }
