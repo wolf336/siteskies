@@ -237,7 +237,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
 
       {/* Map */}
       {hasCoords && (
-        <div className="space-y-1">
+        <div className="space-y-1" style={{ position: "relative", zIndex: 0 }}>
           <div
             ref={mapDivRef}
             style={{ height: 220, borderRadius: 8, overflow: "hidden", border: "1px solid hsl(var(--border))" }}
