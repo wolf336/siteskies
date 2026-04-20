@@ -14,6 +14,7 @@ export const TIER_CONFIG = {
     maxMembers: 2,
     monthlyPrice: 29,
     yearlyPrice: 269,
+    projectsPerSeatLabel: '10 projects per seat',
   },
   large_team: {
     name: 'Large Team',
@@ -23,6 +24,7 @@ export const TIER_CONFIG = {
     maxMembers: 6,
     monthlyPrice: 69,
     yearlyPrice: 659,
+    projectsPerSeatLabel: '30 projects per seat',
   },
   enterprise: {
     name: 'Enterprise',
