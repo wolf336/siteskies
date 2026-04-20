@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -15,7 +15,6 @@ import { format } from 'date-fns';
 export default function BillingSection() {
   const { data, isLoading } = useSubscription();
   const [billingInterval, setBillingInterval] = useState('monthly');
-  const [canceling, setCanceling] = useState(false);
   const [openingPortal, setOpeningPortal] = useState(false);
   const [pollTimedOut, setPollTimedOut] = useState(false);
   const queryClient = useQueryClient();
@@ -83,20 +82,6 @@ export default function BillingSection() {
       toast.error(err.message);
       setOpeningPortal(false);
     }
-  };
-
-  const handleCancel = async () => {
-    if (!confirm('Are you sure? Your subscription will remain active until the end of the billing period.')) return;
-    setCanceling(true);
-    try {
-      const res = await base44.functions.invoke('cancelSubscription', {});
-      if (res.data.error) throw new Error(res.data.error);
-      toast.success('Subscription will cancel at the end of the billing period.');
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
-    } catch (err) {
-      toast.error(err.message);
-    }
-    setCanceling(false);
   };
 
   return (
