@@ -27,7 +27,7 @@ export default function Dashboard() {
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ["projects", user?.id],
-    queryFn: () => base44.entities.Project.filter({ created_by_id: user.id }, "-created_date"),
+    queryFn: () => base44.entities.Project.filter({ created_by: user.email }, "-created_date"),
     enabled: !!user?.id,
   });
 
