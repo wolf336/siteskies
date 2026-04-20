@@ -32,14 +32,15 @@ export default function Dashboard() {
   });
 
   const { data: syncSetting } = useQuery({
-    queryKey: ["lastBulkSync"],
+    queryKey: ["lastBulkSync", user?.id],
     queryFn: async () => {
-      const results = await base44.entities.AppSetting.filter({ key: "last_bulk_weather_sync" });
+      const results = await base44.entities.AppSetting.filter({ key: `last_bulk_weather_sync:${user.id}` });
       if (results.length > 0) {
         return JSON.parse(results[0].value);
       }
       return null;
     },
+    enabled: !!user?.id,
   });
 
   const handleBulkSync = async () => {

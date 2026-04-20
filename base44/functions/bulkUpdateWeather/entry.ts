@@ -165,7 +165,8 @@ Deno.serve(async (req) => {
 
     const successCount = eligibleProjects.length - failed.length;
 
-    // Save last bulk sync time and result to AppSetting
+    // Save last bulk sync time and result to AppSetting (scoped per user)
+    const settingKey = `last_bulk_weather_sync:${user.id}`;
     const syncResult = {
       synced_at: new Date().toISOString(),
       success_count: successCount,
@@ -174,14 +175,14 @@ Deno.serve(async (req) => {
       total_eligible: eligibleProjects.length,
     };
 
-    const existing = await base44.asServiceRole.entities.AppSetting.filter({ key: "last_bulk_weather_sync" });
+    const existing = await base44.asServiceRole.entities.AppSetting.filter({ key: settingKey });
     if (existing.length > 0) {
       await base44.asServiceRole.entities.AppSetting.update(existing[0].id, {
         value: JSON.stringify(syncResult),
       });
     } else {
       await base44.asServiceRole.entities.AppSetting.create({
-        key: "last_bulk_weather_sync",
+        key: settingKey,
         value: JSON.stringify(syncResult),
       });
     }
