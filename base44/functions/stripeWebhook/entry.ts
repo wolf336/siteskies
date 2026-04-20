@@ -42,6 +42,15 @@ Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
   try {
+    const expectedAppId = Deno.env.get('BASE44_APP_ID');
+    const eventAppId = event.data.object.metadata?.base44_app_id;
+
+    // TODO: Tighten to require base44_app_id once all legacy subscriptions are backfilled with metadata.
+    if (eventAppId && expectedAppId && eventAppId !== expectedAppId) {
+      console.log(`Skipping event ${event.id} — app_id mismatch (got ${eventAppId}, expected ${expectedAppId})`);
+      return Response.json({ received: true });
+    }
+
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
       const { user_id, user_email, tier, billing_interval } = session.metadata || {};
