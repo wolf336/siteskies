@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -16,6 +16,7 @@ export default function BillingSection() {
   const { data, isLoading } = useSubscription();
   const [billingInterval, setBillingInterval] = useState('monthly');
   const [canceling, setCanceling] = useState(false);
+  const [pollTimedOut, setPollTimedOut] = useState(false);
   const queryClient = useQueryClient();
 
   const subscription = data?.subscription;
@@ -24,6 +25,50 @@ export default function BillingSection() {
   const params = new URLSearchParams(window.location.search);
   const showSuccess = params.get('success') === 'true';
   const showCanceled = params.get('canceled') === 'true';
+
+  // Strip success/canceled/session_id params from URL after reading them
+  useEffect(() => {
+    if (showSuccess || showCanceled) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('success');
+      url.searchParams.delete('canceled');
+      url.searchParams.delete('session_id');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Poll for subscription upgrade after successful checkout
+  useEffect(() => {
+    if (!showSuccess) return;
+
+    const intervalRef = { id: null };
+    const startTime = Date.now();
+    const MAX_POLL_MS = 10000;
+    const POLL_INTERVAL_MS = 1500;
+
+    intervalRef.id = setInterval(() => {
+      const currentData = queryClient.getQueryData(['subscription']);
+      const currentTier = currentData?.subscription?.tier;
+
+      if (currentTier && currentTier !== 'free') {
+        clearInterval(intervalRef.id);
+        return;
+      }
+
+      if (Date.now() - startTime >= MAX_POLL_MS) {
+        clearInterval(intervalRef.id);
+        const latestData = queryClient.getQueryData(['subscription']);
+        if (!latestData?.subscription?.tier || latestData.subscription.tier === 'free') {
+          setPollTimedOut(true);
+        }
+        return;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+    }, POLL_INTERVAL_MS);
+
+    return () => clearInterval(intervalRef.id);
+  }, [showSuccess, queryClient]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCancel = async () => {
     if (!confirm('Are you sure? Your subscription will remain active until the end of the billing period.')) return;
@@ -46,9 +91,14 @@ export default function BillingSection() {
         <p className="text-sm text-muted-foreground mt-0.5">Manage your plan and billing details.</p>
       </div>
 
-      {showSuccess && (
+      {showSuccess && !pollTimedOut && (
         <div className="rounded-lg bg-success/10 border border-success/30 text-success px-4 py-3 text-sm font-medium">
           🎉 Subscription activated! Your plan has been upgraded.
+        </div>
+      )}
+      {pollTimedOut && tier === 'free' && (
+        <div className="rounded-lg bg-amber-100 border border-amber-300 text-amber-900 px-4 py-3 text-sm font-medium">
+          ⚠️ Your payment was received but it's taking longer than usual to activate. Please refresh this page in a minute. If the problem persists, contact support.
         </div>
       )}
       {showCanceled && (

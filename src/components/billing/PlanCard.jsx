@@ -23,7 +23,7 @@ export default function PlanCard({ tierKey, config, currentTier, billingInterval
       const res = await base44.functions.invoke('createCheckoutSession', {
         tier: tierKey,
         billing_interval: billingInterval,
-        success_url: window.location.origin + '/Settings?section=billing&success=true',
+        success_url: window.location.origin + '/Settings?section=billing&success=true&session_id={CHECKOUT_SESSION_ID}',
         cancel_url: window.location.origin + '/Settings?section=billing&canceled=true',
       });
       if (res.data.error) throw new Error(res.data.error);
