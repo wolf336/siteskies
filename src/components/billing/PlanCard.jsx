@@ -34,10 +34,12 @@ export default function PlanCard({ tierKey, config, currentTier, billingInterval
     setLoading(false);
   };
 
+  const projectsPerSeat = config.maxMembers > 1 ? Math.floor(config.maxProjects / config.maxMembers) : null;
+
   const projectsLabel = config.maxProjects >= 999
     ? 'Unlimited projects'
-    : config.maxMembers > 1
-      ? `10 projects per seat`
+    : projectsPerSeat
+      ? `${projectsPerSeat} projects per seat`
       : `${config.maxProjects} projects`;
 
   const features = [
