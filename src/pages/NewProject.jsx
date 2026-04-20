@@ -193,6 +193,7 @@ export default function NewProject() {
               <CloudSun className="h-4 w-4 text-primary" />
               Weather Requirements
             </CardTitle>
+            <p className="text-xs text-muted-foreground">Fields left blank impose no restriction on that condition.</p>
           </CardHeader>
           <CardContent>
             <WeatherRequirementsForm
