@@ -88,15 +88,22 @@ export default function ProjectDetail() {
     try {
       creditRes = await base44.functions.invoke('consumeRefreshCredit', {});
     } catch (err) {
+      // axios throws on 4xx/5xx — check if it's a 403 (limit reached)
+      const data = err?.response?.data;
       setChecking(false);
-      toast.error("Couldn't verify refresh limit. Please try again.", { duration: 4000 });
+      if (data && data.allowed === false) {
+        const { limit, tier } = data;
+        toast.error(`Daily limit reached — you've used all ${limit} refresh${limit !== 1 ? 'es' : ''} today on your ${tier} plan. Upgrade for more.`, { duration: 5000 });
+      } else {
+        toast.error("Failed to check refresh limit. Please try again.", { duration: 4000 });
+      }
       return;
     }
 
     if (!creditRes?.data?.allowed) {
       setChecking(false);
       const { limit, tier } = creditRes?.data || {};
-      toast.error(`You've used all ${limit} daily refreshes on your ${tier} plan. Upgrade for more.`, { duration: 5000 });
+      toast.error(`Daily limit reached — you've used all ${limit} refresh${limit !== 1 ? 'es' : ''} today on your ${tier} plan. Upgrade for more.`, { duration: 5000 });
       return;
     }
 

@@ -64,7 +64,13 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["projects", user?.id] });
       queryClient.invalidateQueries({ queryKey: ["lastBulkSync"] });
     } catch (err) {
-      toast.error(`Sync failed: ${err?.message || "Unknown error"}`, { duration: 5000 });
+      // axios throws on 4xx/5xx — check if it's a 403 (limit reached)
+      const data = err?.response?.data;
+      if (data && data.allowed === false) {
+        toast.error(`Daily limit reached — upgrade your plan for more refreshes.`, { duration: 5000 });
+      } else {
+        toast.error(`Sync failed: ${err?.message || "Unknown error"}`, { duration: 5000 });
+      }
     }
     setSyncing(false);
   };
