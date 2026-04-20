@@ -34,8 +34,14 @@ export default function PlanCard({ tierKey, config, currentTier, billingInterval
     setLoading(false);
   };
 
+  const projectsLabel = config.maxProjects >= 999
+    ? 'Unlimited projects'
+    : config.maxMembers > 1
+      ? `10 projects per seat`
+      : `${config.maxProjects} projects`;
+
   const features = [
-    `${config.maxProjects >= 999 ? 'Unlimited' : config.maxProjects} projects`,
+    projectsLabel,
     `${config.maxRefreshesPerDay >= 999 ? 'Unlimited' : config.maxRefreshesPerDay} refreshes/day`,
     `${config.forecastDays}-day forecast`,
     `${config.maxMembers >= 999 ? 'Unlimited' : config.maxMembers} seat${config.maxMembers !== 1 ? 's' : ''}`,
