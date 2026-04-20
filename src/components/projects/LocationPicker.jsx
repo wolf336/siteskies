@@ -24,7 +24,7 @@ function parseCoord(str) {
 }
 
 export default function LocationPicker({ location, latitude, longitude, onChange }) {
-  const [mode, setMode] = useState("search");
+  const [mode, setMode] = useState(latitude != null && longitude != null ? "coords" : "search");
   const [query, setQuery] = useState(location || "");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
