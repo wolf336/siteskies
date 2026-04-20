@@ -38,8 +38,9 @@ export default function LocationPicker({ location, latitude, longitude, onChange
     const L = await loadLeaflet();
     if (!mapDivRef.current) return;
     if (mapRef.current) {
+      mapRef.current.invalidateSize();
       mapRef.current.setView([lat, lng], 13);
-      markerRef.current.setLatLng([lat, lng]);
+      if (markerRef.current) markerRef.current.setLatLng([lat, lng]);
       return;
     }
     const map = L.map(mapDivRef.current).setView([lat, lng], 13);
@@ -63,12 +64,14 @@ export default function LocationPicker({ location, latitude, longitude, onChange
     });
     mapRef.current = map;
     markerRef.current = marker;
+    // Force Leaflet to recalculate size after the container becomes visible
+    setTimeout(() => map.invalidateSize(), 100);
   }, [onChange]);
 
   useEffect(() => {
     if (hasCoords) {
-      // slight delay to let DOM render
-      setTimeout(() => initMap(latitude, longitude), 50);
+      // delay to let DOM render the map container before initialising
+      setTimeout(() => initMap(latitude, longitude), 100);
     }
   }, [hasCoords, latitude, longitude, initMap]);
 
