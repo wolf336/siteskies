@@ -171,7 +171,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
 
       {/* Mode: search */}
       {mode === "search" && (
-        <div className="relative" style={{ minHeight: 0 }}>
+        <div className="relative" style={{ minHeight: 0, zIndex: 10000 }}>
           <Input
             placeholder="City, suburb or address"
             value={query}
