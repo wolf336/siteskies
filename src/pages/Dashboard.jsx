@@ -91,25 +91,27 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-start gap-3">
-          <div className="flex flex-col items-start gap-1">
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={handleBulkSync}
-              disabled={syncing}
-            >
-              {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-              {syncing ? "Syncing..." : "Sync all projects"}
-            </Button>
-            {syncSetting?.synced_at && (
-              <p className="text-xs text-muted-foreground">
-                Last synced {formatDistanceToNow(new Date(syncSetting.synced_at), { addSuffix: true })}
-                {syncSetting.failed_count > 0 && (
-                  <span className="text-destructive ml-1">({syncSetting.failed_count} failed)</span>
-                )}
-              </p>
-            )}
-          </div>
+          {projects.length > 0 && (
+            <div className="flex flex-col items-start gap-1">
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={handleBulkSync}
+                disabled={syncing}
+              >
+                {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                {syncing ? "Syncing..." : "Sync all projects"}
+              </Button>
+              {syncSetting?.synced_at && (
+                <p className="text-xs text-muted-foreground">
+                  Last synced {formatDistanceToNow(new Date(syncSetting.synced_at), { addSuffix: true })}
+                  {syncSetting.failed_count > 0 && (
+                    <span className="text-destructive ml-1">({syncSetting.failed_count} failed)</span>
+                  )}
+                </p>
+              )}
+            </div>
+          )}
           <Link to={createPageUrl("NewProject")}>
             <Button className="bg-primary hover:bg-primary/90 gap-2">
               <Plus className="h-4 w-4" />
