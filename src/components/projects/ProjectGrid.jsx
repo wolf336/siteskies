@@ -46,7 +46,7 @@ export default function ProjectGrid({ projects }) {
             <div className="space-y-1 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <MapPin className="h-3 w-3 shrink-0" />
-                <span className="truncate">{project.location_name || project.location}</span>
+                <span className="truncate">{project.location}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-3 w-3 shrink-0" />
