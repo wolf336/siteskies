@@ -109,15 +109,33 @@ Deno.serve(async (req) => {
     }
 
     // Consume a SINGLE refresh credit for the entire bulk sync
-    const creditRes = await base44.functions.invoke('consumeRefreshCredit', {});
+    let creditRes;
+    try {
+      creditRes = await base44.functions.invoke('consumeRefreshCredit', {});
+    } catch (err) {
+      // consumeRefreshCredit returns 403 when limit is reached — axios throws on non-2xx
+      const data = err?.response?.data;
+      if (data && data.allowed === false) {
+        return Response.json({
+          success: false,
+          allowed: false,
+          error: `Daily refresh limit reached`,
+          limit: data.limit,
+          tier: data.tier,
+        }, { status: 200 }); // return 200 so frontend catch isn't triggered
+      }
+      throw err; // unexpected error
+    }
+
     if (!creditRes?.data?.allowed) {
       const { limit, tier } = creditRes?.data || {};
       return Response.json({
         success: false,
+        allowed: false,
         error: `Daily refresh limit reached`,
         limit,
         tier,
-      }, { status: 403 });
+      }, { status: 200 });
     }
 
     // Fetch projects belonging to this user (by email, which is how created_by is stored)
