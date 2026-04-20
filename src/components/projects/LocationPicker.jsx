@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MapPin } from "lucide-react";
@@ -36,6 +37,8 @@ export default function LocationPicker({ location, latitude, longitude, onChange
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const mapDivRef = useRef(null);
+  const inputWrapperRef = useRef(null);
+  const [dropdownRect, setDropdownRect] = useState(null);
 
   const hasCoords = latitude != null && longitude != null;
 
@@ -171,18 +174,32 @@ export default function LocationPicker({ location, latitude, longitude, onChange
 
       {/* Mode: search */}
       {mode === "search" && (
-        <div className="relative" style={{ minHeight: 0, zIndex: 10000 }}>
+        <div className="relative" ref={inputWrapperRef}>
           <Input
             placeholder="City, suburb or address"
             value={query}
-            onChange={(e) => { setQuery(e.target.value); }}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              if (inputWrapperRef.current) {
+                setDropdownRect(inputWrapperRef.current.getBoundingClientRect());
+              }
+            }}
             autoComplete="off"
           />
           {searching && (
             <div className="absolute right-3 top-2.5 text-xs text-muted-foreground">Searching…</div>
           )}
-          {results.length > 0 && (
-            <div className="absolute z-[9999] top-full mt-1 w-full rounded-lg border border-border bg-card shadow-lg overflow-hidden">
+          {results.length > 0 && dropdownRect && createPortal(
+            <div
+              style={{
+                position: "fixed",
+                top: dropdownRect.bottom + 4,
+                left: dropdownRect.left,
+                width: dropdownRect.width,
+                zIndex: 99999,
+              }}
+              className="rounded-lg border border-border bg-card shadow-lg overflow-hidden"
+            >
               {results.map((r) => (
                 <button
                   key={r.place_id}
@@ -193,7 +210,8 @@ export default function LocationPicker({ location, latitude, longitude, onChange
                   {r.display_name}
                 </button>
               ))}
-            </div>
+            </div>,
+            document.body
           )}
         </div>
       )}
@@ -237,7 +255,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
 
       {/* Map */}
       {hasCoords && (
-        <div className="space-y-1" style={{ position: "relative", zIndex: 0 }}>
+        <div className="space-y-1" style={{ isolation: "isolate" }}>
           <div
             ref={mapDivRef}
             style={{ height: 220, borderRadius: 8, overflow: "hidden", border: "1px solid hsl(var(--border))" }}
