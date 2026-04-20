@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const projects = await base44.asServiceRole.entities.Project.list();
+    const projects = await base44.asServiceRole.entities.Project.filter({ created_by_id: user.id });
 
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];
