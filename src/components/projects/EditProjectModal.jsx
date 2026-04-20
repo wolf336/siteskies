@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import { resolveLocationName } from "@/lib/geocode";
 import WeatherRequirementsForm from "./WeatherRequirementsForm.jsx";
+import LocationPicker from "./LocationPicker.jsx";
 
 export default function EditProjectModal({ project, open, onClose }) {
   const queryClient = useQueryClient();
@@ -89,14 +90,14 @@ export default function EditProjectModal({ project, open, onClose }) {
               rows={2}
             />
           </div>
-          <div className="space-y-2">
-            <Label>Location</Label>
-            <Input
-              value={form.location}
-              onChange={(e) => setForm({ ...form, location: e.target.value })}
-              placeholder="City, address, or coordinates"
-            />
-          </div>
+          <LocationPicker
+            location={form.location}
+            latitude={form.latitude}
+            longitude={form.longitude}
+            onChange={({ location, latitude, longitude, location_name }) =>
+              setForm((f) => ({ ...f, location, latitude, longitude, location_name: location_name ?? null }))
+            }
+          />
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Start Date</Label>
