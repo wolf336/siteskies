@@ -1,13 +1,13 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import Stripe from 'npm:stripe@14.21.0';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
+const stripe = new Stripe(Deno.env.get('STRIPE_TEST_SECRET_KEY'));
 
 const PRICE_IDS = {
-  small_team_monthly: 'price_1TNV0qARwXv1I17HSqMPZH3q',
-  small_team_yearly:  'price_1TNV0qARwXv1I17HkQbxbdDI',
-  large_team_monthly: 'price_1TNV0qARwXv1I17HYsbu6xUw',
-  large_team_yearly:  'price_1TNV0qARwXv1I17HKs7RPkqh',
+  small_team_monthly: 'REPLACE_WITH_TEST_PRICE_ID',
+  small_team_yearly:  'REPLACE_WITH_TEST_PRICE_ID',
+  large_team_monthly: 'REPLACE_WITH_TEST_PRICE_ID',
+  large_team_yearly:  'REPLACE_WITH_TEST_PRICE_ID',
 };
 
 Deno.serve(async (req) => {

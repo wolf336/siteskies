@@ -1,20 +1,20 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import Stripe from 'npm:stripe@14.21.0';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
+const stripe = new Stripe(Deno.env.get('STRIPE_TEST_SECRET_KEY'));
 
 const TIER_BY_PRICE = {
-  'price_1TNV0qARwXv1I17HSqMPZH3q': 'small_team',
-  'price_1TNV0qARwXv1I17HkQbxbdDI': 'small_team',
-  'price_1TNV0qARwXv1I17HYsbu6xUw': 'large_team',
-  'price_1TNV0qARwXv1I17HKs7RPkqh': 'large_team',
+  'REPLACE_WITH_TEST_PRICE_ID_SM_M': 'small_team',
+  'REPLACE_WITH_TEST_PRICE_ID_SM_Y': 'small_team',
+  'REPLACE_WITH_TEST_PRICE_ID_LG_M': 'large_team',
+  'REPLACE_WITH_TEST_PRICE_ID_LG_Y': 'large_team',
 };
 
 const INTERVAL_BY_PRICE = {
-  'price_1TNV0qARwXv1I17HSqMPZH3q': 'monthly',
-  'price_1TNV0qARwXv1I17HkQbxbdDI': 'yearly',
-  'price_1TNV0qARwXv1I17HYsbu6xUw': 'monthly',
-  'price_1TNV0qARwXv1I17HKs7RPkqh': 'yearly',
+  'REPLACE_WITH_TEST_PRICE_ID_SM_M': 'monthly',
+  'REPLACE_WITH_TEST_PRICE_ID_SM_Y': 'yearly',
+  'REPLACE_WITH_TEST_PRICE_ID_LG_M': 'monthly',
+  'REPLACE_WITH_TEST_PRICE_ID_LG_Y': 'yearly',
 };
 
 async function upsertSubscription(base44, userId, userEmail, data) {
@@ -29,7 +29,7 @@ async function upsertSubscription(base44, userId, userEmail, data) {
 Deno.serve(async (req) => {
   const body = await req.text();
   const sig = req.headers.get('stripe-signature');
-  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+  const webhookSecret = Deno.env.get('STRIPE_TEST_WEBHOOK_SECRET');
 
   let event;
   try {
