@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import Stripe from 'npm:stripe@14.21.0';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_TEST_SECRET_KEY'));
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
 const TIER_BY_PRICE = {
   'price_1TOhQOARwXv1I17HFJ8p7dHo': 'small_team',
@@ -17,6 +17,9 @@ const INTERVAL_BY_PRICE = {
   'price_1TOhPbARwXv1I17H2PWcgA2C': 'yearly',
 };
 
+// Safe timestamp converter — handles Stripe API versions that moved current_period_end to items
+const toISO = (ts) => (typeof ts === 'number' && ts > 0) ? new Date(ts * 1000).toISOString() : null;
+
 async function upsertSubscription(base44, userId, userEmail, data) {
   const existing = await base44.asServiceRole.entities.Subscription.filter({ user_id: userId });
   if (existing.length > 0) {
@@ -29,7 +32,7 @@ async function upsertSubscription(base44, userId, userEmail, data) {
 Deno.serve(async (req) => {
   const body = await req.text();
   const sig = req.headers.get('stripe-signature');
-  const webhookSecret = Deno.env.get('STRIPE_TEST_WEBHOOK_SECRET');
+  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 
   let event;
   try {
@@ -45,7 +48,6 @@ Deno.serve(async (req) => {
     const expectedAppId = Deno.env.get('BASE44_APP_ID');
     const eventAppId = event.data.object.metadata?.base44_app_id;
 
-    // TODO: Tighten to require base44_app_id once all legacy subscriptions are backfilled with metadata.
     if (eventAppId && expectedAppId && eventAppId !== expectedAppId) {
       console.log(`Skipping event ${event.id} — app_id mismatch (got ${eventAppId}, expected ${expectedAppId})`);
       return Response.json({ received: true });
@@ -58,6 +60,8 @@ Deno.serve(async (req) => {
 
       const stripeSub = await stripe.subscriptions.retrieve(session.subscription);
       const priceId = stripeSub.items.data[0]?.price?.id;
+      // Read current_period_end from item level (Stripe API 2025+)
+      const periodEnd = toISO(stripeSub.items?.data?.[0]?.current_period_end);
 
       await upsertSubscription(base44, user_id, user_email, {
         tier: tier || TIER_BY_PRICE[priceId] || 'free',
@@ -66,7 +70,7 @@ Deno.serve(async (req) => {
         stripe_customer_id: session.customer,
         stripe_subscription_id: session.subscription,
         stripe_price_id: priceId,
-        current_period_end: new Date(stripeSub.current_period_end * 1000).toISOString(),
+        current_period_end: periodEnd,
         cancel_at_period_end: false,
       });
     }
@@ -74,6 +78,9 @@ Deno.serve(async (req) => {
     if (event.type === 'customer.subscription.updated') {
       const stripeSub = event.data.object;
       const priceId = stripeSub.items.data[0]?.price?.id;
+      // Read current_period_end from item level (Stripe API 2025+)
+      const periodEnd = toISO(stripeSub.items?.data?.[0]?.current_period_end);
+
       const existing = await base44.asServiceRole.entities.Subscription.filter({ stripe_subscription_id: stripeSub.id });
       if (existing.length > 0) {
         await base44.asServiceRole.entities.Subscription.update(existing[0].id, {
@@ -81,7 +88,7 @@ Deno.serve(async (req) => {
           tier: TIER_BY_PRICE[priceId] || existing[0].tier,
           billing_interval: INTERVAL_BY_PRICE[priceId] || existing[0].billing_interval,
           stripe_price_id: priceId,
-          current_period_end: new Date(stripeSub.current_period_end * 1000).toISOString(),
+          current_period_end: periodEnd,
           cancel_at_period_end: stripeSub.cancel_at_period_end,
         });
       }
@@ -91,11 +98,15 @@ Deno.serve(async (req) => {
       const stripeSub = event.data.object;
       const existing = await base44.asServiceRole.entities.Subscription.filter({ stripe_subscription_id: stripeSub.id });
       if (existing.length > 0) {
+        // Fully reset to free — clear ALL Stripe-related fields to avoid stale data
         await base44.asServiceRole.entities.Subscription.update(existing[0].id, {
           tier: 'free',
           status: 'canceled',
           stripe_subscription_id: null,
           stripe_price_id: null,
+          stripe_customer_id: null,
+          billing_interval: null,
+          current_period_end: null,
           cancel_at_period_end: false,
         });
       }
@@ -113,8 +124,6 @@ Deno.serve(async (req) => {
           last_payment_failed_at: new Date().toISOString(),
         });
       }
-      // TODO: Send the user an email notifying them of the failed payment.
-      // Stripe's Smart Retries send their own email by default, so this is not critical for launch.
     }
 
     return Response.json({ received: true });

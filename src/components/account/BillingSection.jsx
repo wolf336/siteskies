@@ -52,6 +52,8 @@ export default function BillingSection() {
 
       if (currentTier && currentTier !== 'free') {
         clearInterval(intervalRef.id);
+        const tierName = TIER_CONFIG[currentTier]?.name || currentTier;
+        toast.success(`🎉 Subscription activated! You're now on the ${tierName} plan.`);
         return;
       }
 
@@ -112,9 +114,9 @@ export default function BillingSection() {
         </div>
       )}
 
-      {showSuccess && !pollTimedOut && (
+      {showSuccess && !pollTimedOut && tier !== 'free' && (
         <div className="rounded-lg bg-success/10 border border-success/30 text-success px-4 py-3 text-sm font-medium">
-          🎉 Subscription activated! Your plan has been upgraded.
+          🎉 Subscription activated! Your plan has been upgraded to {TIER_CONFIG[tier]?.name}.
         </div>
       )}
       {pollTimedOut && tier === 'free' && (
