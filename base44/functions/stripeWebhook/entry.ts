@@ -32,10 +32,7 @@ async function upsertSubscription(base44, userId, userEmail, data) {
 Deno.serve(async (req) => {
   const body = await req.text();
   const sig = req.headers.get('stripe-signature');
-  const isLiveMode = JSON.parse(body).livemode;
-  const webhookSecret = isLiveMode
-    ? Deno.env.get('STRIPE_WEBHOOK_SECRET')
-    : Deno.env.get('STRIPE_TEST_WEBHOOK_SECRET');
+  const webhookSecret = Deno.env.get('STRIPE_TEST_WEBHOOK_SECRET');
 
   let event;
   try {
