@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import Stripe from 'npm:stripe@14.21.0';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
+const stripe = new Stripe(Deno.env.get('STRIPE_TEST_SECRET_KEY'));
 
 const TIER_BY_PRICE = {
   'price_1TOhQOARwXv1I17HFJ8p7dHo': 'small_team',
@@ -32,7 +32,10 @@ async function upsertSubscription(base44, userId, userEmail, data) {
 Deno.serve(async (req) => {
   const body = await req.text();
   const sig = req.headers.get('stripe-signature');
-  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
+  const isLiveMode = JSON.parse(body).livemode;
+  const webhookSecret = isLiveMode
+    ? Deno.env.get('STRIPE_WEBHOOK_SECRET')
+    : Deno.env.get('STRIPE_TEST_WEBHOOK_SECRET');
 
   let event;
   try {
