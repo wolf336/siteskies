@@ -22,9 +22,8 @@ export default function BillingSection() {
   const subscription = data?.subscription;
   const tier = subscription?.tier || 'free';
 
-  const params = new URLSearchParams(window.location.search);
-  const showSuccess = params.get('success') === 'true';
-  const showCanceled = params.get('canceled') === 'true';
+  const [showSuccess, setShowSuccess] = useState(() => new URLSearchParams(window.location.search).get('success') === 'true');
+  const [showCanceled, setShowCanceled] = useState(() => new URLSearchParams(window.location.search).get('canceled') === 'true');
 
   // Strip success/canceled/session_id params from URL after reading them
   useEffect(() => {
@@ -54,6 +53,7 @@ export default function BillingSection() {
         clearInterval(intervalRef.id);
         const tierName = TIER_CONFIG[currentTier]?.name || currentTier;
         toast.success(`🎉 Subscription activated! You're now on the ${tierName} plan.`);
+        setShowSuccess(true);
         return;
       }
 
