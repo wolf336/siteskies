@@ -85,7 +85,7 @@ export default function ProfileSection() {
               <span className="block">This action is <strong>permanent and cannot be undone</strong>. All of your data will be deleted, including:</span>
               <ul className="list-disc list-inside text-sm space-y-1 mt-2">
                 <li>All your projects and weather forecasts</li>
-                <li>Your subscription (any active Stripe subscription will be canceled immediately)</li>
+                <li>Your subscription (any active subscription will be canceled immediately)</li>
                 <li>Your team memberships</li>
               </ul>
               <span className="block text-xs text-muted-foreground pt-2">
