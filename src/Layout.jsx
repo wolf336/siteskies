@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { CloudSun, MessageSquare, Settings } from "lucide-react";
+import { MessageSquare, Settings } from "lucide-react";
 import FeedbackModal from "@/components/FeedbackModal";
 
 export default function Layout({ children, currentPageName }) {
@@ -16,9 +16,7 @@ export default function Layout({ children, currentPageName }) {
       <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link to={createPageUrl("Dashboard")} className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <CloudSun className="h-5 w-5" />
-            </div>
+            <img src="https://media.base44.com/images/public/69aada1cbc0882d69fc03625/2635735c5_logoroundend1024x1024.png" alt="SiteSkies logo" className="h-9 w-9 rounded-lg object-cover" />
             <span className="text-lg font-bold tracking-tight text-foreground">
               SiteSkies
             </span>
