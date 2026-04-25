@@ -31,6 +31,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
   const [mode, setMode] = useState(isCoordString ? "coords" : "search");
   const [query, setQuery] = useState(isCoordString ? "" : (location || ""));
   const [results, setResults] = useState([]);
+  const [userHasTyped, setUserHasTyped] = useState(false);
   const [searching, setSearching] = useState(false);
   const [coordLat, setCoordLat] = useState(latitude != null ? String(latitude) : "");
   const [coordLng, setCoordLng] = useState(longitude != null ? String(longitude) : "");
@@ -103,6 +104,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
   // Nominatim search
   useEffect(() => {
     if (mode !== "search") return;
+    if (!userHasTyped) return;
     if (query.length < 2) { setResults([]); return; }
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
@@ -179,7 +181,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
           <Input
             placeholder="City, suburb or address"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setUserHasTyped(true); setQuery(e.target.value); }}
             autoComplete="off"
           />
           {searching && (
