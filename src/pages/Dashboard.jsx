@@ -256,21 +256,11 @@ export default function Dashboard() {
       ) : (
         <>
           {view === 'list' && (
-            <motion.div className="grid gap-3" layout>
-              <AnimatePresence>
-                {filtered.map((project) => (
-                  <motion.div
-                    key={project.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    layout
-                  >
-                    <ProjectCard project={project} />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
+            <div className="grid gap-3">
+              {filtered.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
           )}
           {view === 'grid' && <ProjectGrid projects={filtered} />}
           {view === 'table' && <ProjectTable projects={filtered} />}
