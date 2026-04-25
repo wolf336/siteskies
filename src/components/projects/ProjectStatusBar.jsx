@@ -63,8 +63,9 @@ export default function ProjectStatusBar({ status, onStatusChange }) {
       {!isPostponed && (
         <button
           onClick={() => onStatusChange("postponed")}
-          className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-destructive/50 hover:text-destructive hover:bg-destructive/5 transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/15 hover:border-destructive/50 transition-all shadow-sm"
         >
+          <X className="h-3.5 w-3.5" />
           Mark as Postponed
         </button>
       )}
