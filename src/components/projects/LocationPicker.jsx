@@ -39,7 +39,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
   const markerRef = useRef(null);
   const mapDivRef = useRef(null);
   const inputWrapperRef = useRef(null);
-  const [dropdownRect, setDropdownRect] = useState(null);
+
 
   const hasCoords = latitude != null && longitude != null;
 
@@ -179,24 +179,19 @@ export default function LocationPicker({ location, latitude, longitude, onChange
           <Input
             placeholder="City, suburb or address"
             value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              if (inputWrapperRef.current) {
-                setDropdownRect(inputWrapperRef.current.getBoundingClientRect());
-              }
-            }}
+            onChange={(e) => setQuery(e.target.value)}
             autoComplete="off"
           />
           {searching && (
             <div className="absolute right-3 top-2.5 text-xs text-muted-foreground">Searching…</div>
           )}
-          {results.length > 0 && dropdownRect && createPortal(
+          {results.length > 0 && inputWrapperRef.current && createPortal(
             <div
               style={{
                 position: "fixed",
-                top: dropdownRect.bottom + 4,
-                left: dropdownRect.left,
-                width: dropdownRect.width,
+                top: inputWrapperRef.current.getBoundingClientRect().bottom + 4,
+                left: inputWrapperRef.current.getBoundingClientRect().left,
+                width: inputWrapperRef.current.getBoundingClientRect().width,
                 zIndex: 99999,
                 pointerEvents: "all",
               }}
