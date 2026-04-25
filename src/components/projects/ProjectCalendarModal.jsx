@@ -5,6 +5,7 @@ import { X, MapPin, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import WeatherDots from './WeatherDots';
+import { useFormattedLocation } from "@/hooks/useFormattedLocation";
 
 const REC_STYLES = {
   proceed: 'bg-success/10 text-success',
@@ -15,6 +16,7 @@ const REC_STYLES = {
 
 export default function ProjectCalendarModal({ project, onClose }) {
   const navigate = useNavigate();
+  const formattedLocation = useFormattedLocation(project.location, project.location_name);
   const forecasts = project.weather_forecast?.daily_forecasts || [];
   const clearDays = forecasts.filter(d => d.meets_requirements).length;
 
@@ -53,7 +55,7 @@ export default function ProjectCalendarModal({ project, onClose }) {
         <div className="space-y-1.5 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <MapPin className="h-3.5 w-3.5 shrink-0" />
-            <span>{project.location}</span>
+            <span>{formattedLocation}</span>
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-3.5 w-3.5 shrink-0" />

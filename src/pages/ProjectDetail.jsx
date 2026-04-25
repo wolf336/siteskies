@@ -27,6 +27,7 @@ import { format, differenceInDays } from "date-fns";
 import { toast } from "sonner";
 import RecommendationBanner from "@/components/projects/RecommendationBanner.jsx";
 import ForecastTimeline from "@/components/projects/ForecastTimeline.jsx";
+import { useFormattedLocation } from "@/hooks/useFormattedLocation";
 
 import { Link as RouterLink } from "react-router-dom";
 
@@ -262,6 +263,7 @@ export default function ProjectDetail() {
 }
 
 function ProjectDetailContent({ project, projectId, checking, setChecking, forecastError, setForecastError, editOpen, setEditOpen, checkWeather, deleteMutation }) {
+  const formattedLocation = useFormattedLocation(project.location, project.location_name);
   const todayStr = new Date().toISOString().split("T")[0];
   const isCompleted = project.end_date < todayStr;
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
@@ -287,7 +289,7 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
           <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5" />
-              {project.location}
+              {formattedLocation}
             </div>
             <div className="flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5" />

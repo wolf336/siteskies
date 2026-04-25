@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
 import WeatherDots from './WeatherDots';
+import { useFormattedLocation } from "@/hooks/useFormattedLocation";
 
 const REC_STYLES = {
   proceed: 'bg-success/10 text-success',
@@ -11,9 +12,38 @@ const REC_STYLES = {
   pending: 'bg-muted text-muted-foreground',
 };
 
-export default function ProjectTable({ projects }) {
+function ProjectTableRow({ project }) {
   const navigate = useNavigate();
+  const formattedLocation = useFormattedLocation(project.location, project.location_name);
+  const forecasts = project.weather_forecast?.daily_forecasts || [];
 
+  return (
+    <tr
+      onClick={() => navigate(createPageUrl(`ProjectDetail?id=${project.id}`))}
+      className="hover:bg-muted/30 cursor-pointer transition-colors"
+    >
+      <td className="px-4 py-3 font-medium text-foreground max-w-[180px]">
+        <span className="line-clamp-1">{project.name}</span>
+      </td>
+      <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell max-w-[140px]">
+        <span className="line-clamp-1">{formattedLocation}</span>
+      </td>
+      <td className="px-4 py-3 text-muted-foreground hidden md:table-cell whitespace-nowrap">
+        {format(new Date(project.start_date + 'T00:00:00'), 'MMM d')} – {format(new Date(project.end_date + 'T00:00:00'), 'MMM d')}
+      </td>
+      <td className="px-4 py-3 hidden lg:table-cell">
+        <WeatherDots forecasts={forecasts} />
+      </td>
+      <td className="px-4 py-3">
+        <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${REC_STYLES[project.weather_signal] || REC_STYLES.pending}`}>
+          {project.weather_signal || 'pending'}
+        </span>
+      </td>
+    </tr>
+  );
+}
+
+export default function ProjectTable({ projects }) {
   return (
     <div className="rounded-xl border border-border overflow-hidden">
       <table className="w-full text-sm">
@@ -27,34 +57,9 @@ export default function ProjectTable({ projects }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
-          {projects.map((project) => {
-            const forecasts = project.weather_forecast?.daily_forecasts || [];
-            return (
-              <tr
-                key={project.id}
-                onClick={() => navigate(createPageUrl(`ProjectDetail?id=${project.id}`))}
-                className="hover:bg-muted/30 cursor-pointer transition-colors"
-              >
-                <td className="px-4 py-3 font-medium text-foreground max-w-[180px]">
-                  <span className="line-clamp-1">{project.name}</span>
-                </td>
-                <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell max-w-[140px]">
-                  <span className="line-clamp-1">{project.location}</span>
-                </td>
-                <td className="px-4 py-3 text-muted-foreground hidden md:table-cell whitespace-nowrap">
-                  {format(new Date(project.start_date + 'T00:00:00'), 'MMM d')} – {format(new Date(project.end_date + 'T00:00:00'), 'MMM d')}
-                </td>
-                <td className="px-4 py-3 hidden lg:table-cell">
-                  <WeatherDots forecasts={forecasts} />
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${REC_STYLES[project.weather_signal] || REC_STYLES.pending}`}>
-                    {project.weather_signal || 'pending'}
-                  </span>
-                </td>
-              </tr>
-            );
-          })}
+          {projects.map((project) => (
+            <ProjectTableRow key={project.id} project={project} />
+          ))}
         </tbody>
       </table>
     </div>
