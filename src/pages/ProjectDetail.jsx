@@ -77,6 +77,12 @@ export default function ProjectDetail() {
   };
 
   const checkWeather = async () => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    if (project.end_date < todayStr) {
+      toast.error("This project has already ended. Weather can't be updated.");
+      return;
+    }
+
     setChecking(true);
     setForecastError("");
 
@@ -256,6 +262,8 @@ export default function ProjectDetail() {
 }
 
 function ProjectDetailContent({ project, projectId, checking, setChecking, forecastError, setForecastError, editOpen, setEditOpen, checkWeather, deleteMutation }) {
+  const todayStr = new Date().toISOString().split("T")[0];
+  const isCompleted = project.end_date < todayStr;
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
   const canCheckWeather = daysUntilStart <= 16;
   const forecastAvailableDate = new Date(project.start_date);
@@ -341,7 +349,7 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
         </div>
         <Button
           onClick={checkWeather}
-          disabled={checking || !canCheckWeather}
+          disabled={checking || !canCheckWeather || isCompleted}
           className="gap-2"
         >
           {checking ? (
@@ -353,7 +361,16 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
         </Button>
       </div>
 
-      {!canCheckWeather && (
+      {isCompleted && (
+        <div className="rounded-lg bg-muted/50 border border-border p-4 text-sm text-muted-foreground">
+          This project has already ended on{" "}
+          <span className="font-medium text-foreground">
+            {format(new Date(project.end_date + "T00:00:00"), "MMMM d, yyyy")}
+          </span>. Weather forecasts can no longer be updated.
+        </div>
+      )}
+
+      {!canCheckWeather && !isCompleted && (
         <div className="rounded-lg bg-muted/50 border border-border p-4 text-sm text-muted-foreground">
           Forecast not yet available. Your first forecast will be ready on{" "}
           <span className="font-medium text-foreground">
@@ -361,6 +378,7 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
           </span>.
         </div>
       )}
+
 
       {project.weather_forecast?.partial_forecast && project.weather_forecast?.daily_forecasts?.length > 0 && (
         <div className="rounded-lg bg-accent/10 border border-accent/30 p-4 text-sm text-accent-foreground">
