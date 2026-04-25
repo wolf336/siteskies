@@ -14,7 +14,7 @@ import LocationPicker from "./LocationPicker.jsx";
 
 export default function EditProjectModal({ project, open, onClose }) {
   const queryClient = useQueryClient();
-  const [dialogEl, setDialogEl] = useState(null);
+
   const [form, setForm] = useState({
     name: project.name || "",
     description: project.description || "",
@@ -70,7 +70,7 @@ export default function EditProjectModal({ project, open, onClose }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent ref={setDialogEl} className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Project</DialogTitle>
         </DialogHeader>
@@ -98,7 +98,7 @@ export default function EditProjectModal({ project, open, onClose }) {
             onChange={({ location, latitude, longitude, location_name }) =>
               setForm((f) => ({ ...f, location, latitude, longitude, location_name: location_name ?? null }))
             }
-            portalTarget={dialogEl}
+
           />
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
