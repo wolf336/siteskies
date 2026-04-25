@@ -25,9 +25,10 @@ function parseCoord(str) {
 }
 
 export default function LocationPicker({ location, latitude, longitude, onChange }) {
-  const [mode, setMode] = useState(latitude != null && longitude != null ? "coords" : "search");
-  // If location looks like coords (e.g. "49.7, 10.55"), don't pre-fill the address search field
+  // If location looks like coords (e.g. "49.7, 10.55"), the project was saved via coord input.
+  // Otherwise it was saved via address search (location holds the address string).
   const isCoordString = location && /^-?\d+\.?\d*\s*,\s*-?\d+\.?\d*$/.test(location.trim());
+  const [mode, setMode] = useState(isCoordString ? "coords" : "search");
   const [query, setQuery] = useState(isCoordString ? "" : (location || ""));
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
