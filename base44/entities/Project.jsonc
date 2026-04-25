@@ -45,36 +45,28 @@
       "description": "Weather requirements for the project",
       "properties": {
         "max_wind_speed_kmh": {
-          "type": "number",
-          "description": "Maximum acceptable wind speed in km/h"
+          "type": "number"
         },
         "max_precipitation_mm": {
-          "type": "number",
-          "description": "Maximum acceptable daily precipitation in mm"
+          "type": "number"
         },
         "min_temperature_c": {
-          "type": "number",
-          "description": "Minimum acceptable temperature in Celsius"
+          "type": "number"
         },
         "max_temperature_c": {
-          "type": "number",
-          "description": "Maximum acceptable temperature in Celsius"
+          "type": "number"
         },
         "no_thunderstorms": {
-          "type": "boolean",
-          "description": "Whether thunderstorms must be avoided"
+          "type": "boolean"
         },
         "no_snow": {
-          "type": "boolean",
-          "description": "Whether snow must be avoided"
+          "type": "boolean"
         },
         "no_fog": {
-          "type": "boolean",
-          "description": "Whether fog must be avoided"
+          "type": "boolean"
         },
         "custom_notes": {
-          "type": "string",
-          "description": "Additional weather requirements"
+          "type": "string"
         }
       }
     },
@@ -83,19 +75,16 @@
       "description": "Latest weather forecast data",
       "properties": {
         "last_checked": {
-          "type": "string",
-          "description": "When forecast was last updated"
+          "type": "string"
         },
         "sources": {
           "type": "array",
-          "description": "Weather sources consulted",
           "items": {
             "type": "string"
           }
         },
         "daily_forecasts": {
           "type": "array",
-          "description": "Daily forecast data for project dates",
           "items": {
             "type": "object",
             "properties": {
@@ -133,16 +122,13 @@
           }
         },
         "summary": {
-          "type": "string",
-          "description": "Overall weather summary"
+          "type": "string"
         },
         "partial_forecast": {
-          "type": "boolean",
-          "description": "Whether the forecast covers only part of the project duration"
+          "type": "boolean"
         },
         "forecast_covers_until": {
-          "type": "string",
-          "description": "The last date covered by the current forecast"
+          "type": "string"
         }
       }
     },
@@ -160,19 +146,6 @@
     "weather_signal_details": {
       "type": "string",
       "description": "Detailed explanation of the weather signal"
-    },
-    "status": {
-      "type": "string",
-      "enum": [
-        "planning",
-        "monitoring",
-        "ready",
-        "in_progress",
-        "completed",
-        "postponed"
-      ],
-      "default": "planning",
-      "description": "Current project status"
     }
   },
   "required": [

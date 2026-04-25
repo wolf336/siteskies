@@ -8,15 +8,6 @@ import WeatherDots from "./WeatherDots";
 import { format, differenceInDays, isPast } from "date-fns";
 import EditProjectModal from "./EditProjectModal.jsx";
 
-const statusConfig = {
-  planning: { label: "Planning", className: "bg-secondary text-secondary-foreground" },
-  monitoring: { label: "Monitoring", className: "bg-primary/10 text-primary" },
-  ready: { label: "Ready", className: "bg-success/15 text-success" },
-  in_progress: { label: "In Progress", className: "bg-primary/10 text-primary" },
-  completed: { label: "Completed", className: "bg-success/15 text-success" },
-  postponed: { label: "Postponed", className: "bg-destructive/10 text-destructive" }
-};
-
 const recommendationConfig = {
   proceed: { label: "Proceed", icon: Sun, className: "border-success/30 bg-success/10 text-success" },
   caution: { label: "Caution", icon: TriangleAlert, className: "border-warning/30 bg-warning/10 text-warning" },
@@ -31,7 +22,6 @@ export default function ProjectCard({ project }) {
   const forecasts = project.weather_forecast?.daily_forecasts || [];
   const clearDays = forecasts.filter((d) => d.meets_requirements).length;
   const RecIcon = rec.icon;
-  const stat = statusConfig[project.status || "planning"];
 
   return (
     <>

@@ -87,8 +87,6 @@ export default function NewProject() {
       location_name: finalLocationName || null,
       project_length_days: projectLength,
       required_weather: requirements,
-      recommendation: "pending",
-      status: "planning",
     });
     navigate(createPageUrl(`ProjectDetail?id=${project.id}`));
   };

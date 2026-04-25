@@ -4,15 +4,6 @@ import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
 import WeatherDots from './WeatherDots';
 
-const STATUS_STYLES = {
-  planning: 'bg-muted text-muted-foreground',
-  monitoring: 'bg-primary/10 text-primary',
-  ready: 'bg-success/10 text-success',
-  in_progress: 'bg-accent/20 text-accent-foreground',
-  completed: 'bg-muted text-muted-foreground',
-  postponed: 'bg-destructive/10 text-destructive',
-};
-
 const REC_STYLES = {
   proceed: 'bg-success/10 text-success',
   caution: 'bg-warning/10 text-warning-foreground',
@@ -31,7 +22,6 @@ export default function ProjectTable({ projects }) {
             <th className="text-left px-4 py-3 font-medium">Project</th>
             <th className="text-left px-4 py-3 font-medium hidden sm:table-cell">Location</th>
             <th className="text-left px-4 py-3 font-medium hidden md:table-cell">Dates</th>
-            <th className="text-left px-4 py-3 font-medium">Status</th>
             <th className="text-left px-4 py-3 font-medium hidden lg:table-cell">Forecast</th>
             <th className="text-left px-4 py-3 font-medium">Recommendation</th>
           </tr>
@@ -53,11 +43,6 @@ export default function ProjectTable({ projects }) {
                 </td>
                 <td className="px-4 py-3 text-muted-foreground hidden md:table-cell whitespace-nowrap">
                   {format(new Date(project.start_date + 'T00:00:00'), 'MMM d')} – {format(new Date(project.end_date + 'T00:00:00'), 'MMM d')}
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[project.status] || STATUS_STYLES.planning}`}>
-                    {project.status?.replace('_', ' ')}
-                  </span>
                 </td>
                 <td className="px-4 py-3 hidden lg:table-cell">
                   <WeatherDots forecasts={forecasts} />

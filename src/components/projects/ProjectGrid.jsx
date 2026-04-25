@@ -5,15 +5,6 @@ import { MapPin, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import WeatherDots from './WeatherDots';
 
-const STATUS_STYLES = {
-  planning: 'bg-muted text-muted-foreground',
-  monitoring: 'bg-primary/10 text-primary',
-  ready: 'bg-success/10 text-success',
-  in_progress: 'bg-accent/20 text-accent-foreground',
-  completed: 'bg-muted text-muted-foreground',
-  postponed: 'bg-destructive/10 text-destructive',
-};
-
 const REC_STYLES = {
   proceed: 'bg-success/10 text-success',
   caution: 'bg-warning/10 text-warning-foreground',
@@ -38,9 +29,6 @@ export default function ProjectGrid({ projects }) {
           >
             <div className="flex items-start justify-between gap-2">
               <h3 className="font-semibold text-foreground text-sm leading-tight line-clamp-2">{project.name}</h3>
-              <span className={`shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[project.status] || STATUS_STYLES.planning}`}>
-                {project.status?.replace('_', ' ')}
-              </span>
             </div>
 
             <div className="space-y-1 text-xs text-muted-foreground">

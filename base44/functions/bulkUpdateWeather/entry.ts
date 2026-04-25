@@ -96,7 +96,6 @@ const updateProjectWeather = async (project, base44) => {
     },
     weather_signal,
     weather_signal_details,
-    status: project.status === "planning" ? "monitoring" : project.status,
   });
 };
 

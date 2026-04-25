@@ -6,7 +6,6 @@ import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import ProjectStatusBar from "@/components/projects/ProjectStatusBar.jsx";
 import {
   ArrowLeft,
   RefreshCw,
@@ -58,11 +57,6 @@ export default function ProjectDetail() {
       }
     }
   }, [project]);
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Project.update(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["project", projectId] }),
-  });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Project.delete(id),
@@ -207,7 +201,6 @@ export default function ProjectDetail() {
       },
       weather_signal,
       weather_signal_details,
-      status: project.status === "planning" ? "monitoring" : project.status,
     });
 
     queryClient.invalidateQueries({ queryKey: ["project", projectId] });
@@ -257,13 +250,12 @@ export default function ProjectDetail() {
       editOpen={editOpen}
       setEditOpen={setEditOpen}
       checkWeather={checkWeather}
-      updateMutation={updateMutation}
       deleteMutation={deleteMutation}
     />
   );
 }
 
-function ProjectDetailContent({ project, projectId, checking, setChecking, forecastError, setForecastError, editOpen, setEditOpen, checkWeather, updateMutation, deleteMutation }) {
+function ProjectDetailContent({ project, projectId, checking, setChecking, forecastError, setForecastError, editOpen, setEditOpen, checkWeather, deleteMutation }) {
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
   const canCheckWeather = daysUntilStart <= 16;
   const forecastAvailableDate = new Date(project.start_date);
@@ -323,12 +315,6 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
             </Button>
           </div>
       </div>
-
-      {/* Status progress bar */}
-      <ProjectStatusBar
-        status={project.status}
-        onStatusChange={(value) => updateMutation.mutate({ id: project.id, data: { status: value } })}
-      />
 
       {/* Recommendation banner */}
       <RecommendationBanner

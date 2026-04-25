@@ -96,13 +96,18 @@ export default function Dashboard() {
 
     if (!matchesSearch) return false;
 
+    const isCompleted = p.end_date && new Date(p.end_date) < startOfDay(new Date());
+
     // Weather/status filter
+    if (weatherFilter === "completed") {
+      return isCompleted;
+    }
+    // All other tabs exclude completed projects
+    if (isCompleted) return false;
     if (weatherFilter === "good") {
       if (p.weather_signal !== "proceed") return false;
     } else if (weatherFilter === "attention") {
       if (p.weather_signal !== "caution" && p.weather_signal !== "postpone") return false;
-    } else if (weatherFilter === "completed") {
-      if (p.status !== "completed") return false;
     }
 
     // Time filter (calendar weeks)
