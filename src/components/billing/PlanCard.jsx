@@ -75,7 +75,7 @@ export default function PlanCard({ tierKey, config, currentTier, billingInterval
 
       {!isCurrent && !isFree && (
         isEnterprise ? (
-          <a href="mailto:hello@siteskies.com" className="w-full">
+          <a href="mailto:liam.stienen@gmail.com" className="w-full">
             <Button variant="outline" className="w-full">Contact Us</Button>
           </a>
         ) : (
