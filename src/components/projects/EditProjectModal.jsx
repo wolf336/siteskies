@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Loader2 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import { resolveLocationName } from "@/lib/geocode";
+import { refreshProjectWeather } from "@/lib/refreshProjectWeather";
 import WeatherRequirementsForm from "./WeatherRequirementsForm.jsx";
 import LocationPicker from "./LocationPicker.jsx";
 
@@ -44,10 +45,18 @@ export default function EditProjectModal({ project, open, onClose }) {
   const isValid = form.name && form.location && form.start_date && form.end_date && projectLength > 0;
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.Project.update(project.id, data),
+    mutationFn: async (data) => {
+      await base44.entities.Project.update(project.id, data);
+      const results = await base44.entities.Project.filter({ id: project.id });
+      const updated = results[0];
+      if (updated) {
+        await refreshProjectWeather(updated);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", project.id] });
+      queryClient.invalidateQueries({ queryKey: ["subscription"] });
       onClose();
     },
   });
