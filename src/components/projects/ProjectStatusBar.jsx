@@ -18,33 +18,33 @@ export default function ProjectStatusBar({ status, onStatusChange }) {
     <div className="space-y-3">
       <div className="flex items-center gap-3">
         {/* Progress bar */}
-        <div className="flex-1 flex items-stretch h-9 hidden">
-          {STAGES.map((stage, i) => {
-            const isActive = i <= activeIndex && !isPostponed;
-            const isCurrent = i === activeIndex && !isPostponed;
-            const isLast = i === STAGES.length - 1;
-            const isFirst = i === 0;
+        
 
-            return (
-              <button
-                key={stage.value}
-                onClick={() => onStatusChange(stage.value)}
-                title={`Set to ${stage.label}`}
-                style={{ clipPath: isLast ? undefined : "polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%)", marginLeft: isFirst ? 0 : "-1px" }}
-                className={cn(
-                  "relative flex-1 flex items-center justify-center text-[11px] font-semibold transition-all border whitespace-nowrap px-2",
-                  isFirst ? "rounded-l-md" : "",
-                  isLast ? "rounded-r-md" : "",
-                  isActive ?
-                  "bg-primary border-primary text-primary-foreground" :
-                  "bg-muted/50 border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}>
-                
-                {stage.label}
-              </button>);
 
-          })}
-        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
 
         {/* Postponed badge */}
         {isPostponed &&

@@ -56,9 +56,9 @@ export default function ProjectCard({ project }) {
                 <h3 className="text-base font-semibold text-foreground truncate group-hover:text-primary transition-colors">
                   {project.name}
                 </h3>
-                <Badge variant="outline" className="inline-flex items-center rounded-md px-2.5 py-0.5 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 shrink-0 text-[11px] font-medium bg-primary/10 text-primary border-0 hidden">
-                  {stat.label}
-                </Badge>
+                
+
+                  
               </div>
 
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
