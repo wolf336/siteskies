@@ -200,12 +200,19 @@ export default function LocationPicker({ location, latitude, longitude, onChange
                 zIndex: 99999,
               }}
               className="rounded-lg border border-border bg-card shadow-lg overflow-hidden"
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              onDoubleClick={(e) => e.stopPropagation()}
             >
               {results.map((r) => (
                 <button
                   key={r.place_id}
                   type="button"
-                  onClick={() => selectResult(r)}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    selectResult(r);
+                  }}
                   className="w-full text-left px-3 py-2.5 text-sm hover:bg-muted transition-colors border-b border-border last:border-0"
                 >
                   {r.display_name}
