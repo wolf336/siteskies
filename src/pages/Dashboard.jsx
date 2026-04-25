@@ -15,11 +15,12 @@ import ProjectGrid from "@/components/projects/ProjectGrid.jsx";
 import ProjectTable from "@/components/projects/ProjectTable.jsx";
 import ProjectCalendar from "@/components/projects/ProjectCalendar.jsx";
 import { toast } from "sonner";
-import { formatDistanceToNow, startOfDay, addDays, isWithinInterval, isBefore } from "date-fns";
+import { formatDistanceToNow, startOfDay, startOfWeek, endOfWeek, addWeeks, isWithinInterval } from "date-fns";
 
 export default function Dashboard() {
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [weatherFilter, setWeatherFilter] = useState("all");
+  const [timeFilter, setTimeFilter] = useState("all");
   const [view, setView] = useState("list");
   const [syncing, setSyncing] = useState(false);
   const queryClient = useQueryClient();
@@ -77,6 +78,15 @@ export default function Dashboard() {
   };
 
   const today = startOfDay(new Date());
+  const weekOptions = { weekStartsOn: 1 }; // Monday
+
+  // Calendar week boundaries
+  const thisWeekStart = startOfWeek(today, weekOptions);
+  const thisWeekEnd = endOfWeek(today, weekOptions);
+  const nextWeekStart = addWeeks(thisWeekStart, 1);
+  const nextWeekEnd = endOfWeek(nextWeekStart, weekOptions);
+  const weekAfterStart = addWeeks(thisWeekStart, 2);
+  const weekAfterEnd = endOfWeek(weekAfterStart, weekOptions);
 
   const filtered = projects.filter((p) => {
     const matchesSearch =
@@ -86,19 +96,28 @@ export default function Dashboard() {
 
     if (!matchesSearch) return false;
 
-    if (filter === "all") return true;
+    // Weather/status filter
+    if (weatherFilter === "good") {
+      if (p.weather_signal !== "proceed") return false;
+    } else if (weatherFilter === "attention") {
+      if (p.weather_signal !== "caution" && p.weather_signal !== "postpone") return false;
+    } else if (weatherFilter === "completed") {
+      if (p.status !== "completed") return false;
+    }
 
-    if (!p.start_date) return false;
-    const start = startOfDay(new Date(p.start_date));
-
-    if (filter === "this_week")
-      return isWithinInterval(start, { start: today, end: addDays(today, 7) });
-    if (filter === "next_week")
-      return isWithinInterval(start, { start: addDays(today, 7), end: addDays(today, 14) });
-    if (filter === "two_weeks")
-      return isWithinInterval(start, { start: addDays(today, 14), end: addDays(today, 28) });
-    if (filter === "upcoming")
-      return !isBefore(start, today);
+    // Time filter (calendar weeks)
+    if (timeFilter !== "all") {
+      if (!p.start_date) return false;
+      const start = startOfDay(new Date(p.start_date));
+      if (timeFilter === "this_week")
+        return isWithinInterval(start, { start: thisWeekStart, end: thisWeekEnd });
+      if (timeFilter === "next_week")
+        return isWithinInterval(start, { start: nextWeekStart, end: nextWeekEnd });
+      if (timeFilter === "in_two_weeks")
+        return isWithinInterval(start, { start: weekAfterStart, end: weekAfterEnd });
+      if (timeFilter === "later")
+        return start > weekAfterEnd;
+    }
 
     return true;
   });
@@ -145,9 +164,9 @@ export default function Dashboard() {
       </div>
 
       {/* Filters + View switcher */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center flex-1">
-          <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative max-w-sm w-full">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search projects..."
@@ -156,33 +175,44 @@ export default function Dashboard() {
               className="pl-9"
             />
           </div>
-          <Tabs value={filter} onValueChange={setFilter}>
-            <TabsList className="bg-muted">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-              <TabsTrigger value="this_week">This Week</TabsTrigger>
-              <TabsTrigger value="next_week">Next Week</TabsTrigger>
-              <TabsTrigger value="two_weeks">In 2 Weeks</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex items-center gap-1 border border-border rounded-lg p-1 bg-muted/30 self-start sm:self-auto">
+            {[
+              { key: 'list', icon: List },
+              { key: 'grid', icon: LayoutGrid },
+              { key: 'table', icon: Table2 },
+              { key: 'calendar', icon: CalendarDays },
+            ].map(({ key, icon: Icon }) => (
+              <button
+                key={key}
+                onClick={() => setView(key)}
+                className={`p-1.5 rounded transition-colors ${view === key ? 'bg-background shadow text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <Icon className="h-4 w-4" />
+              </button>
+            ))}
+          </div>
         </div>
-        {/* View switcher */}
-        <div className="flex items-center gap-1 border border-border rounded-lg p-1 bg-muted/30 self-start sm:self-auto">
-          {[
-            { key: 'list', icon: List },
-            { key: 'grid', icon: LayoutGrid },
-            { key: 'table', icon: Table2 },
-            { key: 'calendar', icon: CalendarDays },
-          ].map(({ key, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => setView(key)}
-              className={`p-1.5 rounded transition-colors ${view === key ? 'bg-background shadow text-primary' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              <Icon className="h-4 w-4" />
-            </button>
-          ))}
-        </div>
+
+        {/* Weather filter row */}
+        <Tabs value={weatherFilter} onValueChange={setWeatherFilter}>
+          <TabsList className="bg-muted">
+            <TabsTrigger value="all">All Projects</TabsTrigger>
+            <TabsTrigger value="good">Good Weather</TabsTrigger>
+            <TabsTrigger value="attention">Needs Attention</TabsTrigger>
+            <TabsTrigger value="completed">Completed</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Time filter row */}
+        <Tabs value={timeFilter} onValueChange={setTimeFilter}>
+          <TabsList className="bg-muted">
+            <TabsTrigger value="all">All Dates</TabsTrigger>
+            <TabsTrigger value="this_week">This Week</TabsTrigger>
+            <TabsTrigger value="next_week">Next Week</TabsTrigger>
+            <TabsTrigger value="in_two_weeks">In 2 Weeks</TabsTrigger>
+            <TabsTrigger value="later">Later</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Project list */}
