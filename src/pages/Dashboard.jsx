@@ -15,7 +15,7 @@ import ProjectGrid from "@/components/projects/ProjectGrid.jsx";
 import ProjectTable from "@/components/projects/ProjectTable.jsx";
 import ProjectCalendar from "@/components/projects/ProjectCalendar.jsx";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, startOfDay, addDays, isWithinInterval, isBefore } from "date-fns";
 
 export default function Dashboard() {
   const [search, setSearch] = useState("");
@@ -76,19 +76,31 @@ export default function Dashboard() {
     setSyncing(false);
   };
 
+  const today = startOfDay(new Date());
+
   const filtered = projects.filter((p) => {
     const matchesSearch =
       !search ||
       p.name?.toLowerCase().includes(search.toLowerCase()) ||
       p.location?.toLowerCase().includes(search.toLowerCase());
 
-    if (filter === "all") return matchesSearch;
-    if (filter === "active")
-      return matchesSearch && ["planning", "monitoring", "ready", "in_progress"].includes(p.status);
-    if (filter === "attention")
-      return matchesSearch && (p.weather_signal === "caution" || p.weather_signal === "postpone");
-    if (filter === "completed") return matchesSearch && p.status === "completed";
-    return matchesSearch;
+    if (!matchesSearch) return false;
+
+    if (filter === "all") return true;
+
+    if (!p.start_date) return false;
+    const start = startOfDay(new Date(p.start_date));
+
+    if (filter === "this_week")
+      return isWithinInterval(start, { start: today, end: addDays(today, 7) });
+    if (filter === "next_week")
+      return isWithinInterval(start, { start: addDays(today, 7), end: addDays(today, 14) });
+    if (filter === "two_weeks")
+      return isWithinInterval(start, { start: addDays(today, 14), end: addDays(today, 28) });
+    if (filter === "upcoming")
+      return !isBefore(start, today);
+
+    return true;
   });
 
   return (
@@ -147,9 +159,10 @@ export default function Dashboard() {
           <Tabs value={filter} onValueChange={setFilter}>
             <TabsList className="bg-muted">
               <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="active">Active</TabsTrigger>
-              <TabsTrigger value="attention">Needs Attention</TabsTrigger>
-              <TabsTrigger value="completed">Completed</TabsTrigger>
+              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              <TabsTrigger value="this_week">This Week</TabsTrigger>
+              <TabsTrigger value="next_week">Next Week</TabsTrigger>
+              <TabsTrigger value="two_weeks">In 2 Weeks</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
