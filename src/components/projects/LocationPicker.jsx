@@ -24,7 +24,7 @@ function parseCoord(str) {
   return parseFloat(String(str).replace(",", "."));
 }
 
-export default function LocationPicker({ location, latitude, longitude, onChange }) {
+export default function LocationPicker({ location, latitude, longitude, onChange, portalTarget }) {
   // If location looks like coords (e.g. "49.7, 10.55"), the project was saved via coord input.
   // Otherwise it was saved via address search (location holds the address string).
   const isCoordString = location && /^-?\d+\.?\d*\s*,\s*-?\d+\.?\d*$/.test(location.trim());
@@ -198,6 +198,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
                 left: dropdownRect.left,
                 width: dropdownRect.width,
                 zIndex: 99999,
+                pointerEvents: "all",
               }}
               className="rounded-lg border border-border bg-card shadow-lg overflow-hidden"
               onMouseDown={(e) => e.stopPropagation()}
@@ -219,7 +220,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
                 </button>
               ))}
             </div>,
-            document.body
+            portalTarget || document.body
           )}
         </div>
       )}
