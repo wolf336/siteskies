@@ -143,9 +143,10 @@ Deno.serve(async (req) => {
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];
 
-    // Only sync projects where start_date is within 16 days from today
+    // Only sync projects where end_date hasn't passed and start_date is within 16 days from today
     const eligibleProjects = projects.filter((p) => {
-      if (!p.start_date) return false;
+      if (!p.start_date || !p.end_date) return false;
+      if (p.end_date < todayStr) return false;
       const diffMs = new Date(p.start_date).getTime() - today.getTime();
       const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
       return diffDays <= 16;
