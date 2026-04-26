@@ -46,8 +46,8 @@ export default function ProjectCalendarModal({ project, onClose }) {
         {/* Title + Recommendation */}
         <div className="pr-6 space-y-2">
           <h2 className="text-lg font-bold text-foreground leading-tight">{project.name}</h2>
-          <span className={`inline-block text-xs font-medium px-2.5 py-0.5 rounded-full ${REC_STYLES[project.recommendation] || REC_STYLES.pending}`}>
-            {project.recommendation || 'pending'}
+          <span className={`inline-block text-xs font-medium px-2.5 py-0.5 rounded-full ${REC_STYLES[project.weather_signal] || REC_STYLES.pending}`}>
+            {project.weather_signal || 'pending'}
           </span>
         </div>
 
