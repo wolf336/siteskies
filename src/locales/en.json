@@ -183,7 +183,13 @@
     "creating": "Creating...",
     "cancel": "Cancel",
     "limitReached": "Project limit reached for your plan.",
-    "upgradeRequired": "Upgrade your plan to create more projects."
+    "upgradeRequired": "Upgrade your plan to create more projects.",
+    "limitReachedFull": "You've reached the {{count}} project limit on the {{plan}} plan.",
+    "upgradePlan": "Upgrade your plan",
+    "toCreateMore": "to create more projects.",
+    "duration_one": "Project duration: <strong>{{count}} day</strong>",
+    "duration_other": "Project duration: <strong>{{count}} days</strong>",
+    "duration": "Project duration: {{count}} day(s)"
   },
   "forecast": {
     "noForecast": "No forecast data yet.",
@@ -194,13 +200,43 @@
     "rain": "Rain",
     "precip": "Precip. prob.",
     "high": "High",
-    "low": "Low"
+    "low": "Low",
+    "tempTooltip": "Temperature (Low / High)",
+    "precipTooltip": "Precipitation",
+    "windTooltip": "Wind Speed"
   },
   "signal": {
     "proceed": "Good to Go",
     "caution": "Proceed with Caution",
     "postpone": "Consider Postponing",
-    "pending": "No Forecast Yet"
+    "pending": "No Forecast Yet",
+    "details": "{{bad}} of {{total}} forecasted days do not meet weather requirements."
+  },
+  "weather": {
+    "minTemp": "Min Temperature (°C)",
+    "minTempPlaceholder": "e.g. 5",
+    "maxTemp": "Max Temperature (°C)",
+    "maxTempPlaceholder": "e.g. 35",
+    "maxWind": "Max Wind Speed (km/h)",
+    "maxWindPlaceholder": "e.g. 40",
+    "maxPrecip": "Max Precipitation (mm/day)",
+    "maxPrecipPlaceholder": "e.g. 5",
+    "noThunderstorms": "No Thunderstorms",
+    "noSnow": "No Snow",
+    "noFog": "No Fog",
+    "additionalRequirements": "Additional Requirements",
+    "additionalPlaceholder": "Any other weather conditions to watch for..."
+  },
+  "location": {
+    "label": "Location",
+    "searchAddress": "Search address",
+    "enterCoordinates": "Enter coordinates",
+    "searchPlaceholder": "City, suburb or address",
+    "searching": "Searching…",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "coordsHint": "Enter decimal coordinates — e.g. 49.7012, 6.8523",
+    "latLngDisplay": "Lat: {{lat}}, Lng: {{lng}} — drag the pin to adjust"
   },
   "common": {
     "save": "Save",

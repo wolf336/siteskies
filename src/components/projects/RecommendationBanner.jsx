@@ -1,11 +1,11 @@
 import React from "react";
 import { Sun, TriangleAlert, CloudRain, Hourglass } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 const config = {
   proceed: {
     icon: Sun,
-    title: "Good to Go",
     bg: "bg-success/10 border-success/25",
     iconBg: "bg-success/20",
     iconColor: "text-success",
@@ -13,7 +13,6 @@ const config = {
   },
   caution: {
     icon: TriangleAlert,
-    title: "Proceed with Caution",
     bg: "bg-warning/10 border-warning/25",
     iconBg: "bg-warning/20",
     iconColor: "text-warning",
@@ -21,7 +20,6 @@ const config = {
   },
   postpone: {
     icon: CloudRain,
-    title: "Postponement Recommended",
     bg: "bg-destructive/10 border-destructive/25",
     iconBg: "bg-destructive/20",
     iconColor: "text-destructive",
@@ -29,7 +27,6 @@ const config = {
   },
   pending: {
     icon: Hourglass,
-    title: "Awaiting Forecast",
     bg: "bg-muted border-border",
     iconBg: "bg-muted",
     iconColor: "text-muted-foreground",
@@ -37,9 +34,15 @@ const config = {
   },
 };
 
-export default function RecommendationBanner({ weather_signal, weather_signal_details }) {
-  const c = config[weather_signal || "pending"];
+export default function RecommendationBanner({ weather_signal, bad_days, total_days }) {
+  const { t } = useTranslation();
+  const signal = weather_signal || "pending";
+  const c = config[signal];
   const Icon = c.icon;
+
+  const details = total_days != null
+    ? t('signal.details', { bad: bad_days ?? 0, total: total_days })
+    : null;
 
   return (
     <motion.div
@@ -52,9 +55,9 @@ export default function RecommendationBanner({ weather_signal, weather_signal_de
           <Icon className={`h-5 w-5 ${c.iconColor}`} />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className={`text-base font-semibold ${c.textColor}`}>{c.title}</h3>
-          {weather_signal_details && (
-            <p className="mt-1 text-sm text-foreground/70 leading-relaxed">{weather_signal_details}</p>
+          <h3 className={`text-base font-semibold ${c.textColor}`}>{t(`signal.${signal}`)}</h3>
+          {details && (
+            <p className="mt-1 text-sm text-foreground/70 leading-relaxed">{details}</p>
           )}
         </div>
       </div>

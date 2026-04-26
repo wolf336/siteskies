@@ -4,8 +4,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Thermometer, Wind, Droplets, CloudLightning, Snowflake, CloudFog } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function WeatherRequirementsForm({ requirements, onChange }) {
+  const { t } = useTranslation();
   const update = (key, value) => {
     onChange({ ...requirements, [key]: value });
   };
@@ -17,11 +19,11 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
         <div className="space-y-2">
           <Label className="flex items-center gap-2 text-sm font-medium">
             <Thermometer className="h-4 w-4 text-primary" />
-            Min Temperature (°C)
+            {t('weather.minTemp')}
           </Label>
           <Input
             type="number"
-            placeholder="e.g. 5"
+            placeholder={t('weather.minTempPlaceholder')}
             value={requirements.min_temperature_c ?? ""}
             onChange={(e) => update("min_temperature_c", e.target.value ? Number(e.target.value) : null)}
           />
@@ -29,11 +31,11 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
         <div className="space-y-2">
           <Label className="flex items-center gap-2 text-sm font-medium">
             <Thermometer className="h-4 w-4 text-destructive" />
-            Max Temperature (°C)
+            {t('weather.maxTemp')}
           </Label>
           <Input
             type="number"
-            placeholder="e.g. 35"
+            placeholder={t('weather.maxTempPlaceholder')}
             value={requirements.max_temperature_c ?? ""}
             onChange={(e) => update("max_temperature_c", e.target.value ? Number(e.target.value) : null)}
           />
@@ -43,11 +45,11 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
         <div className="space-y-2">
           <Label className="flex items-center gap-2 text-sm font-medium">
             <Wind className="h-4 w-4 text-primary" />
-            Max Wind Speed (km/h)
+            {t('weather.maxWind')}
           </Label>
           <Input
             type="number"
-            placeholder="e.g. 40"
+            placeholder={t('weather.maxWindPlaceholder')}
             value={requirements.max_wind_speed_kmh ?? ""}
             onChange={(e) => update("max_wind_speed_kmh", e.target.value ? Number(e.target.value) : null)}
           />
@@ -57,11 +59,11 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
         <div className="space-y-2">
           <Label className="flex items-center gap-2 text-sm font-medium">
             <Droplets className="h-4 w-4 text-primary" />
-            Max Precipitation (mm/day)
+            {t('weather.maxPrecip')}
           </Label>
           <Input
             type="number"
-            placeholder="e.g. 5"
+            placeholder={t('weather.maxPrecipPlaceholder')}
             value={requirements.max_precipitation_mm ?? ""}
             onChange={(e) => update("max_precipitation_mm", e.target.value ? Number(e.target.value) : null)}
           />
@@ -73,7 +75,7 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
         <div className="flex items-center justify-between rounded-lg border border-border p-3.5">
           <Label className="flex items-center gap-2 text-sm cursor-pointer">
             <CloudLightning className="h-4 w-4 text-warning" />
-            No Thunderstorms
+            {t('weather.noThunderstorms')}
           </Label>
           <Switch
             checked={requirements.no_thunderstorms || false}
@@ -83,7 +85,7 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
         <div className="flex items-center justify-between rounded-lg border border-border p-3.5">
           <Label className="flex items-center gap-2 text-sm cursor-pointer">
             <Snowflake className="h-4 w-4 text-primary" />
-            No Snow
+            {t('weather.noSnow')}
           </Label>
           <Switch
             checked={requirements.no_snow || false}
@@ -93,7 +95,7 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
         <div className="flex items-center justify-between rounded-lg border border-border p-3.5">
           <Label className="flex items-center gap-2 text-sm cursor-pointer">
             <CloudFog className="h-4 w-4 text-muted-foreground" />
-            No Fog
+            {t('weather.noFog')}
           </Label>
           <Switch
             checked={requirements.no_fog || false}
@@ -104,9 +106,9 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
 
       {/* Notes */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Additional Requirements</Label>
+        <Label className="text-sm font-medium">{t('weather.additionalRequirements')}</Label>
         <Textarea
-          placeholder="Any other weather conditions to watch for..."
+          placeholder={t('weather.additionalPlaceholder')}
           value={requirements.custom_notes || ""}
           onChange={(e) => update("custom_notes", e.target.value)}
           rows={3}

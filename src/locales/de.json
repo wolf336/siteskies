@@ -183,7 +183,11 @@
     "creating": "Wird erstellt...",
     "cancel": "Abbrechen",
     "limitReached": "Projektlimit für Ihren Plan erreicht.",
-    "upgradeRequired": "Upgraden Sie Ihren Plan, um mehr Projekte zu erstellen."
+    "upgradeRequired": "Upgraden Sie Ihren Plan, um mehr Projekte zu erstellen.",
+    "limitReachedFull": "Sie haben das Limit von {{count}} Projekten im {{plan}}-Plan erreicht.",
+    "upgradePlan": "Upgraden Sie Ihren Plan",
+    "toCreateMore": "um mehr Projekte zu erstellen.",
+    "duration": "Projektdauer: {{count}} Tag(e)"
   },
   "forecast": {
     "noForecast": "Noch keine Vorhersagedaten.",
@@ -194,13 +198,43 @@
     "rain": "Regen",
     "precip": "Niederschl.-W.",
     "high": "Max",
-    "low": "Min"
+    "low": "Min",
+    "tempTooltip": "Temperatur (Min / Max)",
+    "precipTooltip": "Niederschlag",
+    "windTooltip": "Windgeschwindigkeit"
   },
   "signal": {
     "proceed": "Bereit",
     "caution": "Mit Vorsicht fortfahren",
     "postpone": "Verschiebung erwägen",
-    "pending": "Noch keine Vorhersage"
+    "pending": "Noch keine Vorhersage",
+    "details": "{{bad}} von {{total}} Vorhersagetagen erfüllen die Wetteranforderungen nicht."
+  },
+  "weather": {
+    "minTemp": "Mindesttemperatur (°C)",
+    "minTempPlaceholder": "z.B. 5",
+    "maxTemp": "Höchsttemperatur (°C)",
+    "maxTempPlaceholder": "z.B. 35",
+    "maxWind": "Max. Windgeschwindigkeit (km/h)",
+    "maxWindPlaceholder": "z.B. 40",
+    "maxPrecip": "Max. Niederschlag (mm/Tag)",
+    "maxPrecipPlaceholder": "z.B. 5",
+    "noThunderstorms": "Kein Gewitter",
+    "noSnow": "Kein Schnee",
+    "noFog": "Kein Nebel",
+    "additionalRequirements": "Weitere Anforderungen",
+    "additionalPlaceholder": "Weitere zu beachtende Wetterbedingungen..."
+  },
+  "location": {
+    "label": "Standort",
+    "searchAddress": "Adresse suchen",
+    "enterCoordinates": "Koordinaten eingeben",
+    "searchPlaceholder": "Stadt, Stadtteil oder Adresse",
+    "searching": "Suche läuft…",
+    "latitude": "Breitengrad",
+    "longitude": "Längengrad",
+    "coordsHint": "Dezimalkoordinaten eingeben — z.B. 49.7012, 6.8523",
+    "latLngDisplay": "Br: {{lat}}, Lg: {{lng}} — Pin zum Anpassen ziehen"
   },
   "common": {
     "save": "Speichern",

@@ -331,7 +331,8 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
       {/* Recommendation banner */}
       <RecommendationBanner
         weather_signal={project.weather_signal}
-        weather_signal_details={project.weather_signal_details}
+        bad_days={project.weather_forecast?.daily_forecasts?.filter(d => !d.meets_requirements).length ?? null}
+        total_days={project.weather_forecast?.daily_forecasts?.length ?? null}
       />
 
       {/* Forecast error */}
@@ -380,13 +381,11 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
 
       {project.weather_forecast?.partial_forecast && project.weather_forecast?.daily_forecasts?.length > 0 && (
         <div className="rounded-lg bg-accent/10 border border-accent/30 p-4 text-sm text-accent-foreground">
-          Showing forecast for{" "}
-          <span className="font-medium">{project.weather_forecast.daily_forecasts.length}</span> of{" "}
-          <span className="font-medium">{project.project_length_days || differenceInDays(new Date(project.end_date), new Date(project.start_date)) + 1}</span> project days.
-          Full forecast available from{" "}
-          <span className="font-medium">
-            {format(new Date(new Date(project.end_date).setDate(new Date(project.end_date).getDate() - 16)), "MMMM d, yyyy")}
-          </span>.
+          {t('project.partialForecast', {
+            shown: project.weather_forecast.daily_forecasts.length,
+            total: project.project_length_days || differenceInDays(new Date(project.end_date), new Date(project.start_date)) + 1,
+            date: format(new Date(new Date(project.end_date).setDate(new Date(project.end_date).getDate() - 16)), "MMMM d, yyyy"),
+          })}
         </div>
       )}
 

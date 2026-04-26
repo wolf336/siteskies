@@ -113,8 +113,9 @@ export default function NewProject() {
 
       {atProjectLimit && (
         <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
-          You've reached the <strong>{tierConfig.maxProjects} project</strong> limit on the <strong>{tierConfig.name}</strong> plan.{' '}
-          <Link to={createPageUrl("Settings") + "?section=billing"} className="underline font-medium">Upgrade your plan</Link> to create more projects.
+          {t('newProject.limitReachedFull', { count: tierConfig.maxProjects, plan: tierConfig.name })}{' '}
+          <Link to={createPageUrl("Settings") + "?section=billing"} className="underline font-medium">{t('newProject.upgradePlan')}</Link>{' '}
+          {t('newProject.toCreateMore')}
         </div>
       )}
 
@@ -180,7 +181,7 @@ export default function NewProject() {
             </div>
             {projectLength > 0 && (
               <p className="text-sm text-muted-foreground">
-                Project duration: <span className="font-medium text-foreground">{projectLength} day{projectLength !== 1 ? "s" : ""}</span>
+                {t('newProject.duration', { count: projectLength })}
               </p>
             )}
           </CardContent>

@@ -1,5 +1,6 @@
 import React from "react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import {
   Sun,
@@ -49,10 +50,11 @@ function getConditionIcon(condition) {
 }
 
 export default function ForecastTimeline({ forecasts }) {
+  const { t } = useTranslation();
   if (!forecasts || forecasts.length === 0) {
     return (
       <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
-        No forecast data available yet. Check the weather to get started.
+        {t('forecast.noForecast')}
       </div>
     );
   }
@@ -112,7 +114,7 @@ export default function ForecastTimeline({ forecasts }) {
                       <span>{day.temp_low_c ?? "–"}° / {day.temp_high_c ?? "–"}°</span>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent>Temperature (Low / High)</TooltipContent>
+                  <TooltipContent>{t('forecast.tempTooltip')}</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -122,7 +124,7 @@ export default function ForecastTimeline({ forecasts }) {
                       <span>{day.precipitation_mm ?? 0}mm</span>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent>Precipitation</TooltipContent>
+                  <TooltipContent>{t('forecast.precipTooltip')}</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -132,7 +134,7 @@ export default function ForecastTimeline({ forecasts }) {
                       <span>{day.wind_speed_kmh ?? 0}km/h</span>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent>Wind Speed</TooltipContent>
+                  <TooltipContent>{t('forecast.windTooltip')}</TooltipContent>
                 </Tooltip>
               </div>
 

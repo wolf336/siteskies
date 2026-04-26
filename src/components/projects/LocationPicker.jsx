@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MapPin } from "lucide-react";
 import { NOMINATIM_EMAIL, seedGeocodeCache } from "@/lib/geocode";
+import { useTranslation } from "react-i18next";
 
 function loadLeaflet() {
   return new Promise((resolve) => {
@@ -25,6 +26,7 @@ function parseCoord(str) {
 }
 
 export default function LocationPicker({ location, latitude, longitude, onChange, portalTarget }) {
+  const { t } = useTranslation();
   // If location looks like coords (e.g. "49.7, 10.55"), the project was saved via coord input.
   // Otherwise it was saved via address search (location holds the address string).
   const isCoordString = location && /^-?\d+\.?\d*\s*,\s*-?\d+\.?\d*$/.test(location.trim());
@@ -154,7 +156,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
     <div className="space-y-3">
       <Label className="flex items-center gap-1.5">
         <MapPin className="h-3.5 w-3.5 text-primary" />
-        Location
+        {t('location.label')}
       </Label>
 
       {/* Toggle */}
@@ -164,14 +166,14 @@ export default function LocationPicker({ location, latitude, longitude, onChange
           onClick={() => { setMode("search"); setResults([]); }}
           className={`px-4 py-1.5 transition-colors ${mode === "search" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
         >
-          Search address
+          {t('location.searchAddress')}
         </button>
         <button
           type="button"
           onClick={() => { setMode("coords"); setResults([]); }}
           className={`px-4 py-1.5 transition-colors ${mode === "coords" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
         >
-          Enter coordinates
+          {t('location.enterCoordinates')}
         </button>
       </div>
 
@@ -179,13 +181,13 @@ export default function LocationPicker({ location, latitude, longitude, onChange
       {mode === "search" && (
         <div className="relative" ref={inputWrapperRef}>
           <Input
-            placeholder="City, suburb or address"
+            placeholder={t('location.searchPlaceholder')}
             value={query}
             onChange={(e) => { setUserHasTyped(true); setQuery(e.target.value); }}
             autoComplete="off"
           />
           {searching && (
-            <div className="absolute right-3 top-2.5 text-xs text-muted-foreground">Searching…</div>
+            <div className="absolute right-3 top-2.5 text-xs text-muted-foreground">{t('location.searching')}</div>
           )}
           {results.length > 0 && inputWrapperRef.current && createPortal(
             <div
@@ -227,7 +229,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Latitude</Label>
+              <Label className="text-xs text-muted-foreground">{t('location.latitude')}</Label>
               <Input
                 type="text"
                 inputMode="decimal"
@@ -241,7 +243,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Longitude</Label>
+              <Label className="text-xs text-muted-foreground">{t('location.longitude')}</Label>
               <Input
                 type="text"
                 inputMode="decimal"
@@ -255,7 +257,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
               />
             </div>
           </div>
-          <p className="text-xs text-muted-foreground">Enter decimal coordinates — e.g. 49.7012, 6.8523</p>
+          <p className="text-xs text-muted-foreground">{t('location.coordsHint')}</p>
         </div>
       )}
 
@@ -267,7 +269,7 @@ export default function LocationPicker({ location, latitude, longitude, onChange
             style={{ height: 220, borderRadius: 8, overflow: "hidden", border: "1px solid hsl(var(--border))" }}
           />
           <p className="text-xs text-muted-foreground">
-            Lat: {typeof latitude === "number" ? latitude.toFixed(6) : latitude}, Lng: {typeof longitude === "number" ? longitude.toFixed(6) : longitude} — drag the pin to adjust
+            {t('location.latLngDisplay', { lat: typeof latitude === "number" ? latitude.toFixed(6) : latitude, lng: typeof longitude === "number" ? longitude.toFixed(6) : longitude })}
           </p>
         </div>
       )}
