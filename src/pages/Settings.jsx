@@ -8,12 +8,13 @@ import TeamSection from '@/components/account/TeamSection';
 import ProfileSection from '@/components/account/ProfileSection';
 import LegalSection from '@/components/settings/LegalSection';
 import AcceptInviteBanner from '@/components/settings/AcceptInviteBanner';
+import AppSettingsSection from '@/components/settings/AppSettingsSection';
 
 export default function Settings() {
   const initialSection = (() => {
     const params = new URLSearchParams(window.location.search);
     const s = params.get('section');
-    return ['profile', 'team', 'billing', 'usage', 'legal'].includes(s) ? s : 'profile';
+    return ['app_settings', 'profile', 'team', 'billing', 'usage', 'legal'].includes(s) ? s : 'app_settings';
   })();
 
   const [activeSection, setActiveSection] = useState(initialSection);
@@ -31,6 +32,8 @@ export default function Settings() {
 
   const renderSection = () => {
     switch (activeSection) {
+      case 'app_settings':
+        return <AppSettingsSection />;
       case 'usage':
         return (
           <UsageOverview

@@ -2,41 +2,45 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   UserCircle, Users, CreditCard, BarChart2, Scale,
-  ArrowLeft, LogOut, ChevronDown,
+  ArrowLeft, LogOut, ChevronDown, Settings2,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { useTranslation } from 'react-i18next';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-const GROUPS = [
+const useGroups = (t) => [
   {
-    key: 'account',
-    label: 'Account',
+    key: 'app',
+    label: t('sidebar.account'),
     items: [
-      { key: 'profile', label: 'Account Info', icon: UserCircle },
-      { key: 'team', label: 'Seats', icon: Users },
+      { key: 'app_settings', label: t('sidebar.appSettings'), icon: Settings2 },
+      { key: 'profile', label: t('sidebar.accountInfo'), icon: UserCircle },
+      { key: 'team', label: t('sidebar.seats'), icon: Users },
     ],
   },
   {
     key: 'subscription',
-    label: 'Subscription',
+    label: t('sidebar.subscription'),
     items: [
-      { key: 'billing', label: 'Billing', icon: CreditCard },
-      { key: 'usage', label: 'Usage', icon: BarChart2 },
+      { key: 'billing', label: t('sidebar.billing'), icon: CreditCard },
+      { key: 'usage', label: t('sidebar.usage'), icon: BarChart2 },
     ],
   },
   {
     key: 'legal',
-    label: 'Legal',
+    label: t('sidebar.legal'),
     items: [
-      { key: 'legal', label: 'Terms & Privacy', icon: Scale },
+      { key: 'legal', label: t('sidebar.termsPrivacy'), icon: Scale },
     ],
   },
 ];
 
 export default function SettingsSidebar({ active, onChange }) {
+  const { t } = useTranslation();
+  const GROUPS = useGroups(t);
   const [openGroups, setOpenGroups] = useState(() =>
     Object.fromEntries(GROUPS.map((g) => [g.key, true]))
   );
@@ -53,11 +57,11 @@ export default function SettingsSidebar({ active, onChange }) {
     <div className="w-60 shrink-0">
       <div className="mb-3">
         <Link
-          to="/"
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+        to="/"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="h-4 w-4 shrink-0" />
-          Back to Dashboard
+        <ArrowLeft className="h-4 w-4 shrink-0" />
+        {t('nav.backToDashboard')}
         </Link>
       </div>
 
@@ -103,7 +107,7 @@ export default function SettingsSidebar({ active, onChange }) {
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
           >
             <LogOut className="h-4 w-4 shrink-0" />
-            Log Out
+            {t('sidebar.logOut')}
           </button>
         </div>
       </nav>
@@ -111,14 +115,14 @@ export default function SettingsSidebar({ active, onChange }) {
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Log out?</AlertDialogTitle>
+            <AlertDialogTitle>{t('sidebar.logOutTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              You'll be signed out of your SiteSkies account.
+              {t('sidebar.logOutDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
+            <AlertDialogCancel>{t('sidebar.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>{t('sidebar.logOut')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
