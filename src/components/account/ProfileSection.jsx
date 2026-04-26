@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 export default function ProfileSection() {
   const { data: user, isLoading } = useQuery({
     queryKey: ['me'],
-    queryFn: () => base44.auth.me(),
+    queryFn: () => base44.auth.me()
   });
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -38,10 +38,10 @@ export default function ProfileSection() {
         <h2 className="text-xl font-semibold text-foreground">Account Info</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Your profile details.</p>
       </div>
-      {isLoading ? (
-        <Skeleton className="h-28 rounded-xl" />
-      ) : (
-        <Card>
+      {isLoading ?
+      <Skeleton className="h-28 rounded-xl" /> :
+
+      <Card>
           <CardContent className="pt-6 space-y-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -49,7 +49,7 @@ export default function ProfileSection() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground">{user?.full_name || '—'}</p>
-                <p className="text-xs text-muted-foreground">Full name</p>
+                <p className="text-xs text-muted-foreground hidden">Full name</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -58,24 +58,24 @@ export default function ProfileSection() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground">{user?.email || '—'}</p>
-                <p className="text-xs text-muted-foreground">Email address</p>
+                <p className="text-xs text-muted-foreground hidden">Email address</p>
               </div>
             </div>
 
             <div className="pt-2 border-t border-border">
               <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
-                onClick={() => { setConfirmText(''); setDialogOpen(true); }}
-              >
+              variant="outline"
+              size="sm"
+              className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
+              onClick={() => {setConfirmText('');setDialogOpen(true);}}>
+              
                 <Trash2 className="h-4 w-4" />
                 Delete Account
               </Button>
             </div>
           </CardContent>
         </Card>
-      )}
+      }
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
@@ -100,10 +100,10 @@ export default function ProfileSection() {
             </p>
             <Input
               value={confirmText}
-              onChange={e => setConfirmText(e.target.value)}
+              onChange={(e) => setConfirmText(e.target.value)}
               placeholder="delete"
-              autoFocus
-            />
+              autoFocus />
+            
           </div>
 
           <DialogFooter>
@@ -113,13 +113,13 @@ export default function ProfileSection() {
             <Button
               variant="destructive"
               disabled={confirmText !== 'delete' || deleting}
-              onClick={handleDeleteAccount}
-            >
+              onClick={handleDeleteAccount}>
+              
               {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Delete My Account'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>);
+
 }
