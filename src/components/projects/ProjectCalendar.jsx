@@ -141,7 +141,7 @@ export default function ProjectCalendar({ projects }) {
                   return (
                     <div
                       key={di}
-                      className={`px-1.5 pt-1.5 pb-0.5 ${!inMonth ? 'bg-muted/20' : 'bg-card'}`}
+                      className={`px-1.5 pt-2 pb-1 ${!inMonth ? 'bg-muted/20' : 'bg-card'}`}
                     >
                       <span className={`text-xs font-medium inline-flex h-5 w-5 items-center justify-center rounded-full
                         ${isToday ? 'bg-primary text-primary-foreground' : inMonth ? 'text-foreground' : 'text-muted-foreground/50'}`}>
@@ -158,7 +158,7 @@ export default function ProjectCalendar({ projects }) {
                   {week.map((date, di) => {
                     const inMonth = isSameMonth(date, currentMonth);
                     return (
-                      <div key={di} className={`h-6 ${!inMonth ? 'bg-muted/20' : 'bg-card'}`} />
+                      <div key={di} className={`h-7 ${!inMonth ? 'bg-muted/20' : 'bg-card'}`} />
                     );
                   })}
                 </div>
@@ -173,7 +173,7 @@ export default function ProjectCalendar({ projects }) {
 
                       if (!project) {
                         return (
-                          <div key={di} className={`h-6 ${!inMonth ? 'bg-muted/20' : 'bg-card'}`} />
+                          <div key={di} className={`h-7 ${!inMonth ? 'bg-muted/20' : 'bg-card'}`} />
                         );
                       }
 
@@ -190,10 +190,10 @@ export default function ProjectCalendar({ projects }) {
                       const pillClass = getDayPillClass(project, dateStr);
 
                       return (
-                        <div key={di} className={`h-6 flex items-center ${!inMonth ? 'bg-muted/20' : 'bg-card'} ${roundLeft ? 'pl-1' : ''} ${roundRight ? 'pr-1' : ''}`}>
+                        <div key={di} className={`h-7 flex items-center ${!inMonth ? 'bg-muted/20' : 'bg-card'} ${roundLeft ? 'pl-1' : ''} ${roundRight ? 'pr-1' : ''}`}>
                           <button
                             onClick={() => setSelectedProject(project)}
-                            className={`h-5 w-full text-left text-[10px] font-semibold leading-none truncate px-1.5
+                            className={`h-6 w-full text-left text-xs font-semibold leading-none truncate px-1.5
                               ${pillClass}
                               ${roundLeft ? 'rounded-l-md' : 'rounded-l-none'}
                               ${roundRight ? 'rounded-r-md' : 'rounded-r-none'}
@@ -213,7 +213,7 @@ export default function ProjectCalendar({ projects }) {
                 {week.map((date, di) => {
                   const inMonth = isSameMonth(date, currentMonth);
                   return (
-                    <div key={di} className={`h-2 ${!inMonth ? 'bg-muted/20' : 'bg-card'}`} />
+                    <div key={di} className={`h-3 ${!inMonth ? 'bg-muted/20' : 'bg-card'}`} />
                   );
                 })}
               </div>
