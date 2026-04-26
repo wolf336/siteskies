@@ -5,15 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ThumbsUp, ThumbsDown, Lightbulb, Bug } from "lucide-react";
 import { toast } from "sonner";
-
-const feedbackTypes = [
-  { value: "positive", label: "Positive", icon: ThumbsUp },
-  { value: "suggestion", label: "Suggestion", icon: Lightbulb },
-  { value: "bug", label: "Bug", icon: Bug },
-  { value: "negative", label: "Negative", icon: ThumbsDown },
-];
+import { useTranslation } from "react-i18next";
 
 export default function FeedbackModal({ open, onClose, page = "Dashboard" }) {
+  const { t } = useTranslation();
+  const feedbackTypes = [
+    { value: "positive", label: t('feedback.positive'), icon: ThumbsUp },
+    { value: "suggestion", label: t('feedback.suggestion'), icon: Lightbulb },
+    { value: "bug", label: t('feedback.bug'), icon: Bug },
+    { value: "negative", label: t('feedback.negative'), icon: ThumbsDown },
+  ];
   const [type, setType] = useState(null);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -28,7 +29,7 @@ export default function FeedbackModal({ open, onClose, page = "Dashboard" }) {
         page,
         user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
       });
-      toast.success("Thanks for your feedback!");
+      toast.success(t('feedback.successToast'));
       setMessage("");
       setType(null);
       onClose();
@@ -44,8 +45,8 @@ export default function FeedbackModal({ open, onClose, page = "Dashboard" }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Share Feedback</DialogTitle>
-          <DialogDescription>Help us improve SiteSkies by sharing your thoughts.</DialogDescription>
+          <DialogTitle>{t('feedback.title')}</DialogTitle>
+          <DialogDescription>{t('feedback.subtitle')}</DialogDescription>
         </DialogHeader>
 
         <div className="flex gap-2 mt-1">
@@ -66,16 +67,16 @@ export default function FeedbackModal({ open, onClose, page = "Dashboard" }) {
         </div>
 
         <Textarea
-          placeholder="Tell us what's on your mind..."
+          placeholder={t('feedback.placeholder')}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           className="h-28 resize-none mt-1"
         />
 
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>{t('feedback.cancel')}</Button>
           <Button onClick={handleSubmit} disabled={!message.trim() || submitting}>
-            {submitting ? "Sending..." : "Submit"}
+            {submitting ? t('feedback.sending') : t('feedback.submit')}
           </Button>
         </div>
       </DialogContent>

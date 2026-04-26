@@ -8,8 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { User, Mail, Trash2, Loader2, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export default function ProfileSection() {
+  const { t } = useTranslation();
   const { data: user, isLoading } = useQuery({
     queryKey: ['me'],
     queryFn: () => base44.auth.me()
@@ -35,8 +37,8 @@ export default function ProfileSection() {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-foreground">Account Info</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Your profile details.</p>
+        <h2 className="text-xl font-semibold text-foreground">{t('profile.title')}</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">{t('profile.subtitle')}</p>
       </div>
       {isLoading ?
       <Skeleton className="h-28 rounded-xl" /> :
@@ -73,7 +75,7 @@ export default function ProfileSection() {
                   toast.success('Password reset email sent! Check your inbox.');
                 }}>
                 <KeyRound className="h-4 w-4" />
-                Change Password
+                {t('profile.changePassword')}
               </Button>
               <Button
               variant="outline"
@@ -81,7 +83,7 @@ export default function ProfileSection() {
               className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
               onClick={() => {setConfirmText('');setDialogOpen(true);}}>
                 <Trash2 className="h-4 w-4" />
-                Delete Account
+                {t('profile.deleteAccount')}
               </Button>
             </div>
           </CardContent>
@@ -91,42 +93,42 @@ export default function ProfileSection() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-destructive">Delete Account</DialogTitle>
+            <DialogTitle className="text-destructive">{t('profile.deleteTitle')}</DialogTitle>
             <DialogDescription className="space-y-2 pt-1">
-              <span className="block">This action is <strong>permanent and cannot be undone</strong>. All of your data will be deleted, including:</span>
+              <span className="block" dangerouslySetInnerHTML={{ __html: t('profile.deleteWarning') }} />
               <ul className="list-disc list-inside text-sm space-y-1 mt-2">
-                <li>All your projects and weather forecasts</li>
-                <li>Your subscription (any active subscription will be canceled immediately)</li>
-                <li>Your team memberships</li>
+                <li>{t('profile.deleteItem1')}</li>
+                <li>{t('profile.deleteItem2')}</li>
+                <li>{t('profile.deleteItem3')}</li>
               </ul>
               <span className="block text-xs text-muted-foreground pt-2">
-                Note: billing records (past invoices and transactions) are retained by our payment processor for tax and audit purposes.
+                {t('profile.deleteNote')}
               </span>
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-2 py-2">
             <p className="text-sm text-muted-foreground">
-              Type <strong className="text-foreground">delete</strong> to confirm:
+              <span dangerouslySetInnerHTML={{ __html: t('profile.deleteConfirmPrompt') }} />
             </p>
             <Input
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
-              placeholder="delete"
+              placeholder={t('profile.deleteConfirmPlaceholder')}
               autoFocus />
             
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={deleting}>
-              Cancel
+              {t('profile.cancel')}
             </Button>
             <Button
               variant="destructive"
-              disabled={confirmText !== 'delete' || deleting}
+              disabled={confirmText !== t('profile.deleteConfirmWord') || deleting}
               onClick={handleDeleteAccount}>
               
-              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Delete My Account'}
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : t('profile.deleteMyAccount')}
             </Button>
           </DialogFooter>
         </DialogContent>

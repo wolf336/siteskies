@@ -7,35 +7,16 @@ import { TIER_CONFIG } from '@/lib/subscriptionConfig';
 import { UserPlus, Trash2, Clock, CheckCircle2, Loader2, AlertCircle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-
-const STATUS_META = {
-  pending: {
-    label: 'Invite sent',
-    color: 'text-muted-foreground',
-    icon: Clock,
-    description: 'Waiting for them to sign in and accept.',
-  },
-  awaiting_own_sub_end: {
-    label: 'Accepted — pending',
-    color: 'text-warning',
-    icon: AlertCircle,
-    description: 'Accepted, but they had their own subscription. Joins your plan when theirs ends.',
-  },
-  active: {
-    label: 'Active',
-    color: 'text-success',
-    icon: CheckCircle2,
-    description: null,
-  },
-  removed: {
-    label: 'Removed',
-    color: 'text-muted-foreground',
-    icon: Info,
-    description: 'No longer on your plan.',
-  },
-};
+import { useTranslation } from 'react-i18next';
 
 export default function TeamMembersList({ subscription, teamMembers = [] }) {
+  const { t } = useTranslation();
+  const STATUS_META = {
+    pending: { label: t('team.statusPendingLabel'), color: 'text-muted-foreground', icon: Clock, description: t('team.statusPendingDesc') },
+    awaiting_own_sub_end: { label: t('team.statusAwaitingLabel'), color: 'text-warning', icon: AlertCircle, description: t('team.statusAwaitingDesc') },
+    active: { label: t('team.statusActiveLabel'), color: 'text-success', icon: CheckCircle2, description: null },
+    removed: { label: t('team.statusRemovedLabel'), color: 'text-muted-foreground', icon: Info, description: t('team.statusRemovedDesc') },
+  };
   const [email, setEmail] = useState('');
   const [inviting, setInviting] = useState(false);
   const [removing, setRemoving] = useState(null);
@@ -88,7 +69,7 @@ export default function TeamMembersList({ subscription, teamMembers = [] }) {
   if (isTeamMember) {
     return (
       <div className="rounded-md bg-muted/50 border border-border px-4 py-3 text-sm text-muted-foreground">
-        Only the plan owner can invite and manage seats.
+        {t('team.onlyOwnerCanManage')}
       </div>
     );
   }
@@ -112,7 +93,7 @@ export default function TeamMembersList({ subscription, teamMembers = [] }) {
                     <p className="text-[11px] text-muted-foreground mt-0.5">{meta.description}</p>
                   )}
                   {m.status === 'active' && m.accepted_at && (
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Joined {format(new Date(m.accepted_at), 'MMM d, yyyy')}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{t('team.joined', { date: format(new Date(m.accepted_at), 'MMM d, yyyy') })}</p>
                   )}
                 </div>
               </div>
@@ -120,7 +101,7 @@ export default function TeamMembersList({ subscription, teamMembers = [] }) {
                 onClick={() => handleRemove(m)}
                 disabled={removing === m.id}
                 className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
-                title={m.status === 'pending' ? 'Cancel invite' : 'Remove member'}
+                title={m.status === 'pending' ? t('team.cancelInvite') : t('team.removeMember')}
               >
                 {removing === m.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
               </button>
@@ -129,26 +110,26 @@ export default function TeamMembersList({ subscription, teamMembers = [] }) {
         })}
 
         {visibleMembers.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-3">No seats assigned yet.</p>
+          <p className="text-sm text-muted-foreground text-center py-3">{t('team.noSeatsAssigned')}</p>
         )}
       </div>
 
       {canInvite ? (
         <div className="flex gap-2">
           <Input
-            placeholder="colleague@company.com"
+            placeholder={t('team.invitePlaceholder')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
           />
           <Button onClick={handleInvite} disabled={inviting || !email.trim()} className="shrink-0 gap-1.5">
             {inviting ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
-            Invite
+            {t('team.invite')}
           </Button>
         </div>
       ) : !isTeamMember && (
         <p className="text-xs text-muted-foreground">
-          You've used all {config.maxMembers} seats on your {config.name} plan. Upgrade to add more.
+          {t('team.seatsMaxReached', { max: config.maxMembers, plan: config.name })}
         </p>
       )}
     </div>
