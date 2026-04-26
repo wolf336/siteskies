@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { User, Mail, Trash2, Loader2 } from 'lucide-react';
+import { User, Mail, Trash2, Loader2, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function ProfileSection() {
@@ -62,13 +62,24 @@ export default function ProfileSection() {
               </div>
             </div>
 
-            <div className="pt-2 border-t border-border">
+            <div className="pt-2 border-t border-border space-y-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={async () => {
+                  if (!user?.email) return;
+                  await base44.auth.resetPasswordRequest(user.email);
+                  toast.success('Password reset email sent! Check your inbox.');
+                }}>
+                <KeyRound className="h-4 w-4" />
+                Change Password
+              </Button>
               <Button
               variant="outline"
               size="sm"
               className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
               onClick={() => {setConfirmText('');setDialogOpen(true);}}>
-              
                 <Trash2 className="h-4 w-4" />
                 Delete Account
               </Button>
