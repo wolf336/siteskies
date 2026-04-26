@@ -1,5 +1,6 @@
 import React from "react";
 import { format } from "date-fns";
+import { de, enUS } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -50,7 +51,8 @@ function getConditionIcon(condition) {
 }
 
 export default function ForecastTimeline({ forecasts }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateFnsLocale = i18n.language === "de" ? de : enUS;
   if (!forecasts || forecasts.length === 0) {
     return (
       <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
@@ -79,10 +81,10 @@ export default function ForecastTimeline({ forecasts }) {
               {/* Date */}
               <div className="w-20 shrink-0 text-center">
                 <p className="text-xs font-medium text-muted-foreground">
-                  {day.date ? format(new Date(day.date), "EEE") : "—"}
+                  {day.date ? format(new Date(day.date + "T00:00:00"), "EEE", { locale: dateFnsLocale }) : "—"}
                 </p>
                 <p className="text-sm font-semibold text-foreground">
-                  {day.date ? format(new Date(day.date), "MMM d") : "—"}
+                  {day.date ? format(new Date(day.date + "T00:00:00"), "MMM d", { locale: dateFnsLocale }) : "—"}
                 </p>
               </div>
 
@@ -96,7 +98,7 @@ export default function ForecastTimeline({ forecasts }) {
               {/* Condition text */}
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-foreground capitalize">
-                  {day.condition || "Unknown"}
+                  {day.condition ? t(`condition.${day.condition.toLowerCase().replace(/ /g, '_')}`, { defaultValue: day.condition }) : t('condition.unknown')}
                 </p>
                 {issues.length > 0 && (
                   <p className="text-xs text-destructive mt-0.5 truncate">

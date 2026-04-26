@@ -203,6 +203,43 @@
     "precipTooltip": "Niederschlag",
     "windTooltip": "Windgeschwindigkeit"
   },
+  "card": {
+    "daysAway": "In {{count}} Tag(en)",
+    "ended": "Beendet",
+    "started": "Gestartet",
+    "clearDays": "{{clear}} von {{total}} Tagen gut",
+    "partialDays": "{{shown}} von {{total}} Tagen Vorhersage"
+  },
+  "table": {
+    "project": "Projekt",
+    "location": "Standort",
+    "dates": "Daten",
+    "forecast": "Vorhersage",
+    "recommendation": "Empfehlung",
+    "noForecast": "Keine Vorhersage"
+  },
+  "editProject": {
+    "title": "Projekt bearbeiten",
+    "saveChanges": "Änderungen speichern"
+  },
+  "condition": {
+    "unknown": "Unbekannt",
+    "clear_sky": "Klarer Himmel",
+    "partly_cloudy": "Teilweise bewölkt",
+    "cloudy": "Bewölkt",
+    "overcast": "Bedeckt",
+    "fog": "Nebel",
+    "rain": "Regen",
+    "light_rain": "Leichter Regen",
+    "heavy_rain": "Starker Regen",
+    "rain_showers": "Regenschauer",
+    "snow": "Schnee",
+    "light_snow": "Leichter Schnee",
+    "thunderstorm": "Gewitter",
+    "drizzle": "Nieselregen",
+    "mist": "Dunst",
+    "showers": "Schauer"
+  },
   "signal": {
     "proceed": "Bereit",
     "caution": "Mit Vorsicht fortfahren",

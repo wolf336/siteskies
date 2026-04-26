@@ -6,17 +6,21 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Clock, CloudRain, Sun, TriangleAlert, Hourglass, Pencil, AlertCircle } from "lucide-react";
 import WeatherDots from "./WeatherDots";
 import { format, differenceInDays, isPast } from "date-fns";
+import { de, enUS } from "date-fns/locale";
 import EditProjectModal from "./EditProjectModal.jsx";
 import { useFormattedLocation } from "@/hooks/useFormattedLocation";
+import { useTranslation } from "react-i18next";
 
 const recommendationConfig = {
-  proceed: { label: "Proceed", icon: Sun, className: "border-success/30 bg-success/10 text-success" },
-  caution: { label: "Caution", icon: TriangleAlert, className: "border-warning/30 bg-warning/10 text-warning" },
-  postpone: { label: "Postpone", icon: CloudRain, className: "border-destructive/30 bg-destructive/10 text-destructive" },
-  pending: { label: "Pending", icon: Hourglass, className: "border-border bg-muted text-muted-foreground" }
+  proceed: { icon: Sun, className: "border-success/30 bg-success/10 text-success" },
+  caution: { icon: TriangleAlert, className: "border-warning/30 bg-warning/10 text-warning" },
+  postpone: { icon: CloudRain, className: "border-destructive/30 bg-destructive/10 text-destructive" },
+  pending: { icon: Hourglass, className: "border-border bg-muted text-muted-foreground" }
 };
 
 export default function ProjectCard({ project }) {
+  const { t, i18n } = useTranslation();
+  const dateFnsLocale = i18n.language === "de" ? de : enUS;
   const [editOpen, setEditOpen] = useState(false);
   const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
   const rec = recommendationConfig[project.weather_signal || "pending"];
@@ -64,17 +68,17 @@ export default function ProjectCard({ project }) {
                 <div className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>
-                    {format(new Date(project.start_date), "MMM d")} – {format(new Date(project.end_date), "MMM d, yyyy")}
+                    {format(new Date(project.start_date), "MMM d", { locale: dateFnsLocale })} – {format(new Date(project.end_date), "MMM d, yyyy", { locale: dateFnsLocale })}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5" />
                   <span>
-                    {daysUntilStart > 0 ?
-                      `${daysUntilStart} day${daysUntilStart !== 1 ? "s" : ""} away` :
-                      isPast(new Date(project.end_date)) ?
-                      "Ended" :
-                      "Started"}
+                    {daysUntilStart > 0
+                    ? t('card.daysAway', { count: daysUntilStart })
+                    : isPast(new Date(project.end_date))
+                    ? t('card.ended')
+                    : t('card.started')}
                   </span>
                 </div>
               </div>
@@ -87,11 +91,11 @@ export default function ProjectCard({ project }) {
                   <div className="flex items-center gap-1">
                     <AlertCircle className="h-3 w-3 text-warning shrink-0" />
                     <p className="text-[11px] text-warning whitespace-nowrap font-medium">
-                      {forecasts.length} of {totalDays} days forecast
+                      {t('card.partialDays', { shown: forecasts.length, total: totalDays })}
                     </p>
                   </div>
                 ) : (
-                  <p className="text-[11px] text-muted-foreground whitespace-nowrap">{clearDays} of {totalDays} days clear</p>
+                  <p className="text-[11px] text-muted-foreground whitespace-nowrap">{t('card.clearDays', { clear: clearDays, total: totalDays })}</p>
                 )}
               </div>
               }
@@ -106,7 +110,7 @@ export default function ProjectCard({ project }) {
               </button>
               <div className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 ${rec.className}`}>
                 <RecIcon className="h-4 w-4" />
-                <span className="text-xs font-semibold">{rec.label}</span>
+                <span className="text-xs font-semibold">{t(`signal.${project.weather_signal || 'pending'}`)}</span>
               </div>
             </div>
           </div>

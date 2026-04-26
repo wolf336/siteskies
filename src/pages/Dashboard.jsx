@@ -153,9 +153,9 @@ export default function Dashboard() {
               </Button>
               {syncSetting?.synced_at && (
                 <p className="text-xs text-muted-foreground">
-                  Last synced {formatDistanceToNow(new Date(syncSetting.synced_at), { addSuffix: true })}
+                  {t('dashboard.lastSynced', { time: formatDistanceToNow(new Date(syncSetting.synced_at), { addSuffix: true }) })}
                   {syncSetting.failed_count > 0 && (
-                    <span className="text-destructive ml-1">({syncSetting.failed_count} failed)</span>
+                    <span className="text-destructive ml-1">({t('dashboard.failed', { count: syncSetting.failed_count })})</span>
                   )}
                 </p>
               )}

@@ -12,8 +12,10 @@ import { resolveLocationName } from "@/lib/geocode";
 import { refreshProjectWeather } from "@/lib/refreshProjectWeather";
 import WeatherRequirementsForm from "./WeatherRequirementsForm.jsx";
 import LocationPicker from "./LocationPicker.jsx";
+import { useTranslation } from "react-i18next";
 
 export default function EditProjectModal({ project, open, onClose }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const [form, setForm] = useState({
@@ -81,19 +83,19 @@ export default function EditProjectModal({ project, open, onClose }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Project</DialogTitle>
+          <DialogTitle>{t('editProject.title')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <Label>Project Name</Label>
+            <Label>{t('newProject.projectName')}</Label>
             <Input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="Project name"
+              placeholder={t('newProject.projectName')}
             />
           </div>
           <div className="space-y-2">
-            <Label>Description (optional)</Label>
+            <Label>{t('newProject.description')}</Label>
             <Textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -111,7 +113,7 @@ export default function EditProjectModal({ project, open, onClose }) {
           />
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Start Date</Label>
+              <Label>{t('newProject.startDate')}</Label>
               <Input
                 type="date"
                 value={form.start_date}
@@ -119,7 +121,7 @@ export default function EditProjectModal({ project, open, onClose }) {
               />
             </div>
             <div className="space-y-2">
-              <Label>End Date</Label>
+              <Label>{t('newProject.endDate')}</Label>
               <Input
                 type="date"
                 value={form.end_date}
@@ -130,18 +132,18 @@ export default function EditProjectModal({ project, open, onClose }) {
           </div>
           {projectLength > 0 && (
             <p className="text-sm text-muted-foreground">
-              Duration: <span className="font-medium text-foreground">{projectLength} day{projectLength !== 1 ? "s" : ""}</span>
+              {t('newProject.duration', { count: projectLength })}
             </p>
           )}
           <div className="border-t border-border pt-4">
-            <Label className="text-sm font-semibold mb-3 block">Weather Requirements</Label>
+            <Label className="text-sm font-semibold mb-3 block">{t('newProject.weatherRequirements')}</Label>
             <WeatherRequirementsForm requirements={requirements} onChange={setRequirements} />
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
             <Button type="submit" disabled={!isValid || updateMutation.isPending} className="gap-2">
               {updateMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              Save Changes
+              {t('editProject.saveChanges')}
             </Button>
           </DialogFooter>
         </form>

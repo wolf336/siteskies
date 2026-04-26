@@ -205,6 +205,45 @@
     "precipTooltip": "Precipitation",
     "windTooltip": "Wind Speed"
   },
+  "card": {
+    "daysAway_one": "{{count}} day away",
+    "daysAway_other": "{{count}} days away",
+    "daysAway": "{{count}} day(s) away",
+    "ended": "Ended",
+    "started": "Started",
+    "clearDays": "{{clear}} of {{total}} days clear",
+    "partialDays": "{{shown}} of {{total}} days forecast"
+  },
+  "table": {
+    "project": "Project",
+    "location": "Location",
+    "dates": "Dates",
+    "forecast": "Forecast",
+    "recommendation": "Recommendation",
+    "noForecast": "No forecast"
+  },
+  "editProject": {
+    "title": "Edit Project",
+    "saveChanges": "Save Changes"
+  },
+  "condition": {
+    "unknown": "Unknown",
+    "clear_sky": "Clear Sky",
+    "partly_cloudy": "Partly Cloudy",
+    "cloudy": "Cloudy",
+    "overcast": "Overcast",
+    "fog": "Fog",
+    "rain": "Rain",
+    "light_rain": "Light Rain",
+    "heavy_rain": "Heavy Rain",
+    "rain_showers": "Rain Showers",
+    "snow": "Snow",
+    "light_snow": "Light Snow",
+    "thunderstorm": "Thunderstorm",
+    "drizzle": "Drizzle",
+    "mist": "Mist",
+    "showers": "Showers"
+  },
   "signal": {
     "proceed": "Good to Go",
     "caution": "Proceed with Caution",
