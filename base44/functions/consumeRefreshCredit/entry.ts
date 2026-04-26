@@ -42,7 +42,8 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     // Admin bypass: unlimited refreshes
-    if (user.email === 'liam.stienen@gmail.com') {
+    const ADMIN_EMAILS = ['liam.stienen@gmail.com', 'liam1@posteo.de'];
+    if (ADMIN_EMAILS.includes(user.email)) {
       return Response.json({ allowed: true, remaining: 999, effective_tier: 'enterprise' });
     }
 

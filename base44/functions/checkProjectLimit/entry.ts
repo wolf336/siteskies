@@ -38,7 +38,8 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     // Admin bypass: unlimited projects
-    if (user.email === 'liam.stienen@gmail.com') {
+    const ADMIN_EMAILS = ['liam.stienen@gmail.com', 'liam1@posteo.de'];
+    if (ADMIN_EMAILS.includes(user.email)) {
       return Response.json({ allowed: true, limit: 999, used: 0, remaining: 999, tier: 'enterprise' });
     }
 

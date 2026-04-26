@@ -7,7 +7,8 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     // Admin bypass: return enterprise tier with no limits
-    if (user.email === 'liam.stienen@gmail.com') {
+    const ADMIN_EMAILS = ['liam.stienen@gmail.com', 'liam1@posteo.de'];
+    if (ADMIN_EMAILS.includes(user.email)) {
       const projects = await base44.asServiceRole.entities.Project.filter({ created_by: user.email });
       return Response.json({
         subscription: {
