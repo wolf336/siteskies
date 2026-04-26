@@ -242,6 +242,11 @@
     "mist": "Dunst",
     "showers": "Schauer"
   },
+  "calendarModal": {
+    "daysOfForecast": "{{clear}} von {{total}} Tagen erfüllen die Anforderungen",
+    "noForecast": "Noch keine Vorhersagedaten",
+    "openProject": "Projekt öffnen →"
+  },
   "signal": {
     "proceed": "Bereit",
     "caution": "Mit Vorsicht fortfahren",

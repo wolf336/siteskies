@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import WeatherDots from './WeatherDots';
 import { useFormattedLocation } from "@/hooks/useFormattedLocation";
+import { useTranslation } from 'react-i18next';
 
 const REC_STYLES = {
   proceed: 'bg-success/10 text-success',
@@ -16,6 +17,7 @@ const REC_STYLES = {
 
 export default function ProjectCalendarModal({ project, onClose }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const formattedLocation = useFormattedLocation(project.location, project.location_name);
   const forecasts = project.weather_forecast?.daily_forecasts || [];
   const clearDays = forecasts.filter(d => d.meets_requirements).length;
@@ -47,7 +49,7 @@ export default function ProjectCalendarModal({ project, onClose }) {
         <div className="pr-6 space-y-2">
           <h2 className="text-lg font-bold text-foreground leading-tight">{project.name}</h2>
           <span className={`inline-block text-xs font-medium px-2.5 py-0.5 rounded-full ${REC_STYLES[project.weather_signal] || REC_STYLES.pending}`}>
-            {project.weather_signal || 'pending'}
+            {t(`signal.${project.weather_signal || 'pending'}`)}
           </span>
         </div>
 
@@ -70,8 +72,8 @@ export default function ProjectCalendarModal({ project, onClose }) {
           <WeatherDots forecasts={forecasts} size="lg" />
           <p className="text-xs text-muted-foreground">
             {forecasts.length > 0
-              ? `${clearDays} of ${forecasts.length} days meet requirements`
-              : 'No forecast data yet'}
+              ? t('calendarModal.daysOfForecast', { clear: clearDays, total: forecasts.length })
+              : t('calendarModal.noForecast')}
           </p>
         </div>
 
@@ -80,7 +82,7 @@ export default function ProjectCalendarModal({ project, onClose }) {
           className="w-full gap-2"
           onClick={() => navigate(createPageUrl(`ProjectDetail?id=${project.id}`))}
         >
-          Open project →
+          {t('calendarModal.openProject')}
         </Button>
       </div>
     </div>
