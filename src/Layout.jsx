@@ -3,11 +3,13 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { MessageSquare, Settings } from "lucide-react";
 import FeedbackModal from "@/components/FeedbackModal";
+import { useTranslation } from "react-i18next";
 
 export default function Layout({ children, currentPageName }) {
+  const { t } = useTranslation();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const navItems = [
-    { name: "Settings", icon: Settings, page: "Settings" },
+    { name: t('nav.settings'), icon: Settings, page: "Settings" },
   ];
 
   return (
@@ -45,7 +47,7 @@ export default function Layout({ children, currentPageName }) {
               className="flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-all"
             >
               <MessageSquare className="h-4 w-4" />
-              <span className="hidden sm:inline">Feedback</span>
+              <span className="hidden sm:inline">{t('nav.feedback')}</span>
             </button>
           </nav>
           <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} page={currentPageName} />

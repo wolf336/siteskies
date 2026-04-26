@@ -16,8 +16,10 @@ import WeatherRequirementsForm from "@/components/projects/WeatherRequirementsFo
 import LocationPicker from "@/components/projects/LocationPicker.jsx";
 import { useSubscription } from "@/hooks/useSubscription";
 import { TIER_CONFIG } from "@/lib/subscriptionConfig";
+import { useTranslation } from "react-i18next";
 
 export default function NewProject() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const { data: subData } = useSubscription();
@@ -99,13 +101,13 @@ export default function NewProject() {
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to Projects
+        {t('project.backToProjects')}
       </Link>
 
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">New Project</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">{t('newProject.title')}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Set up your project details and weather requirements
+          {t('newProject.subtitle')}
         </p>
       </div>
 
@@ -122,12 +124,12 @@ export default function NewProject() {
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <FileText className="h-4 w-4 text-primary" />
-              Project Details
+              {t('newProject.projectDetails')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Project Name</Label>
+              <Label>{t('newProject.projectName')}</Label>
               <Input
                 placeholder="e.g. Roof Installation – 42 Smith St"
                 value={form.name}
@@ -135,7 +137,7 @@ export default function NewProject() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Description (optional)</Label>
+              <Label>{t('newProject.description')}</Label>
               <Textarea
                 placeholder="Brief description of the project..."
                 value={form.description}
@@ -155,7 +157,7 @@ export default function NewProject() {
               <div className="space-y-2">
                 <Label className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5 text-primary" />
-                  Start Date
+                  {t('newProject.startDate')}
                 </Label>
                 <Input
                   type="date"
@@ -166,7 +168,7 @@ export default function NewProject() {
               <div className="space-y-2">
                 <Label className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5 text-primary" />
-                  End Date
+                  {t('newProject.endDate')}
                 </Label>
                 <Input
                   type="date"
@@ -189,9 +191,9 @@ export default function NewProject() {
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               <CloudSun className="h-4 w-4 text-primary" />
-              Weather Requirements
+              {t('newProject.weatherRequirements')}
             </CardTitle>
-            <p className="text-xs text-muted-foreground">Fields left blank impose no restriction on that condition.</p>
+            <p className="text-xs text-muted-foreground">{t('newProject.weatherRequirementsSubtitle')}</p>
           </CardHeader>
           <CardContent>
             <WeatherRequirementsForm
@@ -204,7 +206,7 @@ export default function NewProject() {
         {/* Submit */}
         <div className="flex justify-end gap-3">
           <Link to={createPageUrl("Dashboard")}>
-            <Button type="button" variant="outline">Cancel</Button>
+            <Button type="button" variant="outline">{t('newProject.cancel')}</Button>
           </Link>
           <Button type="submit" disabled={!isValid || saving} className="gap-2">
             {saving ? (
@@ -212,7 +214,7 @@ export default function NewProject() {
             ) : (
               <Plus className="h-4 w-4" />
             )}
-            Create Project
+            {t('newProject.createProject')}
           </Button>
         </div>
       </form>

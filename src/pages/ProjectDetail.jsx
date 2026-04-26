@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import RecommendationBanner from "@/components/projects/RecommendationBanner.jsx";
 import ForecastTimeline from "@/components/projects/ForecastTimeline.jsx";
 import { useFormattedLocation } from "@/hooks/useFormattedLocation";
+import { useTranslation } from "react-i18next";
 
 import { Link as RouterLink } from "react-router-dom";
 
@@ -263,6 +264,7 @@ export default function ProjectDetail() {
 }
 
 function ProjectDetailContent({ project, projectId, checking, setChecking, forecastError, setForecastError, editOpen, setEditOpen, checkWeather, deleteMutation }) {
+  const { t } = useTranslation();
   const formattedLocation = useFormattedLocation(project.location, project.location_name);
   const todayStr = new Date().toISOString().split("T")[0];
   const isCompleted = project.end_date < todayStr;
@@ -283,7 +285,7 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-3"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Projects
+            {t('project.backToProjects')}
           </Link>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{project.name}</h1>
           <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
@@ -297,7 +299,7 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
             </div>
             <div className="flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5" />
-              {project.project_length_days || differenceInDays(new Date(project.end_date), new Date(project.start_date)) + 1} days
+              {project.project_length_days || differenceInDays(new Date(project.end_date), new Date(project.start_date)) + 1} {t('project.days')}
             </div>
           </div>
         </div>
@@ -342,10 +344,10 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
       {/* Check Weather button */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Weather Forecast</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t('project.weatherForecast')}</h2>
           {project.weather_forecast?.last_checked && (
             <p className="text-xs text-muted-foreground mt-0.5">
-              Last checked: {format(new Date(project.weather_forecast.last_checked), "MMM d, yyyy 'at' h:mm a")}
+              {t('project.lastChecked', { date: format(new Date(project.weather_forecast.last_checked), "MMM d, yyyy 'at' h:mm a") })}
             </p>
           )}
         </div>
@@ -359,25 +361,19 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
           ) : (
             <RefreshCw className="h-4 w-4" />
           )}
-          {checking ? "Checking..." : "Check Weather"}
+          {checking ? t('project.checking') : t('project.checkWeather')}
         </Button>
       </div>
 
       {isCompleted && (
         <div className="rounded-lg bg-muted/50 border border-border p-4 text-sm text-muted-foreground">
-          This project has already ended on{" "}
-          <span className="font-medium text-foreground">
-            {format(new Date(project.end_date + "T00:00:00"), "MMMM d, yyyy")}
-          </span>. Weather forecasts can no longer be updated.
+          {t('project.projectEnded', { date: format(new Date(project.end_date + "T00:00:00"), "MMMM d, yyyy") })}
         </div>
       )}
 
       {!canCheckWeather && !isCompleted && (
         <div className="rounded-lg bg-muted/50 border border-border p-4 text-sm text-muted-foreground">
-          Forecast not yet available. Your first forecast will be ready on{" "}
-          <span className="font-medium text-foreground">
-            {format(forecastAvailableDate, "MMMM d, yyyy")}
-          </span>.
+          {t('project.forecastNotAvailable', { date: format(forecastAvailableDate, "MMMM d, yyyy") })}
         </div>
       )}
 
@@ -404,30 +400,30 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
       {/* Requirements summary */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Weather Requirements</CardTitle>
+          <CardTitle className="text-base">{t('project.weatherRequirements')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {req.min_temperature_c != null && (
-              <RequirementChip icon={Thermometer} label="Min Temp" value={`${req.min_temperature_c}°C`} />
+              <RequirementChip icon={Thermometer} label={t('project.minTemp')} value={`${req.min_temperature_c}°C`} />
             )}
             {req.max_temperature_c != null && (
-              <RequirementChip icon={Thermometer} label="Max Temp" value={`${req.max_temperature_c}°C`} />
+              <RequirementChip icon={Thermometer} label={t('project.maxTemp')} value={`${req.max_temperature_c}°C`} />
             )}
             {req.max_wind_speed_kmh != null && (
-              <RequirementChip icon={Wind} label="Max Wind" value={`${req.max_wind_speed_kmh} km/h`} />
+              <RequirementChip icon={Wind} label={t('project.maxWind')} value={`${req.max_wind_speed_kmh} km/h`} />
             )}
             {req.max_precipitation_mm != null && (
-              <RequirementChip icon={Droplets} label="Max Rain" value={`${req.max_precipitation_mm} mm`} />
+              <RequirementChip icon={Droplets} label={t('project.maxRain')} value={`${req.max_precipitation_mm} mm`} />
             )}
             {req.no_thunderstorms && (
-              <RequirementChip icon={CloudLightning} label="No Storms" value="Required" />
+              <RequirementChip icon={CloudLightning} label={t('project.noStorms')} value={t('project.required')} />
             )}
             {req.no_snow && (
-              <RequirementChip icon={Snowflake} label="No Snow" value="Required" />
+              <RequirementChip icon={Snowflake} label={t('project.noSnow')} value={t('project.required')} />
             )}
             {req.no_fog && (
-              <RequirementChip icon={CloudFog} label="No Fog" value="Required" />
+              <RequirementChip icon={CloudFog} label={t('project.noFog')} value={t('project.required')} />
             )}
           </div>
           {req.custom_notes && (

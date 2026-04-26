@@ -16,8 +16,10 @@ import ProjectTable from "@/components/projects/ProjectTable.jsx";
 import ProjectCalendar from "@/components/projects/ProjectCalendar.jsx";
 import { toast } from "sonner";
 import { formatDistanceToNow, startOfDay, startOfWeek, endOfWeek, addWeeks, isWithinInterval } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [weatherFilter, setWeatherFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
@@ -132,9 +134,9 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Projects</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{t('dashboard.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Track weather conditions for your upcoming projects
+            {t('dashboard.subtitle')}
           </p>
         </div>
         <div className="flex items-start gap-3">
@@ -147,7 +149,7 @@ export default function Dashboard() {
                 disabled={syncing}
               >
                 {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                {syncing ? "Syncing..." : "Sync all projects"}
+                {syncing ? t('dashboard.syncing') : t('dashboard.syncAll')}
               </Button>
               {syncSetting?.synced_at && (
                 <p className="text-xs text-muted-foreground">
@@ -162,7 +164,7 @@ export default function Dashboard() {
           <Link to={createPageUrl("NewProject")}>
             <Button className="bg-primary hover:bg-primary/90 gap-2">
               <Plus className="h-4 w-4" />
-              New Project
+              {t('dashboard.newProject')}
             </Button>
           </Link>
         </div>
@@ -174,7 +176,7 @@ export default function Dashboard() {
           <div className="relative max-w-sm w-full">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search projects..."
+              placeholder={t('dashboard.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -201,21 +203,21 @@ export default function Dashboard() {
         {/* Weather filter row */}
         <Tabs value={weatherFilter} onValueChange={setWeatherFilter}>
           <TabsList className="bg-muted">
-            <TabsTrigger value="all">All Projects</TabsTrigger>
-            <TabsTrigger value="good">Good Weather</TabsTrigger>
-            <TabsTrigger value="attention">Needs Attention</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
+            <TabsTrigger value="all">{t('dashboard.allProjects')}</TabsTrigger>
+            <TabsTrigger value="good">{t('dashboard.goodWeather')}</TabsTrigger>
+            <TabsTrigger value="attention">{t('dashboard.needsAttention')}</TabsTrigger>
+            <TabsTrigger value="completed">{t('dashboard.completed')}</TabsTrigger>
           </TabsList>
         </Tabs>
 
         {/* Time filter row */}
         <Tabs value={timeFilter} onValueChange={setTimeFilter}>
           <TabsList className="bg-muted">
-            <TabsTrigger value="all">All Dates</TabsTrigger>
-            <TabsTrigger value="this_week">This Week</TabsTrigger>
-            <TabsTrigger value="next_week">Next Week</TabsTrigger>
-            <TabsTrigger value="in_two_weeks">In 2 Weeks</TabsTrigger>
-            <TabsTrigger value="later">Later</TabsTrigger>
+            <TabsTrigger value="all">{t('dashboard.allDates')}</TabsTrigger>
+            <TabsTrigger value="this_week">{t('dashboard.thisWeek')}</TabsTrigger>
+            <TabsTrigger value="next_week">{t('dashboard.nextWeek')}</TabsTrigger>
+            <TabsTrigger value="in_two_weeks">{t('dashboard.inTwoWeeks')}</TabsTrigger>
+            <TabsTrigger value="later">{t('dashboard.later')}</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -237,18 +239,16 @@ export default function Dashboard() {
             )}
           </div>
           <h3 className="text-base font-semibold text-foreground mb-1">
-            {projects.length === 0 ? "No projects yet" : "No matching projects"}
+            {projects.length === 0 ? t('dashboard.noProjectsTitle') : t('dashboard.noMatchTitle')}
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
-            {projects.length === 0
-              ? "Create your first project to start tracking weather."
-              : "Try adjusting your filters or search."}
+            {projects.length === 0 ? t('dashboard.noProjectsSubtitle') : t('dashboard.noMatchSubtitle')}
           </p>
           {projects.length === 0 && (
             <Link to={createPageUrl("NewProject")}>
               <Button variant="outline" className="gap-2">
                 <Plus className="h-4 w-4" />
-                Create Project
+                {t('dashboard.createProject')}
               </Button>
             </Link>
           )}
