@@ -14,9 +14,15 @@ import {
 const useGroups = (t) => [
   {
     key: 'app',
-    label: t('sidebar.account'),
+    label: t('sidebar.appSettings'),
     items: [
       { key: 'app_settings', label: t('sidebar.appSettings'), icon: Settings2 },
+    ],
+  },
+  {
+    key: 'account',
+    label: t('sidebar.account'),
+    items: [
       { key: 'profile', label: t('sidebar.accountInfo'), icon: UserCircle },
       { key: 'team', label: t('sidebar.seats'), icon: Users },
     ],
