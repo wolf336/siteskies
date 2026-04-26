@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Calendar, Clock, CloudRain, Sun, TriangleAlert, Hourglass, Pencil } from "lucide-react";
+import { MapPin, Calendar, Clock, CloudRain, Sun, TriangleAlert, Hourglass, Pencil, AlertCircle } from "lucide-react";
 import WeatherDots from "./WeatherDots";
 import { format, differenceInDays, isPast } from "date-fns";
 import EditProjectModal from "./EditProjectModal.jsx";
@@ -22,6 +22,8 @@ export default function ProjectCard({ project }) {
   const rec = recommendationConfig[project.weather_signal || "pending"];
   const forecasts = project.weather_forecast?.daily_forecasts || [];
   const clearDays = forecasts.filter((d) => d.meets_requirements).length;
+  const isPartial = project.weather_forecast?.partial_forecast === true;
+  const totalDays = project.project_length_days || forecasts.length;
   const RecIcon = rec.icon;
   const formattedLocation = useFormattedLocation(project.location, project.location_name);
 
@@ -81,7 +83,16 @@ export default function ProjectCard({ project }) {
             {forecasts.length > 0 &&
               <div className="flex flex-col items-center gap-1 px-4">
                 <WeatherDots forecasts={forecasts} size="sm" />
-                <p className="text-[11px] text-muted-foreground whitespace-nowrap">{clearDays} of {forecasts.length} days clear</p>
+                {isPartial ? (
+                  <div className="flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3 text-warning shrink-0" />
+                    <p className="text-[11px] text-warning whitespace-nowrap font-medium">
+                      {forecasts.length} of {totalDays} days forecast
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-muted-foreground whitespace-nowrap">{clearDays} of {totalDays} days clear</p>
+                )}
               </div>
               }
 
