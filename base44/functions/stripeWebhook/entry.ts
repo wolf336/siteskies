@@ -4,17 +4,17 @@ import Stripe from 'npm:stripe@14.21.0';
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
 const TIER_BY_PRICE = {
-  'price_1TOhQOARwXv1I17HFJ8p7dHo': 'small_team',
-  'price_1TOhQfARwXv1I17H4BCSeuIy': 'small_team',
-  'price_1TOhPbARwXv1I17HqOh1Hokh': 'large_team',
-  'price_1TOhPbARwXv1I17H2PWcgA2C': 'large_team',
+  'price_1TNV0qARwXv1I17HSqMPZH3q': 'small_team',
+  'price_1TNV0qARwXv1I17HkQbxbdDI': 'small_team',
+  'price_1TNV0qARwXv1I17HYsbu6xUw': 'large_team',
+  'price_1TNV0qARwXv1I17HKs7RPkqh': 'large_team',
 };
 
 const INTERVAL_BY_PRICE = {
-  'price_1TOhQOARwXv1I17HFJ8p7dHo': 'monthly',
-  'price_1TOhQfARwXv1I17H4BCSeuIy': 'yearly',
-  'price_1TOhPbARwXv1I17HqOh1Hokh': 'monthly',
-  'price_1TOhPbARwXv1I17H2PWcgA2C': 'yearly',
+  'price_1TNV0qARwXv1I17HSqMPZH3q': 'monthly',
+  'price_1TNV0qARwXv1I17HkQbxbdDI': 'yearly',
+  'price_1TNV0qARwXv1I17HYsbu6xUw': 'monthly',
+  'price_1TNV0qARwXv1I17HKs7RPkqh': 'yearly',
 };
 
 // Safe timestamp converter — handles Stripe API versions that moved current_period_end to items
