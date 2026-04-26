@@ -284,6 +284,26 @@
     "coordsHint": "Enter decimal coordinates — e.g. 49.7012, 6.8523",
     "latLngDisplay": "Lat: {{lat}}, Lng: {{lng}} — drag the pin to adjust"
   },
+  "planCard": {
+    "current": "Current",
+    "currentPlan": "Current Plan",
+    "free": "Free",
+    "freeForever": "Free Forever",
+    "enterpriseDesc": "Custom pricing for large organisations.",
+    "contactUs": "Contact Us",
+    "upgrade": "Upgrade",
+    "mo": "mo",
+    "yr": "yr",
+    "unlimitedProjects": "Unlimited projects",
+    "projectsPerSeat": "{{count}} projects per seat",
+    "projects": "{{count}} projects",
+    "unlimitedRefreshes": "Unlimited refreshes/day",
+    "refreshes": "{{count}} refreshes/day",
+    "forecastDays": "{{count}}-day forecast",
+    "unlimitedSeats": "Unlimited seats",
+    "seats_one": "{{count}} seat",
+    "seats_other": "{{count}} seats"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",

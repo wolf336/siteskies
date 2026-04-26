@@ -280,6 +280,26 @@
     "coordsHint": "Dezimalkoordinaten eingeben — z.B. 49.7012, 6.8523",
     "latLngDisplay": "Br: {{lat}}, Lg: {{lng}} — Pin zum Anpassen ziehen"
   },
+  "planCard": {
+    "current": "Aktuell",
+    "currentPlan": "Aktueller Plan",
+    "free": "Kostenlos",
+    "freeForever": "Dauerhaft kostenlos",
+    "enterpriseDesc": "Individuelle Preise für große Unternehmen.",
+    "contactUs": "Kontakt",
+    "upgrade": "Upgraden",
+    "mo": "Monat",
+    "yr": "Jahr",
+    "unlimitedProjects": "Unbegrenzte Projekte",
+    "projectsPerSeat": "{{count}} Projekte pro Platz",
+    "projects": "{{count}} Projekte",
+    "unlimitedRefreshes": "Unbegrenzte Aktualisierungen/Tag",
+    "refreshes": "{{count}} Aktualisierungen/Tag",
+    "forecastDays": "{{count}}-Tage-Vorhersage",
+    "unlimitedSeats": "Unbegrenzte Plätze",
+    "seats_one": "{{count}} Platz",
+    "seats_other": "{{count}} Plätze"
+  },
   "common": {
     "save": "Speichern",
     "cancel": "Abbrechen",
