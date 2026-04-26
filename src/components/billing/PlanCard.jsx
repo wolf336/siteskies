@@ -61,10 +61,17 @@ export default function PlanCard({ tierKey, config, currentTier, billingInterval
           {isCurrent && <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">{t('planCard.current')}</span>}
         </div>
         {!isFree && !isEnterprise && (
-          <p className="text-2xl font-bold text-foreground">
-            €{price}
-            <span className="text-sm font-normal text-muted-foreground">/{billingInterval === 'yearly' ? t('planCard.yr') : t('planCard.mo')}</span>
-          </p>
+          <>
+            <p className="text-2xl font-bold text-foreground">
+              €{billingInterval === 'yearly' ? (config.yearlyPrice / 12).toFixed(2) : price}
+              <span className="text-sm font-normal text-muted-foreground">/{t('planCard.mo')}</span>
+            </p>
+            {billingInterval === 'yearly' && (
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {t('planCard.billedYearly', { total: config.yearlyPrice })}
+              </p>
+            )}
+          </>
         )}
         {isFree && <p className="text-2xl font-bold text-foreground">{t('planCard.free')}</p>}
         {isEnterprise && <p className="text-sm text-muted-foreground mt-1">{t('planCard.enterpriseDesc')}</p>}

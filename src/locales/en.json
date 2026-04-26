@@ -302,7 +302,8 @@
     "forecastDays": "{{count}}-day forecast",
     "unlimitedSeats": "Unlimited seats",
     "seats_one": "{{count}} seat",
-    "seats_other": "{{count}} seats"
+    "seats_other": "{{count}} seats",
+    "billedYearly": "€{{total}} billed yearly"
   },
   "common": {
     "save": "Save",

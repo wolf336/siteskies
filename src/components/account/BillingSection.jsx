@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 export default function BillingSection() {
   const { t } = useTranslation();
   const { data, isLoading } = useSubscription();
-  const [billingInterval, setBillingInterval] = useState('monthly');
+  const [billingInterval, setBillingInterval] = useState('yearly');
   const [openingPortal, setOpeningPortal] = useState(false);
   const [pollTimedOut, setPollTimedOut] = useState(false);
   const queryClient = useQueryClient();

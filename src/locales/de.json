@@ -298,7 +298,8 @@
     "forecastDays": "{{count}}-Tage-Vorhersage",
     "unlimitedSeats": "Unbegrenzte Plätze",
     "seats_one": "{{count}} Platz",
-    "seats_other": "{{count}} Plätze"
+    "seats_other": "{{count}} Plätze",
+    "billedYearly": "€{{total}} jährlich abgerechnet"
   },
   "common": {
     "save": "Speichern",
