@@ -49,7 +49,7 @@ export default function ProfileSection() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground">{user?.full_name || '—'}</p>
-                <p className="text-xs text-muted-foreground hidden">Full name</p>
+                
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -58,7 +58,7 @@ export default function ProfileSection() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground">{user?.email || '—'}</p>
-                <p className="text-xs text-muted-foreground hidden">Email address</p>
+                
               </div>
             </div>
 
