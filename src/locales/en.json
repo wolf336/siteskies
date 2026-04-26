@@ -134,7 +134,9 @@
     "noProjectsSubtitle": "Create your first project to start tracking weather.",
     "noMatchTitle": "No matching projects",
     "noMatchSubtitle": "Try adjusting your filters or search.",
-    "createProject": "Create Project"
+    "createProject": "Create Project",
+    "sortDate": "Start Date",
+    "sortByStartDate": "Sort by start date"
   },
   "project": {
     "days": "days",

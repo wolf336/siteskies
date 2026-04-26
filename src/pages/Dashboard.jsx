@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, CloudSun, FolderOpen, List, LayoutGrid, Table2, CalendarDays, RefreshCw, Loader2 } from "lucide-react";
+import { Plus, Search, CloudSun, FolderOpen, List, LayoutGrid, Table2, CalendarDays, RefreshCw, Loader2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProjectCard from "@/components/projects/ProjectCard.jsx";
 import ProjectGrid from "@/components/projects/ProjectGrid.jsx";
@@ -24,7 +24,14 @@ export default function Dashboard() {
   const [weatherFilter, setWeatherFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
   const [view, setView] = useState("list");
+  const [sortOrder, setSortOrder] = useState(() => localStorage.getItem("dashboard_sort") || "none");
   const [syncing, setSyncing] = useState(false);
+
+  const cycleSort = () => {
+    const next = sortOrder === "none" ? "asc" : sortOrder === "asc" ? "desc" : "none";
+    setSortOrder(next);
+    localStorage.setItem("dashboard_sort", next);
+  };
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
@@ -127,6 +134,11 @@ export default function Dashboard() {
     }
 
     return true;
+  }).sort((a, b) => {
+    if (sortOrder === "none") return 0;
+    const da = new Date(a.start_date);
+    const db = new Date(b.start_date);
+    return sortOrder === "asc" ? da - db : db - da;
   });
 
   return (
@@ -200,15 +212,29 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Weather filter row */}
-        <Tabs value={weatherFilter} onValueChange={setWeatherFilter}>
-          <TabsList className="bg-muted">
-            <TabsTrigger value="all">{t('dashboard.allProjects')}</TabsTrigger>
-            <TabsTrigger value="good">{t('dashboard.goodWeather')}</TabsTrigger>
-            <TabsTrigger value="attention">{t('dashboard.needsAttention')}</TabsTrigger>
-            <TabsTrigger value="completed">{t('dashboard.completed')}</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Weather filter row + sort button */}
+        <div className="flex items-center justify-between gap-2">
+          <Tabs value={weatherFilter} onValueChange={setWeatherFilter}>
+            <TabsList className="bg-muted">
+              <TabsTrigger value="all">{t('dashboard.allProjects')}</TabsTrigger>
+              <TabsTrigger value="good">{t('dashboard.goodWeather')}</TabsTrigger>
+              <TabsTrigger value="attention">{t('dashboard.needsAttention')}</TabsTrigger>
+              <TabsTrigger value="completed">{t('dashboard.completed')}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <button
+            onClick={cycleSort}
+            title={t('dashboard.sortByStartDate')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors shrink-0 ${
+              sortOrder !== "none"
+                ? "border-primary/40 bg-primary/10 text-primary"
+                : "border-border bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            {sortOrder === "asc" ? <ArrowUp className="h-3.5 w-3.5" /> : sortOrder === "desc" ? <ArrowDown className="h-3.5 w-3.5" /> : <ArrowUpDown className="h-3.5 w-3.5" />}
+            {t('dashboard.sortDate')}
+          </button>
+        </div>
 
         {/* Time filter row */}
         <Tabs value={timeFilter} onValueChange={setTimeFilter}>

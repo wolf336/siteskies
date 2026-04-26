@@ -134,7 +134,9 @@
     "noProjectsSubtitle": "Erstellen Sie Ihr erstes Projekt, um das Wetter zu verfolgen.",
     "noMatchTitle": "Keine passenden Projekte",
     "noMatchSubtitle": "Versuchen Sie, Ihre Filter oder Suche anzupassen.",
-    "createProject": "Projekt erstellen"
+    "createProject": "Projekt erstellen",
+    "sortDate": "Startdatum",
+    "sortByStartDate": "Nach Startdatum sortieren"
   },
   "project": {
     "days": "Tage",
