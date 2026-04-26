@@ -24,7 +24,7 @@ export default function LegalSection() {
             <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
           </a>
           <a
-            href="/privacy"
+            href="https://siteskies.lovable.app/datenschutz"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-between rounded-lg border border-border px-4 py-3 hover:bg-secondary transition-colors group"
