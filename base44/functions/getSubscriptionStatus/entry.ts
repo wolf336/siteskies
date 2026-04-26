@@ -6,6 +6,31 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+    // Admin bypass: return enterprise tier with no limits
+    if (user.email === 'liam.stienen@gmail.com') {
+      const projects = await base44.asServiceRole.entities.Project.filter({ created_by: user.email });
+      return Response.json({
+        subscription: {
+          user_id: user.id,
+          user_email: user.email,
+          tier: 'enterprise',
+          billing_interval: null,
+          status: 'active',
+          current_period_end: null,
+          cancel_at_period_end: false,
+          stripe_customer_id: null,
+          stripe_subscription_id: null,
+          stripe_price_id: null,
+          daily_refresh_count: 0,
+          daily_refresh_date: new Date().toISOString().split('T')[0],
+          effective_source: 'admin',
+          inherited_from: null,
+        },
+        teamMembers: [],
+        projectCount: projects.length,
+      });
+    }
+
     const today = new Date().toISOString().split('T')[0];
     const nowIso = new Date().toISOString();
 

@@ -37,6 +37,11 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+    // Admin bypass: unlimited projects
+    if (user.email === 'liam.stienen@gmail.com') {
+      return Response.json({ allowed: true, limit: 999, used: 0, remaining: 999, tier: 'enterprise' });
+    }
+
     const nowIso = new Date().toISOString();
     const ownSubs = await base44.asServiceRole.entities.Subscription.filter({ user_id: user.id });
     const ownSub = ownSubs[0] || { tier: 'free', status: 'active' };

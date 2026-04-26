@@ -41,6 +41,11 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+    // Admin bypass: unlimited refreshes
+    if (user.email === 'liam.stienen@gmail.com') {
+      return Response.json({ allowed: true, remaining: 999, effective_tier: 'enterprise' });
+    }
+
     const today = new Date().toISOString().split('T')[0];
     const nowIso = new Date().toISOString();
 
