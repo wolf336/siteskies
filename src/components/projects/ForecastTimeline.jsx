@@ -83,12 +83,13 @@ function evaluateHour(hour, req) {
   return { meets: issues.length === 0, issues };
 }
 
-function HourlyRow({ hour, req }) {
-  const { t } = useTranslation();
+function HourlyRow({ hour, req, workHoursMode }) {
   const HourIcon = getConditionIcon(hour.condition);
   const inWindow = hour.in_work_window;
-  const { meets, issues } = inWindow ? evaluateHour(hour, req) : { meets: true, issues: [] };
-  const hasProblem = inWindow && !meets;
+  // Only evaluate and highlight when work-hours mode is active
+  const { meets, issues } = (workHoursMode && inWindow) ? evaluateHour(hour, req) : { meets: true, issues: [] };
+  const hasProblem = workHoursMode && inWindow && !meets;
+  const dimmed = workHoursMode && !inWindow;
 
   return (
     <Tooltip>
@@ -96,27 +97,27 @@ function HourlyRow({ hour, req }) {
         <div className={`flex items-center gap-3 px-3 py-1.5 text-xs transition-colors ${
           hasProblem
             ? "bg-destructive/5 hover:bg-destructive/10"
-            : inWindow
+            : (workHoursMode && inWindow)
               ? "bg-primary/5 hover:bg-primary/10"
-              : "opacity-60 hover:opacity-80"
-        }`}>
-          <span className={`w-12 shrink-0 font-mono ${inWindow ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+              : "hover:bg-muted/40"
+        } ${dimmed ? "opacity-50" : ""}`}>
+          <span className={`w-12 shrink-0 font-mono ${dimmed ? "text-muted-foreground" : "text-foreground font-medium"}`}>
             {hour.time}
           </span>
-          <HourIcon className={`h-3.5 w-3.5 shrink-0 ${hasProblem ? "text-destructive" : inWindow ? "text-foreground" : "text-muted-foreground"}`} />
-          <span className={`w-14 shrink-0 ${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
+          <HourIcon className={`h-3.5 w-3.5 shrink-0 ${hasProblem ? "text-destructive" : dimmed ? "text-muted-foreground" : "text-foreground"}`} />
+          <span className={`w-14 shrink-0 ${dimmed ? "text-muted-foreground" : "text-foreground"}`}>
             {fmt.temp(hour.temp_c)}
           </span>
-          <span className={`w-16 shrink-0 ${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
+          <span className={`w-16 shrink-0 ${dimmed ? "text-muted-foreground" : "text-foreground"}`}>
             {fmt.precip(hour.precipitation_mm)}
           </span>
-          <span className={`w-16 shrink-0 ${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
+          <span className={`w-16 shrink-0 ${dimmed ? "text-muted-foreground" : "text-foreground"}`}>
             {fmt.prob(hour.precipitation_probability)}
           </span>
-          <span className={`${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
+          <span className={`flex-1 ${dimmed ? "text-muted-foreground" : "text-foreground"}`}>
             {fmt.wind(hour.wind_speed_kmh)}
           </span>
-          {inWindow && (
+          {workHoursMode && inWindow && (
             <span className="ml-auto shrink-0 flex items-center gap-1.5">
               {hasProblem ? (
                 <>
@@ -132,7 +133,7 @@ function HourlyRow({ hour, req }) {
           )}
         </div>
       </TooltipTrigger>
-      {inWindow && hasProblem && issues.length > 0 && (
+      {workHoursMode && inWindow && hasProblem && issues.length > 0 && (
         <TooltipContent side="left" className="max-w-[200px]">
           <p className="font-medium mb-1">Issues this hour:</p>
           <ul className="space-y-0.5">
@@ -282,7 +283,7 @@ export default function ForecastTimeline({ forecasts, workHoursMode, workStartTi
                     <span className="flex-1">{t('forecast.hourlyWind')}</span>
                   </div>
                   {day.hourly_forecasts.map((hour) => (
-                    <HourlyRow key={hour.time} hour={hour} req={requirements} />
+                    <HourlyRow key={hour.time} hour={hour} req={requirements} workHoursMode={workHoursMode} />
                   ))}
                 </div>
               )}

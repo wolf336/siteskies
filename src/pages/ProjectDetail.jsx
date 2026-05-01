@@ -140,13 +140,11 @@ export default function ProjectDetail() {
       return;
     }
 
-    // Fetch hourly data when work-hours mode is enabled
+    // Always fetch hourly data for display; required for work-hours evaluation too
     let hourly = null;
-    if (req.evaluate_work_hours_only && req.work_start_time && req.work_end_time) {
-      const hRes = await fetch(`${baseUrl}&hourly=temperature_2m,precipitation,precipitation_probability,windspeed_10m,weathercode`);
-      const hData = await hRes.json();
-      if (hData.hourly?.time?.length) hourly = hData.hourly;
-    }
+    const hRes = await fetch(`${baseUrl}&hourly=temperature_2m,precipitation,precipitation_probability,windspeed_10m,weathercode`);
+    const hData = await hRes.json();
+    if (hData.hourly?.time?.length) hourly = hData.hourly;
 
     const daily_forecasts = buildDailyForecasts({ daily: fData.daily, hourly, req });
     const { weather_signal, weather_signal_details } = computeWeatherSignal(daily_forecasts);

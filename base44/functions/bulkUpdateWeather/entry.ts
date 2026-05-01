@@ -42,7 +42,7 @@ function evaluateDay({ temp_high_c, temp_low_c, precipitation_mm, wind_speed_kmh
   return { meets_requirements: issues.length === 0, issues };
 }
 
-function buildDayFromDaily({ date, daily, i, req }) {
+function buildDayFromDaily({ date, daily, i, req, hourly }) {
   const temp_high_c = daily.temperature_2m_max[i];
   const temp_low_c = daily.temperature_2m_min[i];
   const precipitation_mm = daily.precipitation_sum[i];
@@ -53,7 +53,26 @@ function buildDayFromDaily({ date, daily, i, req }) {
   const { meets_requirements, issues } = evaluateDay(
     { temp_high_c, temp_low_c, precipitation_mm, wind_speed_kmh, condition, weathercode }, req
   );
-  return { date, condition, temp_high_c, temp_low_c, precipitation_mm, precipitation_probability, wind_speed_kmh, meets_requirements, issues };
+  let hourly_forecasts;
+  if (hourly) {
+    hourly_forecasts = [];
+    hourly.time.forEach((isoTime, idx) => {
+      if (!isoTime.startsWith(date)) return;
+      const timePart = isoTime.split("T")[1];
+      const wcode = hourly.weathercode[idx];
+      hourly_forecasts.push({
+        time: timePart,
+        condition: wmoToCondition(wcode),
+        weathercode: wcode,
+        temp_c: hourly.temperature_2m[idx],
+        precipitation_mm: hourly.precipitation[idx],
+        precipitation_probability: hourly.precipitation_probability[idx],
+        wind_speed_kmh: hourly.windspeed_10m[idx],
+        in_work_window: false,
+      });
+    });
+  }
+  return { date, condition, temp_high_c, temp_low_c, precipitation_mm, precipitation_probability, wind_speed_kmh, meets_requirements, issues, ...(hourly_forecasts ? { hourly_forecasts } : {}) };
 }
 
 function buildDayFromHourly({ date, hourly, req }) {
@@ -119,7 +138,7 @@ function buildDailyForecasts({ daily, hourly, req }) {
 
   return daily.time.map((date, i) => {
     if (useWorkHours) return buildDayFromHourly({ date, hourly, req });
-    return buildDayFromDaily({ date, daily, i, req });
+    return buildDayFromDaily({ date, daily, i, req, hourly });
   });
 }
 
@@ -171,16 +190,13 @@ const updateProjectWeather = async (project, base44) => {
     throw new Error(`No forecast data available for project dates`);
   }
 
+  // Always fetch hourly data for display; required for work-hours evaluation too
   let hourly = null;
-  if (req.evaluate_work_hours_only && req.work_start_time && req.work_end_time) {
-    const hRes = await fetch(
-      `${baseUrl}&hourly=temperature_2m,precipitation,precipitation_probability,windspeed_10m,weathercode`
-    );
-    const hData = await hRes.json();
-    if (hData.hourly?.time?.length) {
-      hourly = hData.hourly;
-    }
-  }
+  const hRes = await fetch(
+    `${baseUrl}&hourly=temperature_2m,precipitation,precipitation_probability,windspeed_10m,weathercode`
+  );
+  const hData = await hRes.json();
+  if (hData.hourly?.time?.length) hourly = hData.hourly;
 
   const daily_forecasts = buildDailyForecasts({ daily: fData.daily, hourly, req });
   const { weather_signal, weather_signal_details } = computeWeatherSignal(daily_forecasts);

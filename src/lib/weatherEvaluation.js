@@ -96,13 +96,13 @@ export function buildDailyForecasts({ daily, hourly, req }) {
     if (useWorkHours) {
       return buildDayFromHourly({ date, hourly, req });
     } else {
-      return buildDayFromDaily({ date, daily, i, req });
+      return buildDayFromDaily({ date, daily, i, req, hourly });
     }
   });
 }
 
 /** Full-day evaluation from Open-Meteo daily summary fields (legacy / default mode) */
-function buildDayFromDaily({ date, daily, i, req }) {
+function buildDayFromDaily({ date, daily, i, req, hourly }) {
   const temp_high_c = daily.temperature_2m_max[i];
   const temp_low_c = daily.temperature_2m_min[i];
   const precipitation_mm = daily.precipitation_sum[i];
@@ -116,6 +116,27 @@ function buildDayFromDaily({ date, daily, i, req }) {
     req
   );
 
+  // Attach display-only hourly rows when hourly data is available
+  let hourly_forecasts;
+  if (hourly) {
+    hourly_forecasts = [];
+    hourly.time.forEach((isoTime, idx) => {
+      if (!isoTime.startsWith(date)) return;
+      const timePart = isoTime.split("T")[1];
+      const wcode = hourly.weathercode[idx];
+      hourly_forecasts.push({
+        time: timePart,
+        condition: wmoToCondition(wcode),
+        weathercode: wcode,
+        temp_c: hourly.temperature_2m[idx],
+        precipitation_mm: hourly.precipitation[idx],
+        precipitation_probability: hourly.precipitation_probability[idx],
+        wind_speed_kmh: hourly.windspeed_10m[idx],
+        in_work_window: false,
+      });
+    });
+  }
+
   return {
     date,
     condition,
@@ -126,6 +147,7 @@ function buildDayFromDaily({ date, daily, i, req }) {
     wind_speed_kmh,
     meets_requirements,
     issues,
+    ...(hourly_forecasts ? { hourly_forecasts } : {}),
   };
 }
 
