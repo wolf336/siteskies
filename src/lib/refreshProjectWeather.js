@@ -64,8 +64,9 @@ export async function refreshProjectWeather(project) {
     const effectiveEndDate = project.end_date < capDateStr ? project.end_date : capDateStr;
 
     // Always fetch daily data (needed for both modes)
+    const baseUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&timezone=Europe%2FBerlin&start_date=${project.start_date}&end_date=${effectiveEndDate}`;
     const fRes = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,weathercode&timezone=Europe%2FBerlin&start_date=${project.start_date}&end_date=${effectiveEndDate}`
+      `${baseUrl}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,weathercode`
     );
     const fData = await fRes.json();
     if (!fData.daily?.time?.length) {
@@ -73,8 +74,17 @@ export async function refreshProjectWeather(project) {
       return { ok: false, reason: "no_forecast_data" };
     }
 
-    // Phase 3 will add hourly fetch here when work-hours mode is on
-    const hourly = null;
+    // Fetch hourly data when work-hours mode is enabled
+    let hourly = null;
+    if (req.evaluate_work_hours_only && req.work_start_time && req.work_end_time) {
+      const hRes = await fetch(
+        `${baseUrl}&hourly=temperature_2m,precipitation,precipitation_probability,windspeed_10m,weathercode`
+      );
+      const hData = await hRes.json();
+      if (hData.hourly?.time?.length) {
+        hourly = hData.hourly;
+      }
+    }
 
     const daily_forecasts = buildDailyForecasts({ daily: fData.daily, hourly, req });
     const { weather_signal, weather_signal_details } = computeWeatherSignal(daily_forecasts);
