@@ -273,7 +273,7 @@ export default function ForecastTimeline({ forecasts, workHoursMode, workStartTi
 
               {/* Hourly breakdown */}
               {hasHourly && isExpanded && (
-                <div className="border-t border-border">
+                <div className="border-t border-border bg-card rounded-b-xl overflow-hidden">
                   <div className="flex items-center gap-3 px-3 py-1.5 text-[11px] font-semibold text-muted-foreground border-b border-border/50 bg-muted/30">
                     <span className="w-12 shrink-0">{t('forecast.hourlyTime')}</span>
                     <span className="w-5 shrink-0" />
