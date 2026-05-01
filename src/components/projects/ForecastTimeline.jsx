@@ -25,6 +25,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+const fmt = {
+  temp: (v) => v != null ? `${parseFloat(v).toFixed(1)}°` : "–",
+  precip: (v) => v != null ? `${parseFloat(v).toFixed(1)} mm` : "–",
+  wind: (v) => v != null ? `${parseFloat(v).toFixed(1)} km/h` : "–",
+  prob: (v) => v != null ? `${Math.round(v)} %` : "–",
+};
+
 const conditionIcons = {
   sunny: Sun,
   clear: Sun,
@@ -98,16 +105,16 @@ function HourlyRow({ hour, req }) {
           </span>
           <HourIcon className={`h-3.5 w-3.5 shrink-0 ${hasProblem ? "text-destructive" : inWindow ? "text-foreground" : "text-muted-foreground"}`} />
           <span className={`w-14 shrink-0 ${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
-            {hour.temp_c != null ? `${hour.temp_c}°` : "–"}
+            {fmt.temp(hour.temp_c)}
           </span>
           <span className={`w-16 shrink-0 ${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
-            {hour.precipitation_mm != null ? `${hour.precipitation_mm}mm` : "–"}
+            {fmt.precip(hour.precipitation_mm)}
           </span>
           <span className={`w-16 shrink-0 ${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
-            {hour.precipitation_probability != null ? `${hour.precipitation_probability} %` : "–"}
+            {fmt.prob(hour.precipitation_probability)}
           </span>
           <span className={`${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
-            {hour.wind_speed_kmh != null ? `${hour.wind_speed_kmh}km/h` : "–"}
+            {fmt.wind(hour.wind_speed_kmh)}
           </span>
           {inWindow && (
             <span className="ml-auto shrink-0 flex items-center gap-1.5">
@@ -221,7 +228,7 @@ export default function ForecastTimeline({ forecasts, workHoursMode, workStartTi
                     <TooltipTrigger asChild>
                       <div className="flex items-center gap-1">
                         <Thermometer className="h-3.5 w-3.5" />
-                        <span>{day.temp_low_c ?? "–"}° / {day.temp_high_c ?? "–"}°</span>
+                        <span>{fmt.temp(day.temp_low_c)} / {fmt.temp(day.temp_high_c)}</span>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>{t('forecast.tempTooltip')}</TooltipContent>
@@ -231,7 +238,7 @@ export default function ForecastTimeline({ forecasts, workHoursMode, workStartTi
                     <TooltipTrigger asChild>
                       <div className="flex items-center gap-1">
                         <Droplets className="h-3.5 w-3.5" />
-                        <span>{day.precipitation_mm ?? 0}mm</span>
+                        <span>{fmt.precip(day.precipitation_mm ?? 0)}</span>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>{t('forecast.precipTooltip')}</TooltipContent>
@@ -241,7 +248,7 @@ export default function ForecastTimeline({ forecasts, workHoursMode, workStartTi
                     <TooltipTrigger asChild>
                       <div className="flex items-center gap-1">
                         <Wind className="h-3.5 w-3.5" />
-                        <span>{day.wind_speed_kmh ?? 0}km/h</span>
+                        <span>{fmt.wind(day.wind_speed_kmh ?? 0)}</span>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>{t('forecast.windTooltip')}</TooltipContent>
