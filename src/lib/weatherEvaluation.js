@@ -12,9 +12,6 @@
  *      rows to those whose local time falls within [work_start_time, work_end_time].
  *      Activated when required_weather.evaluate_work_hours_only === true AND
  *      hourly data is supplied.
- *
- * Phase 2 wires up the helper in both places (refreshProjectWeather + bulkUpdateWeather)
- * while keeping the API calls unchanged. Phase 3 will add the actual hourly API call.
  */
 
 export const wmoToCondition = (code) => {
@@ -26,11 +23,13 @@ export const wmoToCondition = (code) => {
   if (code <= 67) return "rain";
   if (code <= 77) return "snow";
   if (code <= 82) return "rain_showers";
+  if (code <= 86) return "snow";        // heavy snow showers
+  if (code <= 94) return "rain_showers";
   if (code <= 99) return "thunderstorm";
   return "unknown";
 };
 
-// Human-readable label used in issue strings (kept simple for existing behaviour)
+// Human-readable label used in issue strings
 export const wmoToLabel = (code) => {
   if (code === 0) return "Clear Sky";
   if (code <= 2) return "Partly Cloudy";
@@ -40,16 +39,18 @@ export const wmoToLabel = (code) => {
   if (code <= 67) return "Rain";
   if (code <= 77) return "Snow";
   if (code <= 82) return "Rain Showers";
+  if (code <= 86) return "Snow Showers";
+  if (code <= 94) return "Rain Showers";
   if (code <= 99) return "Thunderstorm";
   return "Unknown";
 };
 
-/** Return true if the WMO code represents a thunderstorm condition */
-const isThunderstorm = (code) => code >= 80 && code <= 99;
-/** Return true if the WMO code represents snow */
-const isSnow = (code) => code >= 70 && code <= 77;
-/** Return true if the WMO code represents fog */
-const isFog = (code) => code >= 40 && code <= 48;
+/** Thunderstorm: WMO codes 95–99 only */
+const isThunderstorm = (code) => code >= 95 && code <= 99;
+/** Snow: WMO codes 71–77 and 85–86 (snow showers) */
+const isSnow = (code) => (code >= 71 && code <= 77) || (code >= 85 && code <= 86);
+/** Fog: WMO codes 45–48 */
+const isFog = (code) => code >= 45 && code <= 48;
 
 /**
  * Evaluate a single day against requirements using pre-computed summary values.
@@ -83,12 +84,6 @@ export function evaluateDay({ temp_high_c, temp_low_c, precipitation_mm, wind_sp
 
 /**
  * Build the daily_forecasts array from Open-Meteo API data.
- *
- * @param {object} params
- * @param {object} params.daily        - Open-Meteo daily response object (always required)
- * @param {object|null} params.hourly  - Open-Meteo hourly response object (required for work-hours mode)
- * @param {object} params.req          - project.required_weather
- * @returns {Array} daily_forecasts array ready to store on the entity
  */
 export function buildDailyForecasts({ daily, hourly, req }) {
   const useWorkHours =
@@ -136,25 +131,20 @@ function buildDayFromDaily({ date, daily, i, req }) {
 
 /**
  * Working-hours evaluation from Open-Meteo hourly data.
- * Filters hourly rows to those within [work_start_time, work_end_time] for the given date.
- * If no rows fall within the window, marks the day as not meeting requirements.
  */
 function buildDayFromHourly({ date, hourly, req }) {
-  const startHHmm = req.work_start_time; // e.g. "07:00"
-  const endHHmm = req.work_end_time;     // e.g. "17:00"
+  const startHHmm = req.work_start_time;
+  const endHHmm = req.work_end_time;
 
-  // Find hourly indices for this date within the work window
   const windowIndices = [];
   hourly.time.forEach((isoTime, idx) => {
-    // Open-Meteo hourly time format: "2024-05-01T09:00" (local time when timezone=Europe/Berlin)
     if (!isoTime.startsWith(date)) return;
-    const timePart = isoTime.split("T")[1]; // "09:00"
+    const timePart = isoTime.split("T")[1];
     if (timePart >= startHHmm && timePart < endHHmm) {
       windowIndices.push(idx);
     }
   });
 
-  // Build hourly_forecasts array for all hours of this day (for UI display)
   const hourly_forecasts = [];
   hourly.time.forEach((isoTime, idx) => {
     if (!isoTime.startsWith(date)) return;
@@ -173,7 +163,6 @@ function buildDayFromHourly({ date, hourly, req }) {
     });
   });
 
-  // If no hourly data at all for this day, fall back to "no data" — mark as not meeting reqs
   if (windowIndices.length === 0) {
     return {
       date,
@@ -189,7 +178,6 @@ function buildDayFromHourly({ date, hourly, req }) {
     };
   }
 
-  // Aggregate work-window values
   const temps = windowIndices.map((idx) => hourly.temperature_2m[idx]).filter((v) => v != null);
   const precips = windowIndices.map((idx) => hourly.precipitation[idx]).filter((v) => v != null);
   const precipProbs = windowIndices.map((idx) => hourly.precipitation_probability[idx]).filter((v) => v != null);
@@ -202,7 +190,6 @@ function buildDayFromHourly({ date, hourly, req }) {
   const precipitation_probability = precipProbs.length ? Math.max(...precipProbs) : null;
   const wind_speed_kmh = winds.length ? Math.max(...winds) : null;
 
-  // Most severe condition: pick the highest WMO code in the window
   const worstCode = codes.length ? Math.max(...codes) : null;
   const condition = worstCode != null ? wmoToCondition(worstCode) : "unknown";
 

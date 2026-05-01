@@ -11,13 +11,18 @@ const wmoToCondition = (code) => {
   if (code <= 67) return "rain";
   if (code <= 77) return "snow";
   if (code <= 82) return "rain_showers";
+  if (code <= 86) return "snow";        // heavy snow showers
+  if (code <= 94) return "rain_showers";
   if (code <= 99) return "thunderstorm";
   return "unknown";
 };
 
-const isThunderstorm = (code) => code >= 80 && code <= 99;
-const isSnow = (code) => code >= 70 && code <= 77;
-const isFog = (code) => code >= 40 && code <= 48;
+/** Thunderstorm: WMO codes 95–99 only */
+const isThunderstorm = (code) => code >= 95 && code <= 99;
+/** Snow: WMO codes 71–77 and 85–86 (snow showers) */
+const isSnow = (code) => (code >= 71 && code <= 77) || (code >= 85 && code <= 86);
+/** Fog: WMO codes 45–48 */
+const isFog = (code) => code >= 45 && code <= 48;
 
 function evaluateDay({ temp_high_c, temp_low_c, precipitation_mm, wind_speed_kmh, condition, weathercode }, req) {
   const issues = [];
@@ -157,7 +162,6 @@ const updateProjectWeather = async (project, base44) => {
   const capDateStr = capDate.toISOString().split("T")[0];
   const effectiveEndDate = project.end_date < capDateStr ? project.end_date : capDateStr;
 
-  // Always fetch daily data (needed for both modes)
   const baseUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&timezone=Europe%2FBerlin&start_date=${project.start_date}&end_date=${effectiveEndDate}`;
   const fRes = await fetch(
     `${baseUrl}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,weathercode`
@@ -167,7 +171,6 @@ const updateProjectWeather = async (project, base44) => {
     throw new Error(`No forecast data available for project dates`);
   }
 
-  // Fetch hourly data when work-hours mode is enabled
   let hourly = null;
   if (req.evaluate_work_hours_only && req.work_start_time && req.work_end_time) {
     const hRes = await fetch(
@@ -210,7 +213,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Consume a SINGLE refresh credit for the entire bulk sync
     let creditRes;
     try {
       creditRes = await base44.functions.invoke('consumeRefreshCredit', {});
