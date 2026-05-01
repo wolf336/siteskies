@@ -1,16 +1,6 @@
 import { base44 } from "@/api/base44Client";
 import { differenceInDays } from "date-fns";
-
-const wmoToCondition = (code) => {
-  if (code === 0) return "Clear Sky";
-  if (code <= 3) return "Partly Cloudy";
-  if (code <= 48) return "Fog";
-  if (code <= 67) return "Rain";
-  if (code <= 77) return "Snow";
-  if (code <= 82) return "Rain Showers";
-  if (code <= 99) return "Thunderstorm";
-  return "Unknown";
-};
+import { buildDailyForecasts, computeWeatherSignal } from "@/lib/weatherEvaluation";
 
 /**
  * Refreshes a project's weather forecast and stores the result.
@@ -73,8 +63,9 @@ export async function refreshProjectWeather(project) {
     const capDateStr = capDate.toISOString().split("T")[0];
     const effectiveEndDate = project.end_date < capDateStr ? project.end_date : capDateStr;
 
+    // Always fetch daily data (needed for both modes)
     const fRes = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,weathercode&timezone=auto&start_date=${project.start_date}&end_date=${effectiveEndDate}`
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,weathercode&timezone=Europe%2FBerlin&start_date=${project.start_date}&end_date=${effectiveEndDate}`
     );
     const fData = await fRes.json();
     if (!fData.daily?.time?.length) {
@@ -82,41 +73,11 @@ export async function refreshProjectWeather(project) {
       return { ok: false, reason: "no_forecast_data" };
     }
 
-    const daily = fData.daily;
-    const daily_forecasts = daily.time.map((date, i) => {
-      const temp_high_c = daily.temperature_2m_max[i];
-      const temp_low_c = daily.temperature_2m_min[i];
-      const precipitation_mm = daily.precipitation_sum[i];
-      const wind_speed_kmh = daily.windspeed_10m_max[i];
-      const condition = wmoToCondition(daily.weathercode[i]);
-      const precipitation_probability = daily.precipitation_probability_max[i];
+    // Phase 3 will add hourly fetch here when work-hours mode is on
+    const hourly = null;
 
-      const issues = [];
-      if (req.max_wind_speed_kmh != null && wind_speed_kmh >= req.max_wind_speed_kmh)
-        issues.push(`Wind speed ${wind_speed_kmh} km/h exceeds limit of ${req.max_wind_speed_kmh} km/h`);
-      if (req.max_precipitation_mm != null && precipitation_mm > req.max_precipitation_mm)
-        issues.push(`Precipitation ${precipitation_mm} mm exceeds limit of ${req.max_precipitation_mm} mm`);
-      if (req.min_temperature_c != null && temp_low_c < req.min_temperature_c)
-        issues.push(`Low temp ${temp_low_c}°C is below minimum ${req.min_temperature_c}°C`);
-      if (req.max_temperature_c != null && temp_high_c > req.max_temperature_c)
-        issues.push(`High temp ${temp_high_c}°C exceeds maximum ${req.max_temperature_c}°C`);
-      if (req.no_thunderstorms && condition === "Thunderstorm") issues.push("Thunderstorm forecast");
-      if (req.no_snow && condition === "Snow") issues.push("Snow forecast");
-      if (req.no_fog && condition === "Fog") issues.push("Fog forecast");
-
-      return { date, condition, temp_high_c, temp_low_c, precipitation_mm, precipitation_probability, wind_speed_kmh, meets_requirements: issues.length === 0, issues };
-    });
-
-    const badDays = daily_forecasts.filter(d => !d.meets_requirements).length;
-    const forecastedDays = daily_forecasts.length;
-    const badPercentage = forecastedDays > 0 ? badDays / forecastedDays : 0;
-
-    let weather_signal;
-    if (badDays === 0) weather_signal = "proceed";
-    else if (badPercentage < 0.5) weather_signal = "caution";
-    else weather_signal = "postpone";
-
-    const weather_signal_details = `${badDays} of ${forecastedDays} forecasted days do not meet weather requirements.`;
+    const daily_forecasts = buildDailyForecasts({ daily: fData.daily, hourly, req });
+    const { weather_signal, weather_signal_details } = computeWeatherSignal(daily_forecasts);
 
     const projectLengthDays = differenceInDays(new Date(project.end_date), new Date(project.start_date)) + 1;
     const isPartial = daily_forecasts.length < projectLengthDays;
