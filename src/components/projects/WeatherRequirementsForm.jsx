@@ -12,6 +12,22 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
     onChange({ ...requirements, [key]: value });
   };
 
+  const handleWorkHoursToggle = (v) => {
+    if (v) {
+      onChange({
+        ...requirements,
+        evaluate_work_hours_only: true,
+        work_start_time: requirements.work_start_time || "08:00",
+        work_end_time: requirements.work_end_time || "16:00",
+      });
+    } else {
+      onChange({
+        ...requirements,
+        evaluate_work_hours_only: false,
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -116,7 +132,7 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
           </div>
           <Switch
             checked={requirements.evaluate_work_hours_only || false}
-            onCheckedChange={(v) => update("evaluate_work_hours_only", v)}
+            onCheckedChange={handleWorkHoursToggle}
           />
         </div>
         {requirements.evaluate_work_hours_only && (
@@ -125,7 +141,7 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
               <Label className="text-xs text-muted-foreground">{t('weather.workStartTime')}</Label>
               <Input
                 type="time"
-                value={requirements.work_start_time || "07:00"}
+                value={requirements.work_start_time || "08:00"}
                 onChange={(e) => update("work_start_time", e.target.value)}
               />
             </div>
@@ -133,7 +149,7 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
               <Label className="text-xs text-muted-foreground">{t('weather.workEndTime')}</Label>
               <Input
                 type="time"
-                value={requirements.work_end_time || "17:00"}
+                value={requirements.work_end_time || "16:00"}
                 onChange={(e) => update("work_end_time", e.target.value)}
               />
             </div>
