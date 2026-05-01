@@ -36,7 +36,6 @@ function evaluateDay({ temp_high_c, temp_low_c, precipitation_mm, wind_speed_kmh
     issues.push(`High temp ${temp_high_c}°C exceeds maximum ${req.max_temperature_c}°C`);
   const condStr = condition || "";
   const code = weathercode;
-  if (req.no_thunderstorms && (condStr === "thunderstorm" || (code != null && isThunderstorm(code)))) issues.push("Thunderstorm forecast");
   if (req.no_snow && (condStr === "snow" || (code != null && isSnow(code)))) issues.push("Snow forecast");
   if (req.no_fog && (condStr === "fog" || (code != null && isFog(code)))) issues.push("Fog forecast");
   return { meets_requirements: issues.length === 0, issues };

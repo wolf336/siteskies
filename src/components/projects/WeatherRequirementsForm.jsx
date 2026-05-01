@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Thermometer, Wind, Droplets, CloudLightning, Snowflake, CloudFog, Clock } from "lucide-react";
+import { Thermometer, Wind, Droplets, Snowflake, CloudFog, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export default function WeatherRequirementsForm({ requirements, onChange }) {
@@ -87,17 +87,7 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
       </div>
 
       {/* Toggle conditions */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="flex items-center justify-between rounded-lg border border-border p-3.5">
-          <Label className="flex items-center gap-2 text-sm cursor-pointer">
-            <CloudLightning className="h-4 w-4 text-warning" />
-            {t('weather.noThunderstorms')}
-          </Label>
-          <Switch
-            checked={requirements.no_thunderstorms || false}
-            onCheckedChange={(v) => update("no_thunderstorms", v)}
-          />
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex items-center justify-between rounded-lg border border-border p-3.5">
           <Label className="flex items-center gap-2 text-sm cursor-pointer">
             <Snowflake className="h-4 w-4 text-primary" />

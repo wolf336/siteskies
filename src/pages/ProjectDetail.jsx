@@ -15,7 +15,6 @@ import {
   Thermometer,
   Wind,
   Droplets,
-  CloudLightning,
   Snowflake,
   CloudFog,
   Trash2,
@@ -375,9 +374,6 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
             )}
             {req.max_precipitation_mm != null && (
               <RequirementChip icon={Droplets} label={t('project.maxRain')} value={`${req.max_precipitation_mm} mm`} />
-            )}
-            {req.no_thunderstorms && (
-              <RequirementChip icon={CloudLightning} label={t('project.noStorms')} value={t('project.required')} />
             )}
             {req.no_snow && (
               <RequirementChip icon={Snowflake} label={t('project.noSnow')} value={t('project.required')} />

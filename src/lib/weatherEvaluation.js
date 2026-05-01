@@ -71,11 +71,9 @@ export function evaluateDay({ temp_high_c, temp_low_c, precipitation_mm, wind_sp
   // Condition-based checks — support both string labels and WMO codes
   const condStr = condition || "";
   const code = weathercode;
-  const hasThunderstorm = condStr === "thunderstorm" || (code != null && isThunderstorm(code));
   const hasSnow = condStr === "snow" || (code != null && isSnow(code));
   const hasFog = condStr === "fog" || (code != null && isFog(code));
 
-  if (req.no_thunderstorms && hasThunderstorm) issues.push("Thunderstorm forecast");
   if (req.no_snow && hasSnow) issues.push("Snow forecast");
   if (req.no_fog && hasFog) issues.push("Fog forecast");
 
