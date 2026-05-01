@@ -354,6 +354,7 @@ function ProjectDetailContent({ project, projectId, checking, setChecking, forec
             workHoursMode={req.evaluate_work_hours_only}
             workStartTime={req.work_start_time}
             workEndTime={req.work_end_time}
+            requirements={req}
           />
         </CardContent>
       </Card>

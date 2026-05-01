@@ -52,43 +52,96 @@ function getConditionIcon(condition) {
   return Cloud;
 }
 
-function HourlyRow({ hour }) {
+/** Display-only per-hour evaluation — does NOT affect daily aggregation */
+function evaluateHour(hour, req) {
+  if (!req) return { meets: true, issues: [] };
+  const issues = [];
+  const { temp_c, precipitation_mm, wind_speed_kmh, condition, weathercode } = hour;
+  if (req.min_temperature_c != null && temp_c != null && temp_c < req.min_temperature_c)
+    issues.push(`${temp_c}° < min ${req.min_temperature_c}°`);
+  if (req.max_temperature_c != null && temp_c != null && temp_c > req.max_temperature_c)
+    issues.push(`${temp_c}° > max ${req.max_temperature_c}°`);
+  if (req.max_precipitation_mm != null && precipitation_mm != null && precipitation_mm > req.max_precipitation_mm)
+    issues.push(`${precipitation_mm}mm rain`);
+  if (req.max_wind_speed_kmh != null && wind_speed_kmh != null && wind_speed_kmh >= req.max_wind_speed_kmh)
+    issues.push(`${wind_speed_kmh}km/h wind`);
+  const cond = condition || "";
+  const code = weathercode;
+  if (req.no_thunderstorms && (cond === "thunderstorm" || (code != null && code >= 95 && code <= 99)))
+    issues.push("Thunderstorm");
+  if (req.no_snow && (cond === "snow" || (code != null && ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)))))
+    issues.push("Snow");
+  if (req.no_fog && (cond === "fog" || (code != null && code >= 45 && code <= 48)))
+    issues.push("Fog");
+  return { meets: issues.length === 0, issues };
+}
+
+function HourlyRow({ hour, req }) {
   const { t } = useTranslation();
   const HourIcon = getConditionIcon(hour.condition);
   const inWindow = hour.in_work_window;
+  const { meets, issues } = inWindow ? evaluateHour(hour, req) : { meets: true, issues: [] };
+  const hasProblem = inWindow && !meets;
 
   return (
-    <div className={`flex items-center gap-3 px-3 py-1.5 text-xs transition-colors ${
-      inWindow
-        ? "bg-primary/5 hover:bg-primary/10"
-        : "opacity-60 hover:opacity-80"
-    }`}>
-      <span className={`w-12 shrink-0 font-mono ${inWindow ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-        {hour.time}
-      </span>
-      <HourIcon className={`h-3.5 w-3.5 shrink-0 ${inWindow ? "text-foreground" : "text-muted-foreground"}`} />
-      <span className={`w-14 shrink-0 ${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
-        {hour.temp_c != null ? `${hour.temp_c}°` : "–"}
-      </span>
-      <span className={`w-16 shrink-0 ${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
-        {hour.precipitation_mm != null ? `${hour.precipitation_mm}mm` : "–"}
-      </span>
-      <span className={`w-16 shrink-0 ${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
-        {hour.precipitation_probability != null ? `${hour.precipitation_probability} %` : "–"}
-      </span>
-      <span className={`${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
-        {hour.wind_speed_kmh != null ? `${hour.wind_speed_kmh}km/h` : "–"}
-      </span>
-      {inWindow && (
-        <span className="ml-auto shrink-0 rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
-          {t('forecast.workBadge')}
-        </span>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className={`flex items-center gap-3 px-3 py-1.5 text-xs transition-colors ${
+          hasProblem
+            ? "bg-destructive/5 hover:bg-destructive/10"
+            : inWindow
+              ? "bg-primary/5 hover:bg-primary/10"
+              : "opacity-60 hover:opacity-80"
+        }`}>
+          <span className={`w-12 shrink-0 font-mono ${inWindow ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+            {hour.time}
+          </span>
+          <HourIcon className={`h-3.5 w-3.5 shrink-0 ${hasProblem ? "text-destructive" : inWindow ? "text-foreground" : "text-muted-foreground"}`} />
+          <span className={`w-14 shrink-0 ${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
+            {hour.temp_c != null ? `${hour.temp_c}°` : "–"}
+          </span>
+          <span className={`w-16 shrink-0 ${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
+            {hour.precipitation_mm != null ? `${hour.precipitation_mm}mm` : "–"}
+          </span>
+          <span className={`w-16 shrink-0 ${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
+            {hour.precipitation_probability != null ? `${hour.precipitation_probability} %` : "–"}
+          </span>
+          <span className={`${inWindow ? "text-foreground" : "text-muted-foreground"}`}>
+            {hour.wind_speed_kmh != null ? `${hour.wind_speed_kmh}km/h` : "–"}
+          </span>
+          {inWindow && (
+            <span className="ml-auto shrink-0 flex items-center gap-1.5">
+              {hasProblem ? (
+                <>
+                  <span className="text-[10px] text-destructive font-medium hidden sm:inline truncate max-w-[120px]">
+                    {issues[0]}{issues.length > 1 ? ` +${issues.length - 1}` : ""}
+                  </span>
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-destructive/20">
+                    <AlertTriangle className="h-2.5 w-2.5 text-destructive" />
+                  </span>
+                </>
+              ) : (
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-success/20">
+                  <Check className="h-2.5 w-2.5 text-success" />
+                </span>
+              )}
+            </span>
+          )}
+        </div>
+      </TooltipTrigger>
+      {inWindow && hasProblem && issues.length > 0 && (
+        <TooltipContent side="left" className="max-w-[200px]">
+          <p className="font-medium mb-1">Issues this hour:</p>
+          <ul className="space-y-0.5">
+            {issues.map((iss, i) => <li key={i}>• {iss}</li>)}
+          </ul>
+        </TooltipContent>
       )}
-    </div>
+    </Tooltip>
   );
 }
 
-export default function ForecastTimeline({ forecasts, workHoursMode, workStartTime, workEndTime }) {
+export default function ForecastTimeline({ forecasts, workHoursMode, workStartTime, workEndTime, requirements }) {
   const { t, i18n } = useTranslation();
   const dateFnsLocale = i18n.language === "de" ? de : enUS;
   const [expandedDays, setExpandedDays] = useState({});
@@ -226,7 +279,7 @@ export default function ForecastTimeline({ forecasts, workHoursMode, workStartTi
                     <span>{t('forecast.hourlyWind')}</span>
                   </div>
                   {day.hourly_forecasts.map((hour) => (
-                    <HourlyRow key={hour.time} hour={hour} />
+                    <HourlyRow key={hour.time} hour={hour} req={requirements} />
                   ))}
                 </div>
               )}
