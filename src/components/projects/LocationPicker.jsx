@@ -46,6 +46,35 @@ export default function LocationPicker({ location, latitude, longitude, onChange
 
   const hasCoords = latitude != null && longitude != null;
 
+  const closeResults = useCallback(() => {
+    setResults([]);
+    setSearching(false);
+  }, []);
+
+  // Close on scroll, resize, Escape, outside click
+  useEffect(() => {
+    if (results.length === 0) return;
+
+    const onScrollOrResize = () => closeResults();
+    const onKeyDown = (e) => { if (e.key === "Escape") closeResults(); };
+    const onMouseDown = (e) => {
+      if (inputWrapperRef.current && !inputWrapperRef.current.contains(e.target)) {
+        closeResults();
+      }
+    };
+
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("mousedown", onMouseDown);
+    return () => {
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("mousedown", onMouseDown);
+    };
+  }, [results.length, closeResults]);
+
   const initMap = useCallback(async (lat, lng) => {
     const L = await loadLeaflet();
     if (!mapDivRef.current) return;
@@ -123,13 +152,17 @@ export default function LocationPicker({ location, latitude, longitude, onChange
       }
     }, 400);
     return () => clearTimeout(debounceRef.current);
-  }, [query, mode]);
+  }, [query, mode, userHasTyped]);
 
   const selectResult = (r) => {
     const lat = parseFloat(r.lat);
     const lng = parseFloat(r.lon);
+
+    // Stop any in-flight debounce and suppress future searches
+    clearTimeout(debounceRef.current);
+    setUserHasTyped(false);
+    closeResults();
     setQuery(r.display_name);
-    setResults([]);
 
     const addr = r.address || {};
     const town = addr.town || addr.city || addr.village || addr.municipality || addr.hamlet || null;
@@ -163,14 +196,14 @@ export default function LocationPicker({ location, latitude, longitude, onChange
       <div className="flex rounded-lg border border-border overflow-hidden w-fit text-sm">
         <button
           type="button"
-          onClick={() => { setMode("search"); setResults([]); }}
+          onClick={() => { setMode("search"); setUserHasTyped(false); clearTimeout(debounceRef.current); closeResults(); }}
           className={`px-4 py-1.5 transition-colors ${mode === "search" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
         >
           {t('location.searchAddress')}
         </button>
         <button
           type="button"
-          onClick={() => { setMode("coords"); setResults([]); }}
+          onClick={() => { setMode("coords"); setUserHasTyped(false); clearTimeout(debounceRef.current); closeResults(); }}
           className={`px-4 py-1.5 transition-colors ${mode === "coords" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
         >
           {t('location.enterCoordinates')}
