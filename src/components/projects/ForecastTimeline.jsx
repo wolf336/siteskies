@@ -217,7 +217,7 @@ export default function ForecastTimeline({ forecasts, workHoursMode, workStartTi
                   </p>
                   {issues.length > 0 && (
                     <p className="text-xs text-destructive mt-0.5 truncate">
-                      {issues.join(" · ")}
+                      {issues.map(s => s.replace(/\d+\.\d+/g, n => parseFloat(n).toFixed(1))).join(" · ")}
                     </p>
                   )}
                 </div>
