@@ -205,7 +205,13 @@
     "low": "Low",
     "tempTooltip": "Temperature (Low / High)",
     "precipTooltip": "Precipitation",
-    "windTooltip": "Wind Speed"
+    "windTooltip": "Wind Speed",
+    "workBadge": "Work",
+    "hourlyTime": "Time",
+    "hourlyTemp": "Temp",
+    "hourlyRain": "Rain",
+    "hourlyProb": "Probability",
+    "hourlyWind": "Wind"
   },
   "card": {
     "daysAway_one": "{{count}} day away",

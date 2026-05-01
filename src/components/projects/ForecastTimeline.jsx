@@ -54,16 +54,18 @@ function getConditionIcon(condition) {
 
 function HourlyRow({ hour }) {
   const HourIcon = getConditionIcon(hour.condition);
+  const { t } = useTranslation();
   return (
     <div className={`flex items-center gap-3 px-3 py-1.5 text-xs ${hour.in_work_window ? "bg-primary/5" : "opacity-50"}`}>
       <span className="w-12 shrink-0 font-mono text-muted-foreground">{hour.time}</span>
       <HourIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
       <span className="w-14 shrink-0 text-muted-foreground">{hour.temp_c != null ? `${hour.temp_c}°` : "–"}</span>
       <span className="w-16 shrink-0 text-muted-foreground">{hour.precipitation_mm != null ? `${hour.precipitation_mm}mm` : "–"}</span>
+      <span className="w-16 shrink-0 text-muted-foreground">{hour.precipitation_probability != null ? `${hour.precipitation_probability} %` : "–"}</span>
       <span className="text-muted-foreground">{hour.wind_speed_kmh != null ? `${hour.wind_speed_kmh}km/h` : "–"}</span>
       {hour.in_work_window && (
         <span className="ml-auto shrink-0 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-          work
+          {t('forecast.workBadge')}
         </span>
       )}
     </div>
@@ -199,11 +201,12 @@ export default function ForecastTimeline({ forecasts, workHoursMode, workStartTi
               {hasHourly && isExpanded && (
                 <div className="border-t border-border">
                   <div className="flex items-center gap-3 px-3 py-1.5 text-[11px] font-medium text-muted-foreground border-b border-border/50">
-                    <span className="w-12 shrink-0">Time</span>
+                    <span className="w-12 shrink-0">{t('forecast.hourlyTime')}</span>
                     <span className="w-5 shrink-0" />
-                    <span className="w-14 shrink-0">Temp</span>
-                    <span className="w-16 shrink-0">Precip</span>
-                    <span>Wind</span>
+                    <span className="w-14 shrink-0">{t('forecast.hourlyTemp')}</span>
+                    <span className="w-16 shrink-0">{t('forecast.hourlyRain')}</span>
+                    <span className="w-16 shrink-0">{t('forecast.hourlyProb')}</span>
+                    <span>{t('forecast.hourlyWind')}</span>
                   </div>
                   {day.hourly_forecasts.map((hour) => (
                     <HourlyRow key={hour.time} hour={hour} />

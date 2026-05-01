@@ -203,7 +203,13 @@
     "low": "Min",
     "tempTooltip": "Temperatur (Min / Max)",
     "precipTooltip": "Niederschlag",
-    "windTooltip": "Windgeschwindigkeit"
+    "windTooltip": "Windgeschwindigkeit",
+    "workBadge": "Arbeit",
+    "hourlyTime": "Zeit",
+    "hourlyTemp": "Temp.",
+    "hourlyRain": "Regen",
+    "hourlyProb": "Wahrscheinlichkeit",
+    "hourlyWind": "Wind"
   },
   "card": {
     "daysAway": "In {{count}} Tag(en)",
