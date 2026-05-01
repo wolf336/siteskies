@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Thermometer, Wind, Droplets, CloudLightning, Snowflake, CloudFog } from "lucide-react";
+import { Thermometer, Wind, Droplets, CloudLightning, Snowflake, CloudFog, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export default function WeatherRequirementsForm({ requirements, onChange }) {
@@ -102,6 +102,43 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
             onCheckedChange={(v) => update("no_fog", v)}
           />
         </div>
+      </div>
+
+      {/* Working hours evaluation */}
+      <div className="rounded-lg border border-border p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+              <Clock className="h-4 w-4 text-primary" />
+              {t('weather.evaluateWorkHoursOnly')}
+            </Label>
+            <p className="text-xs text-muted-foreground">{t('weather.evaluateWorkHoursOnlyDesc')}</p>
+          </div>
+          <Switch
+            checked={requirements.evaluate_work_hours_only || false}
+            onCheckedChange={(v) => update("evaluate_work_hours_only", v)}
+          />
+        </div>
+        {requirements.evaluate_work_hours_only && (
+          <div className="grid grid-cols-2 gap-4 pt-1">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">{t('weather.workStartTime')}</Label>
+              <Input
+                type="time"
+                value={requirements.work_start_time || "07:00"}
+                onChange={(e) => update("work_start_time", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">{t('weather.workEndTime')}</Label>
+              <Input
+                type="time"
+                value={requirements.work_end_time || "17:00"}
+                onChange={(e) => update("work_end_time", e.target.value)}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Notes */}

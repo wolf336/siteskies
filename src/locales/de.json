@@ -267,7 +267,11 @@
     "noSnow": "Kein Schnee",
     "noFog": "Kein Nebel",
     "additionalRequirements": "Weitere Anforderungen",
-    "additionalPlaceholder": "Weitere zu beachtende Wetterbedingungen..."
+    "additionalPlaceholder": "Weitere zu beachtende Wetterbedingungen...",
+    "evaluateWorkHoursOnly": "Nur bestimmte Zeitfenster bewerten",
+    "evaluateWorkHoursOnlyDesc": "Wetteranforderungen nur im ausgewählten Zeitfenster statt über den vollen Tag bewerten.",
+    "workStartTime": "Arbeitsbeginn",
+    "workEndTime": "Arbeitsende"
   },
   "location": {
     "label": "Standort",

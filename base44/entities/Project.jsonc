@@ -67,6 +67,18 @@
         },
         "custom_notes": {
           "type": "string"
+        },
+        "evaluate_work_hours_only": {
+          "type": "boolean",
+          "description": "If true, weather requirements are evaluated only within the specified working hours window"
+        },
+        "work_start_time": {
+          "type": "string",
+          "description": "Working hours start time in HH:mm format (e.g. '07:00')"
+        },
+        "work_end_time": {
+          "type": "string",
+          "description": "Working hours end time in HH:mm format (e.g. '17:00')"
         }
       }
     },
@@ -116,6 +128,36 @@
                 "type": "array",
                 "items": {
                   "type": "string"
+                }
+              },
+              "hourly_forecasts": {
+                "type": "array",
+                "description": "Hourly forecast rows for this day",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "time": {
+                      "type": "string"
+                    },
+                    "condition": {
+                      "type": "string"
+                    },
+                    "temp_c": {
+                      "type": "number"
+                    },
+                    "precipitation_mm": {
+                      "type": "number"
+                    },
+                    "precipitation_probability": {
+                      "type": "number"
+                    },
+                    "wind_speed_kmh": {
+                      "type": "number"
+                    },
+                    "in_work_window": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }

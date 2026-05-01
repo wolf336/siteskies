@@ -271,7 +271,11 @@
     "noSnow": "No Snow",
     "noFog": "No Fog",
     "additionalRequirements": "Additional Requirements",
-    "additionalPlaceholder": "Any other weather conditions to watch for..."
+    "additionalPlaceholder": "Any other weather conditions to watch for...",
+    "evaluateWorkHoursOnly": "Only evaluate certain hours",
+    "evaluateWorkHoursOnlyDesc": "Evaluate weather requirements only within the selected time window instead of the full day.",
+    "workStartTime": "Work start",
+    "workEndTime": "Work end"
   },
   "location": {
     "label": "Location",
