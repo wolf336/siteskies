@@ -123,14 +123,10 @@ function HourlyRow({ hour, req }) {
                   <span className="text-[10px] text-destructive font-medium hidden sm:inline truncate max-w-[120px]">
                     {issues[0]}{issues.length > 1 ? ` +${issues.length - 1}` : ""}
                   </span>
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-destructive/20">
-                    <AlertTriangle className="h-2.5 w-2.5 text-destructive" />
-                  </span>
+                  <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
                 </>
               ) : (
-                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-success/20">
-                  <Check className="h-2.5 w-2.5 text-success" />
-                </span>
+                <Check className="h-3.5 w-3.5 text-primary" />
               )}
             </span>
           )}
@@ -282,8 +278,8 @@ export default function ForecastTimeline({ forecasts, workHoursMode, workStartTi
                     <span className="w-5 shrink-0" />
                     <span className="w-14 shrink-0">{t('forecast.hourlyTemp')}</span>
                     <span className="w-16 shrink-0">{t('forecast.hourlyRain')}</span>
-                    <span className="w-16 shrink-0">{t('forecast.hourlyProb')}</span>
-                    <span>{t('forecast.hourlyWind')}</span>
+                    <span className="w-16 shrink-0">%</span>
+                    <span className="flex-1">{t('forecast.hourlyWind')}</span>
                   </div>
                   {day.hourly_forecasts.map((hour) => (
                     <HourlyRow key={hour.time} hour={hour} req={requirements} />
