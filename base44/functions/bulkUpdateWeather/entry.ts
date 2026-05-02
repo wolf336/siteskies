@@ -38,6 +38,7 @@ function evaluateDay({ temp_high_c, temp_low_c, precipitation_mm, wind_speed_kmh
   const code = weathercode;
   if (req.no_snow && (condStr === "snow" || (code != null && isSnow(code)))) issues.push("Snow forecast");
   if (req.no_fog && (condStr === "fog" || (code != null && isFog(code)))) issues.push("Fog forecast");
+  // no_thunderstorms is intentionally ignored — thunderstorm is display-only
   return { meets_requirements: issues.length === 0, issues };
 }
 

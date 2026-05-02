@@ -74,8 +74,6 @@ function evaluateHour(hour, req) {
     issues.push(`${wind_speed_kmh}km/h wind`);
   const cond = condition || "";
   const code = weathercode;
-  if (req.no_thunderstorms && (cond === "thunderstorm" || (code != null && code >= 95 && code <= 99)))
-    issues.push("Thunderstorm");
   if (req.no_snow && (cond === "snow" || (code != null && ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)))))
     issues.push("Snow");
   if (req.no_fog && (cond === "fog" || (code != null && code >= 45 && code <= 48)))

@@ -76,6 +76,7 @@ export function evaluateDay({ temp_high_c, temp_low_c, precipitation_mm, wind_sp
 
   if (req.no_snow && hasSnow) issues.push("Snow forecast");
   if (req.no_fog && hasFog) issues.push("Fog forecast");
+  // no_thunderstorms is intentionally ignored — thunderstorm is display-only
 
   return { meets_requirements: issues.length === 0, issues };
 }
