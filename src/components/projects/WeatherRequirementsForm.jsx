@@ -3,8 +3,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Thermometer, Wind, Droplets, Snowflake, CloudFog, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
+const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0") + ":00");
 
 export default function WeatherRequirementsForm({ requirements, onChange }) {
   const { t } = useTranslation();
@@ -17,8 +20,8 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
       onChange({
         ...requirements,
         evaluate_work_hours_only: true,
-        work_start_time: requirements.work_start_time || "08:00",
-        work_end_time: requirements.work_end_time || "16:00",
+        work_start_time: requirements.work_start_time || "07:00",
+        work_end_time: requirements.work_end_time || "17:00",
       });
     } else {
       onChange({
@@ -129,19 +132,35 @@ export default function WeatherRequirementsForm({ requirements, onChange }) {
           <div className="grid grid-cols-2 gap-4 pt-1">
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">{t('weather.workStartTime')}</Label>
-              <Input
-                type="time"
-                value={requirements.work_start_time || "08:00"}
-                onChange={(e) => update("work_start_time", e.target.value)}
-              />
+              <Select
+                value={requirements.work_start_time || "07:00"}
+                onValueChange={(v) => update("work_start_time", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {HOUR_OPTIONS.map((h) => (
+                    <SelectItem key={h} value={h}>{h}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">{t('weather.workEndTime')}</Label>
-              <Input
-                type="time"
-                value={requirements.work_end_time || "16:00"}
-                onChange={(e) => update("work_end_time", e.target.value)}
-              />
+              <Select
+                value={requirements.work_end_time || "17:00"}
+                onValueChange={(v) => update("work_end_time", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {HOUR_OPTIONS.map((h) => (
+                    <SelectItem key={h} value={h}>{h}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         )}
