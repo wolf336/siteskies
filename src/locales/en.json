@@ -190,8 +190,8 @@
     "limitReachedFull": "You've reached the {{count}} project limit on the {{plan}} plan.",
     "upgradePlan": "Upgrade your plan",
     "toCreateMore": "to create more projects.",
-    "duration_one": "Project duration: <strong>{{count}} day</strong>",
-    "duration_other": "Project duration: <strong>{{count}} days</strong>",
+    "duration_one": "Project duration: {{count}} day",
+    "duration_other": "Project duration: {{count}} days",
     "duration": "Project duration: {{count}} day(s)"
   },
   "forecast": {
