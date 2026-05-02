@@ -4,10 +4,13 @@ import { createPageUrl } from "@/utils";
 import { MessageSquare, Settings } from "lucide-react";
 import FeedbackModal from "@/components/FeedbackModal";
 import { useTranslation } from "react-i18next";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export default function Layout({ children, currentPageName }) {
   const { t } = useTranslation();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const { data: subscription } = useSubscription();
+  const isFreeTier = !subscription || subscription.tier === "free";
   const navItems = [
     { name: t('nav.settings'), icon: Settings, page: "Settings" },
   ];
@@ -25,6 +28,14 @@ export default function Layout({ children, currentPageName }) {
           </Link>
 
           <nav className="flex items-center gap-1">
+            {isFreeTier && (
+              <Link
+                to={createPageUrl("Settings") + "?tab=billing"}
+                className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
+              >
+                {t('nav.upgradeNow')}
+              </Link>
+            )}
             {navItems.map((item) => {
               const isActive = currentPageName === item.page;
               return (

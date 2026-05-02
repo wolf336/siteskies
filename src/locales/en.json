@@ -2,7 +2,8 @@
   "nav": {
     "settings": "Settings",
     "feedback": "Feedback",
-    "backToDashboard": "Back to Dashboard"
+    "backToDashboard": "Back to Dashboard",
+    "upgradeNow": "⚡ Upgrade Now"
   },
   "sidebar": {
     "account": "Account",
