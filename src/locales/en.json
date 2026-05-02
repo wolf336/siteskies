@@ -212,7 +212,14 @@
     "hourlyTemp": "Temp",
     "hourlyRain": "Rain",
     "hourlyProb": "Probability",
-    "hourlyWind": "Wind"
+    "hourlyWind": "Wind",
+    "issue_wind": "Wind {{value}} km/h > limit {{limit}} km/h",
+    "issue_precip": "Precipitation {{value}} mm > limit {{limit}} mm",
+    "issue_temp_low": "Low {{value}}°C < min {{limit}}°C",
+    "issue_temp_high": "High {{value}}°C > max {{limit}}°C",
+    "issue_snow": "Snow forecast",
+    "issue_fog": "Fog forecast",
+    "issue_no_work_window": "No hourly data for work window"
   },
   "card": {
     "daysAway_one": "{{count}} day away",
