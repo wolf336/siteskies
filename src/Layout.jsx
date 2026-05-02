@@ -11,7 +11,14 @@ export default function Layout({ children, currentPageName }) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const { data: subscriptionData, isLoading: isLoadingSubscription } = useSubscription();
   const currentSubscription = subscriptionData?.subscription;
-  const isFreeTier = !isLoadingSubscription && currentSubscription?.tier === "free";
+
+  // Cache tier in localStorage so the button shows immediately on reload
+  const cachedTier = localStorage.getItem("siteskies_subscription_tier");
+  if (currentSubscription?.tier) {
+    localStorage.setItem("siteskies_subscription_tier", currentSubscription.tier);
+  }
+  const effectiveTier = currentSubscription?.tier ?? cachedTier;
+  const isFreeTier = effectiveTier === "free";
   const navItems = [
     { name: t('nav.settings'), icon: Settings, page: "Settings" },
   ];
