@@ -27,17 +27,17 @@ const isFog = (code) => code >= 45 && code <= 48;
 function evaluateDay({ temp_high_c, temp_low_c, precipitation_mm, wind_speed_kmh, condition, weathercode }, req) {
   const issues = [];
   if (req.max_wind_speed_kmh != null && wind_speed_kmh != null && wind_speed_kmh >= req.max_wind_speed_kmh)
-    issues.push({ key: "forecast.issue_wind", value: parseFloat(wind_speed_kmh).toFixed(1), limit: req.max_wind_speed_kmh });
+    issues.push(`Wind ${wind_speed_kmh} km/h exceeds limit of ${req.max_wind_speed_kmh} km/h`);
   if (req.max_precipitation_mm != null && precipitation_mm != null && precipitation_mm > req.max_precipitation_mm)
-    issues.push({ key: "forecast.issue_precip", value: parseFloat(precipitation_mm).toFixed(1), limit: req.max_precipitation_mm });
+    issues.push(`Precipitation ${precipitation_mm} mm exceeds limit of ${req.max_precipitation_mm} mm`);
   if (req.min_temperature_c != null && temp_low_c != null && temp_low_c < req.min_temperature_c)
-    issues.push({ key: "forecast.issue_temp_low", value: parseFloat(temp_low_c).toFixed(1), limit: req.min_temperature_c });
+    issues.push(`Low temp ${temp_low_c}°C below minimum ${req.min_temperature_c}°C`);
   if (req.max_temperature_c != null && temp_high_c != null && temp_high_c > req.max_temperature_c)
-    issues.push({ key: "forecast.issue_temp_high", value: parseFloat(temp_high_c).toFixed(1), limit: req.max_temperature_c });
+    issues.push(`High temp ${temp_high_c}°C exceeds maximum ${req.max_temperature_c}°C`);
   const condStr = condition || "";
   const code = weathercode;
-  if (req.no_snow && (condStr === "snow" || (code != null && isSnow(code)))) issues.push({ key: "forecast.issue_snow" });
-  if (req.no_fog && (condStr === "fog" || (code != null && isFog(code)))) issues.push({ key: "forecast.issue_fog" });
+  if (req.no_snow && (condStr === "snow" || (code != null && isSnow(code)))) issues.push("Snow forecast");
+  if (req.no_fog && (condStr === "fog" || (code != null && isFog(code)))) issues.push("Fog forecast");
   // no_thunderstorms is intentionally ignored — thunderstorm is display-only
   return { meets_requirements: issues.length === 0, issues };
 }
@@ -105,7 +105,7 @@ function buildDayFromHourly({ date, hourly, req }) {
   });
 
   if (windowIndices.length === 0) {
-    return { date, condition: "unknown", temp_high_c: null, temp_low_c: null, precipitation_mm: null, precipitation_probability: null, wind_speed_kmh: null, meets_requirements: false, issues: [{ key: "forecast.issue_no_work_window" }], hourly_forecasts };
+    return { date, condition: "unknown", temp_high_c: null, temp_low_c: null, precipitation_mm: null, precipitation_probability: null, wind_speed_kmh: null, meets_requirements: false, issues: ["No hourly data available for the work window"], hourly_forecasts };
   }
 
   const temps = windowIndices.map((idx) => hourly.temperature_2m[idx]).filter((v) => v != null);

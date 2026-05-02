@@ -194,13 +194,6 @@
   },
   "forecast": {
     "noForecast": "Noch keine Vorhersagedaten.",
-    "issue_wind": "Wind {{value}} km/h > Grenzwert {{limit}} km/h",
-    "issue_precip": "Niederschlag {{value}} mm > Grenzwert {{limit}} mm",
-    "issue_temp_low": "Tief {{value}}°C < Min. {{limit}}°C",
-    "issue_temp_high": "Hoch {{value}}°C > Max. {{limit}}°C",
-    "issue_snow": "Schnee vorhergesagt",
-    "issue_fog": "Nebel vorhergesagt",
-    "issue_no_work_window": "Keine Stundendaten für Arbeitszeitfenster",
     "checkWeatherHint": "Klicken Sie auf \"Wetter prüfen\", um die Vorhersage zu laden.",
     "good": "Gut",
     "issues": "Probleme",

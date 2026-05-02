@@ -65,23 +65,23 @@ function evaluateHour(hour, req) {
   const issues = [];
   const { temp_c, precipitation_mm, wind_speed_kmh, condition, weathercode } = hour;
   if (req.min_temperature_c != null && temp_c != null && temp_c < req.min_temperature_c)
-    issues.push({ key: "forecast.issue_temp_low", value: parseFloat(temp_c).toFixed(1), limit: req.min_temperature_c });
+    issues.push(`${temp_c}° < min ${req.min_temperature_c}°`);
   if (req.max_temperature_c != null && temp_c != null && temp_c > req.max_temperature_c)
-    issues.push({ key: "forecast.issue_temp_high", value: parseFloat(temp_c).toFixed(1), limit: req.max_temperature_c });
+    issues.push(`${temp_c}° > max ${req.max_temperature_c}°`);
   if (req.max_precipitation_mm != null && precipitation_mm != null && precipitation_mm > req.max_precipitation_mm)
-    issues.push({ key: "forecast.issue_precip", value: parseFloat(precipitation_mm).toFixed(1), limit: req.max_precipitation_mm });
+    issues.push(`${precipitation_mm}mm rain`);
   if (req.max_wind_speed_kmh != null && wind_speed_kmh != null && wind_speed_kmh >= req.max_wind_speed_kmh)
-    issues.push({ key: "forecast.issue_wind", value: parseFloat(wind_speed_kmh).toFixed(1), limit: req.max_wind_speed_kmh });
+    issues.push(`${wind_speed_kmh}km/h wind`);
   const cond = condition || "";
   const code = weathercode;
   if (req.no_snow && (cond === "snow" || (code != null && ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)))))
-    issues.push({ key: "forecast.issue_snow" });
+    issues.push("Snow");
   if (req.no_fog && (cond === "fog" || (code != null && code >= 45 && code <= 48)))
-    issues.push({ key: "forecast.issue_fog" });
+    issues.push("Fog");
   return { meets: issues.length === 0, issues };
 }
 
-function HourlyRow({ hour, req, workHoursMode, t }) {
+function HourlyRow({ hour, req, workHoursMode }) {
   const HourIcon = getConditionIcon(hour.condition);
   const inWindow = hour.in_work_window;
   // Only evaluate and highlight when work-hours mode is active
@@ -120,7 +120,7 @@ function HourlyRow({ hour, req, workHoursMode, t }) {
               {hasProblem ? (
                 <>
                   <span className="text-[10px] text-destructive font-medium hidden sm:inline truncate max-w-[120px]">
-                    {translateIssue(issues[0], t)}{issues.length > 1 ? ` +${issues.length - 1}` : ""}
+                    {issues[0]}{issues.length > 1 ? ` +${issues.length - 1}` : ""}
                   </span>
                   <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
                 </>
@@ -133,20 +133,14 @@ function HourlyRow({ hour, req, workHoursMode, t }) {
       </TooltipTrigger>
       {workHoursMode && inWindow && hasProblem && issues.length > 0 && (
         <TooltipContent side="left" className="max-w-[200px]">
-          <p className="font-medium mb-1">{t('forecast.issues')}:</p>
+          <p className="font-medium mb-1">Issues this hour:</p>
           <ul className="space-y-0.5">
-            {issues.map((iss, i) => <li key={i}>• {translateIssue(iss, t)}</li>)}
+            {issues.map((iss, i) => <li key={i}>• {iss}</li>)}
           </ul>
         </TooltipContent>
       )}
     </Tooltip>
   );
-}
-
-/** Translate a structured issue object or legacy string */
-function translateIssue(issue, t) {
-  if (typeof issue === "string") return issue;
-  return t(issue.key, { value: issue.value, limit: issue.limit, defaultValue: issue.key });
 }
 
 export default function ForecastTimeline({ forecasts, workHoursMode, workStartTime, workEndTime, requirements }) {
@@ -218,7 +212,7 @@ export default function ForecastTimeline({ forecasts, workHoursMode, workStartTi
                   </p>
                   {issues.length > 0 && (
                     <p className="text-xs text-destructive mt-0.5 truncate">
-                      {issues.map(s => translateIssue(s, t)).join(" · ")}
+                      {issues.map(s => s.replace(/\d+\.\d+/g, n => parseFloat(n).toFixed(1))).join(" · ")}
                     </p>
                   )}
                 </div>
@@ -287,7 +281,7 @@ export default function ForecastTimeline({ forecasts, workHoursMode, workStartTi
                     <span className="flex-1">{t('forecast.hourlyWind')}</span>
                   </div>
                   {day.hourly_forecasts.map((hour) => (
-                    <HourlyRow key={hour.time} hour={hour} req={requirements} workHoursMode={workHoursMode} t={t} />
+                    <HourlyRow key={hour.time} hour={hour} req={requirements} workHoursMode={workHoursMode} />
                   ))}
                 </div>
               )}
