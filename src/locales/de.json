@@ -137,7 +137,10 @@
     "noMatchSubtitle": "Versuchen Sie, Ihre Filter oder Suche anzupassen.",
     "createProject": "Projekt erstellen",
     "sortDate": "Startdatum",
-    "sortByStartDate": "Nach Startdatum sortieren"
+    "sortByStartDate": "Nach Startdatum sortieren",
+    "syncedCount": "{{count}} Projekt(e) erfolgreich synchronisiert.",
+    "skippedFuture_one": "{{count}} Projekt übersprungen – Vorhersage noch nicht verfügbar.",
+    "skippedFuture_other": "{{count}} Projekte übersprungen – Vorhersage noch nicht verfügbar."
   },
   "project": {
     "days": "Tage",

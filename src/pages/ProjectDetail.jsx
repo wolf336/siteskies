@@ -52,8 +52,11 @@ export default function ProjectDetail() {
   const hasAutoChecked = React.useRef(false);
   React.useEffect(() => {
     if (project && !project.weather_forecast?.last_checked && !hasAutoChecked.current) {
-      const daysUntil = differenceInDays(new Date(project.start_date), new Date());
-      if (daysUntil <= 16) {
+      const today = new Date();
+      const latestForecastDate = new Date(today);
+      latestForecastDate.setDate(today.getDate() + 15);
+      const startDate = new Date(project.start_date + "T00:00:00");
+      if (startDate <= latestForecastDate) {
         hasAutoChecked.current = true;
         checkWeather();
       }
@@ -68,9 +71,20 @@ export default function ProjectDetail() {
   });
 
   const checkWeather = async () => {
-    const todayStr = new Date().toISOString().split("T")[0];
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0];
+    const latestForecastDate = new Date(today);
+    latestForecastDate.setDate(today.getDate() + 15);
+    const startDate = new Date(project.start_date + "T00:00:00");
+
     if (project.end_date < todayStr) {
       toast.error("This project has already ended. Weather can't be updated.");
+      return;
+    }
+
+    // Guard: project starts beyond the forecast window — skip without consuming credit
+    if (startDate > latestForecastDate) {
+      setForecastError("Weather forecast is not yet available for these project dates. Forecasts are available up to 16 days ahead.");
       return;
     }
 
@@ -124,11 +138,17 @@ export default function ProjectDetail() {
     }
 
     // Step 2 — Fetch forecast (cap end_date to today + 15 days = 16-day window)
-    const today = new Date();
     const capDate = new Date(today);
     capDate.setDate(today.getDate() + 15);
     const capDateStr = capDate.toISOString().split("T")[0];
     const effectiveEndDate = project.end_date < capDateStr ? project.end_date : capDateStr;
+
+    // Defensive guard: effectiveEndDate before start_date means no data will be available
+    if (effectiveEndDate < project.start_date) {
+      setChecking(false);
+      setForecastError("Weather forecast is not yet available for these project dates. Forecasts are available up to 16 days ahead.");
+      return;
+    }
 
     const baseUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&timezone=Europe%2FBerlin&start_date=${project.start_date}&end_date=${effectiveEndDate}`;
     const fRes = await fetch(`${baseUrl}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,weathercode`);
@@ -220,12 +240,16 @@ export default function ProjectDetail() {
 function ProjectDetailContent({ project, projectId, checking, setChecking, forecastError, setForecastError, editOpen, setEditOpen, checkWeather, deleteMutation }) {
   const { t } = useTranslation();
   const formattedLocation = useFormattedLocation(project.location, project.location_name);
-  const todayStr = new Date().toISOString().split("T")[0];
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
   const isCompleted = project.end_date < todayStr;
-  const daysUntilStart = differenceInDays(new Date(project.start_date), new Date());
-  const canCheckWeather = daysUntilStart <= 16;
-  const forecastAvailableDate = new Date(project.start_date);
-  forecastAvailableDate.setDate(forecastAvailableDate.getDate() - 16);
+  const latestForecastDate = new Date(today);
+  latestForecastDate.setDate(today.getDate() + 15);
+  const startDate = new Date(project.start_date + "T00:00:00");
+  const canCheckWeather = startDate <= latestForecastDate && !isCompleted;
+  // Date when the project start will come within forecast range (start - 15 days)
+  const forecastAvailableDate = new Date(project.start_date + "T00:00:00");
+  forecastAvailableDate.setDate(forecastAvailableDate.getDate() - 15);
   const req = project.required_weather || {};
 
   return (

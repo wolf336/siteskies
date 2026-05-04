@@ -61,12 +61,15 @@ export default function Dashboard() {
       if (!res.data.success && res.data.error) {
         toast.error(`${res.data.error}. Upgrade your plan for more refreshes.`, { duration: 5000 });
       } else {
-        const { successCount, failed, totalEligible } = res.data;
+        const { successCount, failed, skippedFutureCount, totalEligible } = res.data;
+        const skippedMsg = skippedFutureCount > 0
+          ? ` ${t('dashboard.skippedFuture', { count: skippedFutureCount })}`
+          : "";
         if (failed.length === 0) {
-          toast.success(`All ${successCount} eligible project${successCount !== 1 ? "s" : ""} synced successfully.`);
+          toast.success(`${t('dashboard.syncedCount', { count: successCount })}${skippedMsg}`);
         } else {
           toast.error(
-            `${successCount} of ${totalEligible} projects synced. ${failed.length} failed:\n${failed.map(f => `• ${f.name}: ${f.reason}`).join("\n")}`,
+            `${successCount} of ${totalEligible} projects synced. ${failed.length} failed:\n${failed.map(f => `• ${f.name}: ${f.reason}`).join("\n")}${skippedMsg}`,
             { duration: 8000 }
           );
         }
@@ -168,6 +171,9 @@ export default function Dashboard() {
                   {t('dashboard.lastSynced', { time: formatDistanceToNow(new Date(syncSetting.synced_at), { addSuffix: true }) })}
                   {syncSetting.failed_count > 0 && (
                     <span className="text-destructive ml-1">({t('dashboard.failed', { count: syncSetting.failed_count })})</span>
+                  )}
+                  {syncSetting.skipped_future_count > 0 && (
+                    <span className="text-muted-foreground ml-1">({t('dashboard.skippedFuture', { count: syncSetting.skipped_future_count })})</span>
                   )}
                 </p>
               )}

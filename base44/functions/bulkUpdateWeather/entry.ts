@@ -261,14 +261,22 @@ Deno.serve(async (req) => {
 
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];
+    const latestForecastDate = new Date(today);
+    latestForecastDate.setDate(today.getDate() + 15);
+    const latestForecastDateStr = latestForecastDate.toISOString().split("T")[0];
 
-    const eligibleProjects = projects.filter((p) => {
-      if (!p.start_date || !p.end_date) return false;
-      if (p.end_date < todayStr) return false;
-      const diffMs = new Date(p.start_date).getTime() - today.getTime();
-      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-      return diffDays <= 16;
-    });
+    const eligibleProjects = [];
+    let skippedFutureCount = 0;
+
+    for (const p of projects) {
+      if (!p.start_date || !p.end_date) continue;
+      if (p.end_date < todayStr) continue;                    // already ended
+      if (p.start_date > latestForecastDateStr) {             // starts beyond forecast window
+        skippedFutureCount++;
+        continue;
+      }
+      eligibleProjects.push(p);
+    }
 
     const results = await Promise.allSettled(
       eligibleProjects.map((p) => updateProjectWeather(p, base44))
@@ -289,6 +297,7 @@ Deno.serve(async (req) => {
       success_count: successCount,
       failed_count: failed.length,
       failed_projects: failed,
+      skipped_future_count: skippedFutureCount,
       total_eligible: eligibleProjects.length,
     };
 
@@ -299,7 +308,7 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.AppSetting.create({ key: settingKey, value: JSON.stringify(syncResult) });
     }
 
-    return Response.json({ success: true, successCount, failed, totalEligible: eligibleProjects.length });
+    return Response.json({ success: true, successCount, failed, skippedFutureCount, totalEligible: eligibleProjects.length });
   } catch (error) {
     console.error("bulkUpdateWeather error:", error);
     return Response.json({ error: error.message }, { status: 500 });
