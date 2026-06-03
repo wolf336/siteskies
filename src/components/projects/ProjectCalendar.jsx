@@ -205,14 +205,22 @@ export default function ProjectCalendar({ projects }) {
 
               {/* Project spanning bars — one grid row per slot */}
               {numSlots === 0 ? (
-                <div className="h-7" />
+                <div className="grid grid-cols-7 divide-x divide-border h-7">
+                  {week.map((_, di) => <div key={di} className="bg-card" />)}
+                </div>
               ) : (
                 Array.from({ length: numSlots }).map((_, slotIdx) => {
                   const slotRow = slots[slotIdx] || {};
                   const segments = buildSegments(slotRow, week, activeProjects);
 
                   return (
-                    <div key={slotIdx} className="grid grid-cols-7 px-0.5 py-0.5 gap-y-0">
+                    <div key={slotIdx} className="relative py-0.5">
+                      {/* Day divider lines behind the bars */}
+                      <div className="absolute inset-0 grid grid-cols-7 divide-x divide-border pointer-events-none">
+                        {week.map((_, di) => <div key={di} />)}
+                      </div>
+                      {/* Bars */}
+                      <div className="relative grid grid-cols-7 px-0.5">
                       {/* We use absolute positioning via CSS grid column placement */}
                       {(() => {
                         // Build a list of all 7 columns — each either a segment or an empty cell
@@ -256,13 +264,16 @@ export default function ProjectCalendar({ projects }) {
                         }
                         return cells;
                       })()}
+                      </div>
                     </div>
                   );
                 })
               )}
 
               {/* Bottom padding row */}
-              <div className="h-2" />
+              <div className="grid grid-cols-7 divide-x divide-border h-2">
+                {week.map((_, di) => <div key={di} className="bg-card" />)}
+              </div>
             </div>
           );
         })}
