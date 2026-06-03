@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek,
   addDays, isSameMonth, format, addMonths, subMonths,
-  parseISO, isWithinInterval
+  parseISO, isWithinInterval, isBefore, isAfter
 } from 'date-fns';
 import ProjectCalendarModal from './ProjectCalendarModal';
 
@@ -14,33 +14,47 @@ function getDayPillClass(project, dateStr) {
   return 'bg-muted-foreground/50 text-white';
 }
 
-// Assign each project a stable slot index for a given week
-function assignSlots(week, projects) {
-  const slots = []; // slots[slotIndex] = projectId or null per day
+// For a spanning bar, we pick the color based on the majority of days in the span
+function getSpanPillClass(project, week) {
+  const forecasts = project.weather_forecast?.daily_forecasts || [];
+  let good = 0, bad = 0;
+  week.forEach(day => {
+    const dateStr = format(day, 'yyyy-MM-dd');
+    const start = parseISO(project.start_date);
+    const end = parseISO(project.end_date);
+    if (isWithinInterval(day, { start, end })) {
+      const f = forecasts.find(fc => fc.date === dateStr);
+      if (f?.meets_requirements === true) good++;
+      else if (f?.meets_requirements === false) bad++;
+    }
+  });
+  if (bad > 0) return 'bg-destructive text-white hover:bg-destructive/90';
+  if (good > 0) return 'bg-success text-white hover:bg-success/90';
+  return 'bg-muted-foreground/50 text-white hover:bg-muted-foreground/60';
+}
 
+// Assign each project a stable slot (row) index for a given week
+function assignSlots(week, projects) {
   const weekStart = week[0];
   const weekEnd = week[week.length - 1];
 
-  // Find all projects active in this week
   const activeProjects = projects.filter(p => {
+    if (!p.start_date || !p.end_date) return false;
     const start = parseISO(p.start_date);
     const end = parseISO(p.end_date);
-    return isWithinInterval(weekStart, { start, end }) ||
-           isWithinInterval(weekEnd, { start, end }) ||
-           (start >= weekStart && start <= weekEnd);
+    return !isAfter(start, weekEnd) && !isBefore(end, weekStart);
   });
 
-  // Sort by start date for stable ordering
   activeProjects.sort((a, b) => parseISO(a.start_date) - parseISO(b.start_date));
 
-  const slotAssignments = {}; // projectId -> slotIndex
+  // slots[slotIdx][dateStr] = projectId
+  const slots = [];
+  const slotAssignments = {};
 
   activeProjects.forEach(project => {
-    // Find the first slot where this project doesn't conflict
     let slotIdx = 0;
     while (true) {
       if (!slots[slotIdx]) slots[slotIdx] = {};
-      // Check if any day this project occupies in this week is taken
       let conflict = false;
       week.forEach(day => {
         const dateStr = format(day, 'yyyy-MM-dd');
@@ -53,7 +67,6 @@ function assignSlots(week, projects) {
       if (!conflict) break;
       slotIdx++;
     }
-    // Assign project to this slot for all its days in this week
     week.forEach(day => {
       const dateStr = format(day, 'yyyy-MM-dd');
       const start = parseISO(project.start_date);
@@ -67,6 +80,43 @@ function assignSlots(week, projects) {
   });
 
   return { slots, slotAssignments, activeProjects };
+}
+
+// Build spanning segments for a slot row within a week
+// Returns array of { project, colStart (1-based), colSpan, isStart, isEnd }
+function buildSegments(slotRow, week, activeProjects) {
+  const segments = [];
+  let i = 0;
+  while (i < week.length) {
+    const dateStr = format(week[i], 'yyyy-MM-dd');
+    const projectId = slotRow[dateStr];
+    if (!projectId) {
+      i++;
+      continue;
+    }
+    const project = activeProjects.find(p => p.id === projectId);
+    // Find how many consecutive days this project occupies from i
+    let span = 0;
+    while (i + span < week.length) {
+      const ds = format(week[i + span], 'yyyy-MM-dd');
+      if (slotRow[ds] !== projectId) break;
+      span++;
+    }
+    const projectStart = format(parseISO(project.start_date), 'yyyy-MM-dd');
+    const projectEnd = format(parseISO(project.end_date), 'yyyy-MM-dd');
+    const firstDayStr = format(week[i], 'yyyy-MM-dd');
+    const lastDayStr = format(week[i + span - 1], 'yyyy-MM-dd');
+
+    segments.push({
+      project,
+      colStart: i + 1,
+      colSpan: span,
+      isStart: firstDayStr === projectStart,
+      isEnd: lastDayStr === projectEnd,
+    });
+    i += span;
+  }
+  return segments;
 }
 
 export default function ProjectCalendar({ projects }) {
@@ -128,7 +178,7 @@ export default function ProjectCalendar({ projects }) {
 
         {/* Weeks */}
         {weeks.map((week, wi) => {
-          const { slots, slotAssignments, activeProjects } = assignSlots(week, projects);
+          const { slots, activeProjects } = assignSlots(week, projects);
           const numSlots = slots.length;
 
           return (
@@ -152,71 +202,63 @@ export default function ProjectCalendar({ projects }) {
                 })}
               </div>
 
-              {/* Project bars - one row per slot */}
+              {/* Project spanning bars — one grid row per slot */}
               {numSlots === 0 ? (
-                <div className="grid grid-cols-7 divide-x divide-border">
-                  {week.map((date, di) => {
-                    const inMonth = isSameMonth(date, currentMonth);
-                    return (
-                      <div key={di} className={`h-7 ${!inMonth ? 'bg-muted/20' : 'bg-card'}`} />
-                    );
-                  })}
-                </div>
+                <div className="h-7" />
               ) : (
-                Array.from({ length: numSlots }).map((_, slotIdx) => (
-                  <div key={slotIdx} className="grid grid-cols-7 divide-x divide-border">
-                    {week.map((date, di) => {
-                      const inMonth = isSameMonth(date, currentMonth);
-                      const dateStr = format(date, 'yyyy-MM-dd');
-                      const projectId = slots[slotIdx]?.[dateStr];
-                      const project = projectId ? activeProjects.find(p => p.id === projectId) : null;
+                Array.from({ length: numSlots }).map((_, slotIdx) => {
+                  const slotRow = slots[slotIdx] || {};
+                  const segments = buildSegments(slotRow, week, activeProjects);
 
-                      if (!project) {
-                        return (
-                          <div key={di} className={`h-7 ${!inMonth ? 'bg-muted/20' : 'bg-card'}`} />
-                        );
-                      }
+                  return (
+                    <div key={slotIdx} className="grid grid-cols-7 px-0.5 py-0.5 gap-y-0">
+                      {/* We use absolute positioning via CSS grid column placement */}
+                      {(() => {
+                        // Build a list of all 7 columns — each either a segment or an empty cell
+                        const cells = [];
+                        const segmentsByCol = {};
+                        segments.forEach(seg => { segmentsByCol[seg.colStart] = seg; });
 
-                      const projectStart = parseISO(project.start_date);
-                      const projectEnd = parseISO(project.end_date);
-                      const isFirstDayOfWeek = di === 0;
-                      const isLastDayOfWeek = di === 6;
-                      const isProjectStart = format(date, 'yyyy-MM-dd') === format(projectStart, 'yyyy-MM-dd');
-                      const isProjectEnd = format(date, 'yyyy-MM-dd') === format(projectEnd, 'yyyy-MM-dd');
-
-                      const roundLeft = isProjectStart || isFirstDayOfWeek;
-                      const roundRight = isProjectEnd || isLastDayOfWeek;
-
-                      const pillClass = getDayPillClass(project, dateStr);
-
-                      return (
-                        <div key={di} className={`h-7 flex items-center ${!inMonth ? 'bg-muted/20' : 'bg-card'} ${roundLeft ? 'pl-1' : ''} ${roundRight ? 'pr-1' : ''}`}>
-                          <button
-                            onClick={() => setSelectedProject(project)}
-                            className={`h-6 w-full text-left text-xs font-semibold leading-none truncate px-1.5
-                              ${pillClass}
-                              ${roundLeft ? 'rounded-l-md' : 'rounded-l-none'}
-                              ${roundRight ? 'rounded-r-md' : 'rounded-r-none'}
-                            `}
-                          >
-                            {(isProjectStart || isFirstDayOfWeek) ? project.name : ''}
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))
+                        let col = 1;
+                        while (col <= 7) {
+                          const seg = segmentsByCol[col];
+                          if (seg) {
+                            const pillClass = getSpanPillClass(seg.project, week);
+                            cells.push(
+                              <button
+                                key={`seg-${col}`}
+                                onClick={() => setSelectedProject(seg.project)}
+                                title={seg.project.name}
+                                style={{
+                                  gridColumnStart: seg.colStart,
+                                  gridColumnEnd: seg.colStart + seg.colSpan,
+                                }}
+                                className={`h-6 min-w-0 text-left text-xs font-semibold leading-none px-2 truncate flex items-center transition-opacity
+                                  ${pillClass}
+                                  ${seg.isStart ? 'rounded-l-md ml-0.5' : 'rounded-l-none -ml-px'}
+                                  ${seg.isEnd ? 'rounded-r-md mr-0.5' : 'rounded-r-none -mr-px'}
+                                `}
+                              >
+                                {seg.project.name}
+                              </button>
+                            );
+                            col += seg.colSpan;
+                          } else {
+                            cells.push(
+                              <div key={`empty-${col}`} style={{ gridColumnStart: col, gridColumnEnd: col + 1 }} />
+                            );
+                            col++;
+                          }
+                        }
+                        return cells;
+                      })()}
+                    </div>
+                  );
+                })
               )}
 
               {/* Bottom padding row */}
-              <div className="grid grid-cols-7 divide-x divide-border">
-                {week.map((date, di) => {
-                  const inMonth = isSameMonth(date, currentMonth);
-                  return (
-                    <div key={di} className={`h-3 ${!inMonth ? 'bg-muted/20' : 'bg-card'}`} />
-                  );
-                })}
-              </div>
+              <div className="h-2" />
             </div>
           );
         })}
