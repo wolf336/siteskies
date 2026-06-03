@@ -122,6 +122,7 @@ function buildSegments(slotRow, week, activeProjects) {
 export default function ProjectCalendar({ projects }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedProject, setSelectedProject] = useState(null);
+  const [hoveredProjectId, setHoveredProjectId] = useState(null);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -228,15 +229,18 @@ export default function ProjectCalendar({ projects }) {
                               <button
                                 key={`seg-${col}`}
                                 onClick={() => setSelectedProject(seg.project)}
+                                onMouseEnter={() => setHoveredProjectId(seg.project.id)}
+                                onMouseLeave={() => setHoveredProjectId(null)}
                                 title={seg.project.name}
                                 style={{
                                   gridColumnStart: seg.colStart,
                                   gridColumnEnd: seg.colStart + seg.colSpan,
                                 }}
-                                className={`h-6 min-w-0 text-left text-xs font-semibold leading-none px-2 truncate flex items-center transition-opacity
+                                className={`h-6 min-w-0 text-left text-xs font-semibold leading-none px-2 truncate flex items-center transition-all duration-150
                                   ${pillClass}
                                   ${seg.isStart ? 'rounded-l-md ml-0.5' : 'rounded-l-none -ml-px'}
                                   ${seg.isEnd ? 'rounded-r-md mr-0.5' : 'rounded-r-none -mr-px'}
+                                  ${hoveredProjectId === seg.project.id ? 'brightness-110 ring-2 ring-white/60 ring-inset scale-y-105 shadow-lg z-10' : hoveredProjectId !== null ? 'opacity-40' : ''}
                                 `}
                               >
                                 {seg.project.name}
