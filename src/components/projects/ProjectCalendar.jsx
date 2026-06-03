@@ -214,10 +214,10 @@ export default function ProjectCalendar({ projects }) {
                   const segments = buildSegments(slotRow, week, activeProjects);
 
                   return (
-                    <div key={slotIdx} className="relative py-0.5">
+                    <div key={slotIdx} className="relative py-0.5 bg-card">
                       {/* Day divider lines behind the bars */}
                       <div className="absolute inset-0 grid grid-cols-7 divide-x divide-border pointer-events-none">
-                        {week.map((_, di) => <div key={di} />)}
+                        {week.map((_, di) => <div key={di} className="bg-transparent" />)}
                       </div>
                       {/* Bars */}
                       <div className="relative grid grid-cols-7 px-0.5">
